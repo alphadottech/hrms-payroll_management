@@ -21,14 +21,7 @@ public class FileController {
 
     @Autowired
     private FileService fileService;
-    
- 
-
-//    @GetMapping("/readWordFile")
-//    public String readWordFile(){
-//        return this.fileService.readWordFile();
-//    }
-    
+  
     @GetMapping("/readExcelFile")
     public String readExcelFile(@RequestParam("name") String name,@RequestParam("month") String month,@RequestParam("AddOn") int addOns,@RequestParam("MidPeriod") String midPeriod,@RequestParam("Add") int add) throws IOException, ParseException {
     	return this.fileService.readExcelFile(name,month,addOns,midPeriod,add);
