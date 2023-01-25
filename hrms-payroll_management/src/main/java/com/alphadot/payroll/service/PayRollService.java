@@ -1,4 +1,4 @@
-package com.example.filesread.service;
+package com.alphadot.payroll.service;
 
 import java.io.FileNotFoundException;
 
@@ -37,7 +37,7 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 
 @Service
-public class FileService {
+public class PayRollService {
 	public String readExcelFile(String name, String month, int addOn, String midPeriod, int add)
 			throws IOException, ParseException {
 		int beforeDays = 0;

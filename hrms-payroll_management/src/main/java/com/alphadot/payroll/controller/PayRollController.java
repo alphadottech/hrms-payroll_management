@@ -1,4 +1,4 @@
-package com.example.filesread.controller;
+package com.alphadot.payroll.controller;
 
 
 
@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.filesread.service.FileService;
+import com.alphadot.payroll.service.PayRollService;
 
 @RestController
-public class FileController {
+public class PayRollController {
 
     @Autowired
-    private FileService fileService;
+    private PayRollService fileService;
   
     @GetMapping("/readExcelFile")
     public String readExcelFile(@RequestParam("name") String name,@RequestParam("month") String month,@RequestParam("AddOn") int addOns,@RequestParam("MidPeriod") String midPeriod,@RequestParam("Add") int add) throws IOException, ParseException {

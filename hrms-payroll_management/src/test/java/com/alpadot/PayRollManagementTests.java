@@ -1,10 +1,10 @@
-package com.example.filesread;
+package com.alpadot;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class FilesreadApplicationTests {
+class PayRollManagementTests {
 
 	@Test
 	void contextLoads() {

@@ -1,13 +1,13 @@
-package com.example.filesread;
+package com.alphadot.payroll;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class FilesreadApplication {
+public class PayRollManagement {
 
 	public static void main(String[] args) {
-		SpringApplication.run(FilesreadApplication.class, args);
+		SpringApplication.run(PayRollManagement.class, args);
 	}
 
 }

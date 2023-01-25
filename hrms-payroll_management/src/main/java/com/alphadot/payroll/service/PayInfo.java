@@ -1,4 +1,4 @@
-package com.example.filesread.service;
+package com.alphadot.payroll.service;
 
 public class PayInfo {
 	   public static final String BName = "State Bank Of India";
