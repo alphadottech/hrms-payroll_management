@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="leave_balance")
+@Table(catalog = "EmployeeDB", schema = "payroll_schema", name="leave_balance")
 public class LeaveModel {
 
 	@Id

@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="salary_table")
+@Table(catalog = "EmployeeDB", schema = "payroll_schema", name="salary_table")
 public class SalaryModel {
 
 	@Id

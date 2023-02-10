@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 import com.alphadot.payroll.model.LeaveModel;
+import com.alphadot.payroll.model.LeaveRequestModel;
+import com.alphadot.payroll.service.LeaveRequestService;
 import com.alphadot.payroll.service.LeaveService;
 
 @RestController
@@ -24,6 +25,9 @@ public class LeaveController {
 
 	@Autowired
 	public LeaveService leaveService;
+	
+	@Autowired
+	private LeaveRequestService leaveRequestService;
 	
 
 	@GetMapping("/getAllEmpLeaves")
@@ -47,6 +51,22 @@ public class LeaveController {
 	@PutMapping("/updateLeave/{empId}/{leaveCount}")
 	public ResponseEntity<String> updateEmpLeaves(@PathVariable("empId") int empId,@PathVariable("leaveCount") int leaveCount) {
 		return new ResponseEntity<>(leaveService.updateEmpLeaves(empId,leaveCount), HttpStatus.OK);
+	}
+	
+	@PostMapping("/leaveRequest")
+	public ResponseEntity<String> saveLeaveRequest(@RequestBody LeaveRequestModel lr) {
+		return new ResponseEntity<>(leaveRequestService.saveLeaveRequest(lr), HttpStatus.OK);
+
+	}
+
+	@GetMapping("/getLeaveDetails")
+	public ResponseEntity<List<LeaveRequestModel>> getLeaveDetails() {
+		return new ResponseEntity<>(leaveRequestService.getLeaveDetails(), HttpStatus.OK);
+	}
+	
+	@GetMapping("getAllLeaveByEmpId/{empid}")
+	public ResponseEntity<List<LeaveRequestModel>> getLeaveRequestDetailsByEmpId(@PathVariable("empid") int empid){
+		return new ResponseEntity<>(leaveRequestService.getLeaveRequestDetailsByEmpId(empid),HttpStatus.OK);
 	}
 	
 }
