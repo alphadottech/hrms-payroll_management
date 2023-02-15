@@ -20,7 +20,7 @@ public class SalaryModel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="serial_id",columnDefinition = "serial")
+	@Column(name="serial_id")
 	private int serialNo;
 	
 	@Column(name="emp_id")

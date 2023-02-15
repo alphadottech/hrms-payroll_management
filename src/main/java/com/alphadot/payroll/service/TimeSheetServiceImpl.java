@@ -3,8 +3,11 @@ package com.alphadot.payroll.service;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alphadot.payroll.model.TimeSheetModel;
+import com.alphadot.payroll.msg.Response;
 import com.alphadot.payroll.repository.TimeSheetRepo;
 
 @Service
@@ -26,18 +30,20 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 	public String updateCheckIn(int id) {
     log.warn("Do not checkIn again once its done");
 		TimeSheetModel timeSheetModel = new TimeSheetModel();
-
+		LocalDate currentdate = LocalDate.now();
+		Month currentMonth = currentdate.getMonth();
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 		LocalDateTime localDateTime = LocalDateTime.now();
 		String time = String.valueOf(dateTimeFormatter.format(localDateTime));
-
-		LocalDate localDate = LocalDate.now();
-		String date = String.valueOf(localDate);
-
+        
+	
+		String date = String.valueOf(currentdate);
+    
 		timeSheetModel.setDate(date);
 		timeSheetModel.setEmployeeId(id);
-
+        timeSheetModel.setMonth(String.valueOf(currentMonth));
 		timeSheetModel.setCheckIn(time);
+		timeSheetModel.setYear(String.valueOf(currentdate.getYear()));
 		timeSheetRepo.save(timeSheetModel);
     log.info("successfully done checkIn and returning to controller");
 		return "check In successfully AT :" + time;
@@ -50,13 +56,14 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 	    log.warn("Do not checkOut again once its done");
 
 		TimeSheetModel timeSheetStatus = new TimeSheetModel();
-
+		LocalDate currentdate = LocalDate.now();
+		Month currentMonth = currentdate.getMonth();
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 		LocalDateTime localDateTime = LocalDateTime.now();
 		String time = String.valueOf(dateTimeFormatter.format(localDateTime));
 
-		LocalDate localDate = LocalDate.now();
-		String date = String.valueOf(localDate);
+		
+		String date = String.valueOf(currentdate);
 		TimeSheetModel timeSheetModel = timeSheetRepo.findByEmployeeIdAndDate(id, date);
 
 		timeSheetStatus.setDate(date);
@@ -75,7 +82,8 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
 			timeSheetModel.setWorkingHour(differenceInHours + ":" + differenceInMinutes + ":" + differenceInSeconds);
 			timeSheetModel.setStatus("Present");
-
+            timeSheetModel.setMonth(String.valueOf(currentMonth));
+        	timeSheetModel.setYear(String.valueOf(currentdate.getYear()));
 			timeSheetRepo.save(timeSheetModel);
 
 			log.info("successfully done checkOut and returning to controller");
@@ -102,13 +110,13 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 			if (timeSheetModel.getCheckOut() == null)
 			{
 				log.info("You are checked In today and Not checkOut so you are elligible to checkout");	
-				return false;
+				return Response.False;
 			}	
 			log.info("you are already checkout for the day");	
 			return null;
 		} else {
          log.info("You are Not checked In today So you are elligible to Do CheckIn");			
-			return true;
+			return Response.True;
 		}
 
 	}
