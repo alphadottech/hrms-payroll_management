@@ -27,14 +27,20 @@ public class SalaryModel {
 	private int empId;
 	
 	@Column(name="month")
-	private int month;
+	private String month;
+	
+	@Column(name="name")
+	private String name;
 	
 	@Column(name="year")
-	private int year;
+	private String year;
 	
-	@Column(name="leave_dates")
-	private String leavedates;
+	@Column(name="leave_counts")
+	private int leaveCounts;
 	
-	@Column(name="working_days")
-	private int workingDay;
+	@Column(name="days_worked")
+	private int workedDays;
+	
+	@Column(name="total_working_days")
+	private int totalWorkingDays;
 }
