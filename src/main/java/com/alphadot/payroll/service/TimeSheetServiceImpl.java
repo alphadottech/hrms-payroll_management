@@ -1,21 +1,25 @@
 package com.alphadot.payroll.service;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alphadot.payroll.model.Priortime;
 import com.alphadot.payroll.model.TimeSheetModel;
+import com.alphadot.payroll.model.payload.PriorTimeManagementRequest;
 import com.alphadot.payroll.msg.Response;
+import com.alphadot.payroll.repository.PriorTimeRepository;
 import com.alphadot.payroll.repository.TimeSheetRepo;
 
 @Service
@@ -25,6 +29,9 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 	
 	@Autowired
 	private TimeSheetRepo timeSheetRepo;
+	
+	@Autowired
+	PriorTimeRepository priorTimeRepository;
 
 	@Override
 	public String updateCheckIn(int id) {
@@ -119,6 +126,95 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 			return Response.True;
 		}
 
+	}
+	
+	public Optional<Priortime> savePriorTime(PriorTimeManagementRequest priorTimeManagementRequest)
+			throws ParseException {
+
+		Priortime priortimeuser = new Priortime();
+		if (priorTimeManagementRequest.getCheckIn() != null && !priorTimeManagementRequest.getCheckIn().equals("") ) {
+			priortimeuser.setCheckIn(priorTimeManagementRequest.getCheckIn());
+		} else {
+			TimeSheetModel timeSheetModel = timeSheetRepo.findByEmployeeIdAndDate(priorTimeManagementRequest.getEmployeeId(), priorTimeManagementRequest.getDate());
+			timeSheetModel.getCheckIn();
+			priortimeuser.setCheckIn(timeSheetModel.getCheckIn());
+
+		}
+		if (priorTimeManagementRequest.getCheckOut() != null && !priorTimeManagementRequest.getCheckOut().equals("")) {
+			priortimeuser.setCheckOut(priorTimeManagementRequest.getCheckOut());
+		} else {
+
+			String checkout = timeSheetRepo.findCheckOutByEmployeeIdAndDate(priorTimeManagementRequest.getEmployeeId(),
+					priorTimeManagementRequest.getDate());
+			priortimeuser.setCheckOut(checkout);
+		}
+
+		priortimeuser.setDate(priorTimeManagementRequest.getDate());
+		priortimeuser.setEmail(priorTimeManagementRequest.getEmail());
+		priortimeuser.setEmployeeId(priorTimeManagementRequest.getEmployeeId());
+
+		SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
+
+		SimpleDateFormat monthFormatter = new SimpleDateFormat("MMMM");
+		Date d = dateFormatter.parse(String.valueOf(priorTimeManagementRequest.getDate()));
+		String month = monthFormatter.format(d);
+
+		SimpleDateFormat yearFormatter = new SimpleDateFormat("yyyy");
+		Date y = dateFormatter.parse(String.valueOf(priorTimeManagementRequest.getDate()));
+		String year = yearFormatter.format(y);
+		
+        DateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
+
+		Date checkin = timeFormat.parse(priortimeuser.getCheckIn());
+		Date checkout = timeFormat.parse(priortimeuser.getCheckOut());
+		long differenceInMilliSeconds = Math.abs(checkin.getTime() - checkout.getTime());
+		long differenceInHours = (differenceInMilliSeconds / (60 * 60 * 1000)) % 24;
+		long differenceInMinutes = (differenceInMilliSeconds / (60 * 1000)) % 60;
+		long differenceInSeconds = (differenceInMilliSeconds / 1000) % 60;
+
+		priortimeuser.setWorkingHour(differenceInHours + ":" + differenceInMinutes + ":" + differenceInSeconds);
+		priortimeuser.setMonth(month.toUpperCase());
+		priortimeuser.setYear(year.toUpperCase());
+
+		Priortime priortime = priorTimeRepository.save(priortimeuser);
+
+		return Optional.ofNullable(priortime);
+
+	}
+
+
+	
+	@Override
+	public TimeSheetModel saveConfirmedDetails(Optional<Priortime> priortime) throws ParseException {
+		Integer employeeId = priortime.get().getEmployeeId();
+		String date = priortime.get().getDate();
+		
+
+		if((priortime.get().getCheckIn())==null || (priortime.get().getCheckIn())==null){
+		
+			TimeSheetModel timesheet = timeSheetRepo.findByEmployeeIdAndDate(employeeId,date);
+
+		timesheet.setCheckIn(priortime.get().getCheckIn());
+		timesheet.setCheckOut(priortime.get().getCheckOut());
+		timesheet.setStatus("PRESENT");
+		timesheet.setWorkingHour(priortime.get().getWorkingHour());
+
+		return timeSheetRepo.save(timesheet);
+	}
+		else {
+			TimeSheetModel timesheet = new TimeSheetModel();
+			timesheet.setCheckIn(priortime.get().getCheckIn());
+			timesheet.setCheckOut(priortime.get().getCheckOut());
+			timesheet.setDate(priortime.get().getDate());
+			timesheet.setEmployeeId(priortime.get().getEmployeeId());
+			timesheet.setMonth(priortime.get().getMonth());
+			timesheet.setYear(priortime.get().getYear());
+			timesheet.setWorkingHour(priortime.get().getWorkingHour());
+			timesheet.setStatus("PRESENT");
+			return timeSheetRepo.save(timesheet);
+
+		}
+		
 	}
 
 }
