@@ -69,21 +69,21 @@ public class User{
 	@Column(name = "Gender")
 	private String gender;
 
-	@Column(name = "DOB")
-	private String dob;
+//	@Column(name = "DOB")
+//	private String dob;
 
 	@Column(name = "bank_name")
 	private String bankName;
 	
 	@Column(name = "account_number")
 	private String accountNumber;
-	
-	@Column(name = "ifsc_code")
-	private String ifscCode;
-	
-	@Column(name = "created_at")
-	private LocalTime createdAt;
-	
-	@Column(name = "updated_at")
-	private LocalTime updatedAt;
+//	
+//	@Column(name = "ifsc_code")
+//	private String ifscCode;
+//	
+//	@Column(name = "created_at")
+//	private LocalTime createdAt;
+//	
+//	@Column(name = "updated_at")
+//	private LocalTime updatedAt;
 }
