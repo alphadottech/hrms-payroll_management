@@ -13,8 +13,6 @@ public interface LeaveRequestService {
 	public List<LeaveRequestModel> getLeaveDetails();
 
 	public List<LeaveRequestModel> getLeaveRequestDetailsByEmpId(Integer empid);
-	
-//	public String AcceptLeaveRequest(Integer empid, String[] Dates);
 
 	public String AcceptLeaveRequest(Integer empid, Integer leaveId);
 	

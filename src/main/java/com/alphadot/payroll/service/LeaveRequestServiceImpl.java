@@ -2,6 +2,8 @@ package com.alphadot.payroll.service;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 	
 	private final ApplicationEventPublisher applicationEventPublisher;
 	
+	private static final Logger log=LogManager.getLogger(LeaveServiceImpl.class);
+	
 	public LeaveRequestServiceImpl(ApplicationEventPublisher applicationEventPublisher) {
 		this.applicationEventPublisher = applicationEventPublisher;
 	}
@@ -28,7 +32,8 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
 	@Override
 	public String saveLeaveRequest(LeaveRequestModel lr) {
-
+		
+		 log.info("Payroll service: LeaveRequestServiceImpl:  saveLeaveRequest Info level log msg");
 		List<LeaveRequestModel> opt = leaveRequestRepo.findByempid(lr.getEmpid());
 
 		int counter = 0;
@@ -76,12 +81,14 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
 	@Override
 	public List<LeaveRequestModel> getLeaveDetails() {
+		 log.info("Payroll service: LeaveRequestServiceImpl:  getLeaveDetails Info level log msg");
 		List<LeaveRequestModel> leavelist = leaveRequestRepo.findAll();
 		return leavelist;
 	}
 
 	@Override
 	public List<LeaveRequestModel> getLeaveRequestDetailsByEmpId(Integer empid) {
+		log.info("Payroll service: LeaveRequestServiceImpl:  getLeaveRequestDetailsByEmpId Info level log msg");
 		List<LeaveRequestModel> opt = leaveRequestRepo.findByempid(empid);
 		if(!opt.isEmpty()) {
 			return opt;

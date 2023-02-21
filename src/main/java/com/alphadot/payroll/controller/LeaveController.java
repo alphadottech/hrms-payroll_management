@@ -58,26 +58,31 @@ public class LeaveController {
 	
 	@PostMapping("/leaveRequest")
 	public ResponseEntity<String> saveLeaveRequest(@RequestBody LeaveRequestModel lr) {
+		log.info("Payroll service: leave:  saveLeaveRequest Info level log msg");
 		return new ResponseEntity<>(leaveRequestService.saveLeaveRequest(lr), HttpStatus.OK);
 		}
 	
 	@GetMapping("/getLeaveDetails")
 	public ResponseEntity<List<LeaveRequestModel>> getLeaveDetails() {
+		log.info("Payroll service: leave:  getLeaveDetails Info level log msg");
 		return new ResponseEntity<>(leaveRequestService.getLeaveDetails(), HttpStatus.OK);
 	}
 	
 	@GetMapping("getAllLeaveByEmpId/{empid}")
 	public ResponseEntity<List<LeaveRequestModel>> getLeaveRequestDetailsByEmpId(@PathVariable("empid") int empid){
+		log.info("Payroll service: leave:  getLeaveRequestDetailsByEmpId Info level log msg");
 		return new ResponseEntity<>(leaveRequestService.getLeaveRequestDetailsByEmpId(empid),HttpStatus.OK);
 	}
 	
 	@GetMapping("/leave/Accepted/{empid}/{leaveId}")
 	public ResponseEntity<String> AcceptLeaveRequest(@PathVariable("empid") Integer empid, @PathVariable("leaveId") Integer leaveId) {
+		log.info("Payroll service: leave:  AcceptLeaveRequest Info level log msg");
 		return new ResponseEntity<>(leaveRequestService.AcceptLeaveRequest(empid, leaveId), HttpStatus.OK);		
 	}
 	
 	@GetMapping("/leave/Rejected/{empid}/{leaveId}")
 	public ResponseEntity<String> RejectLeaveRequest(@PathVariable("empid") Integer empid, @PathVariable("leaveId") Integer leaveId) {
+		log.info("Payroll service: leave:  RejectLeaveRequest Info level log msg");
 		return new ResponseEntity<>(leaveRequestService.RejectLeaveRequest(empid, leaveId), HttpStatus.OK);		
 	}
 	
