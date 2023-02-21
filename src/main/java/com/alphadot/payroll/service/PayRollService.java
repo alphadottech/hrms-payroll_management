@@ -1,359 +1,303 @@
 package com.alphadot.payroll.service;
-import java.io.FileNotFoundException;
+
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
 
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import javax.persistence.EntityNotFoundException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
+//import com.alphadot.payroll.model.Employee;
+import com.alphadot.payroll.model.LeaveTime;
+import com.alphadot.payroll.model.PaySlip;
+import com.alphadot.payroll.model.TimeSheetModel;
+import com.alphadot.payroll.model.User;
+import com.alphadot.payroll.repository.LeaveTimeRepo;
+import com.alphadot.payroll.repository.TimeSheetRepo;
+import com.alphadot.payroll.repository.UserRepo;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
-import com.itextpdf.kernel.colors.DeviceRgb;
+import com.itextpdf.kernel.color.Color;
+import com.itextpdf.kernel.color.DeviceRgb;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
-import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.border.Border;
+import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
-import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.property.TextAlignment;
+import com.itextpdf.layout.property.VerticalAlignment;
+
 @Service
 public class PayRollService {
-	public String readExcelFile(String name, String month, int addOn, String midPeriod, int add)
-			throws IOException, ParseException {
-		int beforeDays = 0;
-		int afterDays = 0;
-		int workingDays = 0;
-		int leaveDays = 0;
-		int beforeLeaveDays = 0;
-		int afterLeaveDays = 0;
-		String leave = "yes";
-		String monthName = "";
-		String startTime = "";
-		String endTime = "";
-		String date = "";
-		String leaveStatus = "";
-		int grossSalary = PayInfo.GSalary;
-		String payPeriod = "";
-		String payPeriods = "";
-		Date endPayPeriod = null;
-		Date endPayPeriods = null;
-		Date startPayPeriods = null;
-		String enDate = "";
-		String strDate = "";
 
-		SimpleDateFormat DateFor = new SimpleDateFormat("MM/dd/yyyy");
+	private static final Logger log = LogManager.getLogger(PayRollService.class);
 
-		SimpleDateFormat DateFors = new SimpleDateFormat("MM/dd/yyyy");
+	@Autowired
+	private TimeSheetRepo timeSheetRepo;
 
-		boolean status = true;
+	@Autowired
+	private LeaveTimeRepo leaveTimeRepo;
 
+	@Autowired
+	private UserRepo userRepo;
+	
+	  @Autowired
+	    private MessageSource messageSource;
+
+	@Value("${holiday.republic}")
+	private String republic;
+
+	@Value("${holiday.holi}")
+	private String holi;
+
+	@Value("${holiday.rakhi}")
+	private String rakhi;
+
+	@Value("${holiday.independence}")
+	private String independence;
+
+	@Value("${holiday.gandhi}")
+	private String gandhi;
+
+	@Value("${holiday.dussehra}")
+	private String dussehra;
+	
+	@Value("${holiday.diwali}")
+	private String diwali;
+
+	public PaySlip createPaySlip(int empId, String month,String year) throws ParseException, IOException {
+
+		log.warn("inside method");
+
+		List<String> li = new ArrayList<>();
+		li.add(diwali);
+		li.add(holi);
+		li.add(rakhi);
+		li.add(independence);
+		li.add(gandhi);
+		li.add(dussehra);
+		li.add(republic);
+		
+	    int yourWorkingDays = 0;
+		int saturday = 2;
+
+//		SalaryModel salaryModel = new SalaryModel();
+		Map<String, Integer> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		map.put(Util.January, 1);
+		map.put(Util.February, 2);
+		map.put(Util.March, 3);
+		map.put(Util.April, 4);
+		map.put(Util.May, 5);
+		map.put(Util.June, 6);
+		map.put(Util.July, 7);
+		map.put(Util.August, 8);
+		map.put(Util.September, 9);
+		map.put(Util.October, 10);
+		map.put(Util.November, 11);
+		map.put(Util.December, 12);
+
+		LocalDate currentdate = LocalDate.now();
+//		String year = String.valueOf(currentdate.getYear());
+		int leaves = 0;
+
+//		User user = new User();
+		PaySlip paySlip = new PaySlip();
+
+		Optional<User> user = userRepo.findById(empId);
+		
+		if (!user.isPresent()) {
+	        String message = messageSource.getMessage("api.error.data.not.found.id", null, Locale.ENGLISH);
+	        log.error(message=message+empId);
+	        throw new EntityNotFoundException(message);
+	    }
+		
+		List<TimeSheetModel> timeSheetModel = timeSheetRepo.search(empId, month.toUpperCase(), year);
+		List<LeaveTime> leaveModel = leaveTimeRepo.findByEmpIdAndMonth(empId, month.toUpperCase());
+
+		for (TimeSheetModel tm : timeSheetModel) {
+			if (tm.getWorkingHour() != null && tm.getStatus().equalsIgnoreCase(Util.StatusPresent)) {
+				yourWorkingDays++;
+			}
+		}
+
+		leaves = leaveModel.size();
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		LocalDateTime now = LocalDateTime.now();
-		String dat = String.valueOf(dtf.format(now));
+		String monthDate = String.valueOf(map.get(month));
 
-		String projDir = System.getProperty("user.dir");
-		SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+		String firstDayMonth = "01/" + monthDate + "/" + Util.Year;
 
-		XSSFWorkbook workbook = new XSSFWorkbook(Util.ExcelPath);
+		String lastDayOfMonth = (LocalDate.parse(firstDayMonth, DateTimeFormatter.ofPattern("dd/M/yyyy"))
+				.with(TemporalAdjusters.lastDayOfMonth())).format(DateTimeFormatter.ofPattern("dd/M/yyyy"));
+		Map<Integer, String> maps = new HashMap<>();
+		maps.put(0, Util.Sunday);
+		maps.put(1, Util.Monday);
+		maps.put(2, Util.Tuesday);
+		maps.put(3, Util.Wednesday);
+		maps.put(4, Util.Thursday);
+		maps.put(5, Util.Friday);
+		maps.put(6, Util.Saturday);
 
-		DataFormatter dataFormatter = new DataFormatter();
-		dataFormatter.addFormat("m/d/yy", new java.text.SimpleDateFormat("M/d/yyyy"));
-		XSSFSheet sheet = workbook.getSheet(name);
+		int workDays = 0;
+		int beforeHolidays = 0;
+		int afterHolidays = 0;
+		int diff = 0;
+		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+		Date startDate = formatter.parse(firstDayMonth);
+		Date endDate = formatter.parse(lastDayOfMonth);
 
-		try {
-			Date midDate = new SimpleDateFormat("MM/dd/yyyy").parse(midPeriod);
-			LocalDate parsedDate = midDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-			LocalDate newDate = parsedDate.minusDays(1);
-			Date x = Date.from(newDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-			String newDates = formatter.format(x);
-			Date dates = DateFor.parse(midPeriod);
-			formatter.format(dates);
-			// excel read and extract data
-			for (int i = 1; i <= 366; i++) {
-				XSSFRow row = sheet.getRow(i);
-				try {
-					XSSFCell xssMonth = sheet.getRow(i).getCell(1);
+		Calendar start = Calendar.getInstance();
+		start.setTime(startDate);
+		Calendar end = Calendar.getInstance();
+		end.setTime(endDate);
+		List<String> list = new ArrayList<>();
+		List<String> lists = new ArrayList<>();
 
-					if (month.equalsIgnoreCase(dataFormatter.formatCellValue(xssMonth))) {
-						if (status) {
-							startPayPeriods = new SimpleDateFormat("MM/dd/yyyy")
-									.parse(dataFormatter.formatCellValue(row.getCell(2)));
-							status = false;
-						}
+		LocalDate localDate = null;
 
-						date = dataFormatter.formatCellValue(row.getCell(2));
+		for (Date date = start.getTime(); start.before(end) || start.equals(end); start.add(Calendar.DATE,
+				1), date = start.getTime()) {
 
-						if (DateFor.parse(midPeriod).compareTo(DateFors.parse(date)) > 0) {
+			localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-							if ((!(dataFormatter.formatCellValue(row.getCell(4)).equals(""))
-									&& (!(dataFormatter.formatCellValue(row.getCell(5)).equals(""))))) {
+			lists.add(localDate.toString().strip());
 
-								endPayPeriod = new SimpleDateFormat("MM/dd/yyyy")
-										.parse(dataFormatter.formatCellValue(row.getCell(2)));
-
-								startTime = dataFormatter.formatCellValue(row.getCell(4));
-								endTime = dataFormatter.formatCellValue(row.getCell(5));
-
-								beforeDays++;
-							} else {
-								leaveStatus = dataFormatter.formatCellValue(row.getCell(6));
-								leaveStatus = leaveStatus.replaceAll("\\s", "");
-								if (leaveStatus.equalsIgnoreCase(leave)) {
-									beforeLeaveDays++;
-								}
-								leaveStatus = dataFormatter.formatCellValue(row.getCell(6));
-								leaveStatus = leaveStatus.replaceAll("\\s", "");
-
-							}
-						} else {
-							if ((!(dataFormatter.formatCellValue(row.getCell(4)).equals(""))
-									&& (!(dataFormatter.formatCellValue(row.getCell(5)).equals(""))))) {
-
-								endPayPeriod = new SimpleDateFormat("MM/dd/yyyy")
-										.parse(dataFormatter.formatCellValue(row.getCell(2)));
-
-								startTime = dataFormatter.formatCellValue(row.getCell(4));
-								endTime = dataFormatter.formatCellValue(row.getCell(5));
-
-								afterDays++;
-							} else {
-								leaveStatus = dataFormatter.formatCellValue(row.getCell(6));
-								leaveStatus = leaveStatus.replaceAll("\\s", "");
-								if (leaveStatus.equalsIgnoreCase(leave)) {
-									afterLeaveDays++;
-								}
-								leaveStatus = dataFormatter.formatCellValue(row.getCell(6));
-								leaveStatus = leaveStatus.replaceAll("\\s", "");
-
-							}
-						}
-
-					}
-				} catch (Exception e) {
-					break;
-				}
-			}
-			workingDays = beforeDays + afterDays;
-			leaveDays = beforeLeaveDays + afterLeaveDays;
-
-			enDate = formatter.format(endPayPeriod);
-
-			strDate = formatter.format(startPayPeriods);
-
-			payPeriod = midPeriod + "-" + enDate;
-
-			payPeriods = strDate + "-" + newDates;
-			return pdfGenerates(payPeriod, payPeriods, grossSalary, add, beforeDays, afterDays, workingDays,
-					afterLeaveDays, beforeLeaveDays, leaveDays, name, addOn, month, dat);
-
-		} catch (Exception e) {
-			// excel read and extract data
-			for (int i = 1; i <= 366; i++) {
-				XSSFRow row = sheet.getRow(i);
-				try {
-					XSSFCell xssMonth = sheet.getRow(i).getCell(1);
-
-					if (month.equalsIgnoreCase(dataFormatter.formatCellValue(xssMonth))) {
-						if (status) {
-							startPayPeriods = new SimpleDateFormat("MM/dd/yyyy")
-									.parse(dataFormatter.formatCellValue(row.getCell(2)));
-							status = false;
-						}
-						date = dataFormatter.formatCellValue(row.getCell(2));
-
-						if ((!(dataFormatter.formatCellValue(row.getCell(4)).equals(""))
-								&& (!(dataFormatter.formatCellValue(row.getCell(5)).equals(""))))) {
-
-							endPayPeriod = new SimpleDateFormat("MM/dd/yyyy")
-									.parse(dataFormatter.formatCellValue(row.getCell(2)));
-
-							startTime = dataFormatter.formatCellValue(row.getCell(4));
-							endTime = dataFormatter.formatCellValue(row.getCell(5));
-
-							workingDays++;
-						} else {
-							leaveStatus = dataFormatter.formatCellValue(row.getCell(6));
-							leaveStatus = leaveStatus.replaceAll("\\s", "");
-							if (leaveStatus.equalsIgnoreCase(leave)) {
-								leaveDays++;
-							}
-							leaveStatus = dataFormatter.formatCellValue(row.getCell(6));
-							leaveStatus = leaveStatus.replaceAll("\\s", "");
-
-						}
-
-					}
-				} catch (Exception k) {
-					break;
-				}
-
-			}
-
-			enDate = formatter.format(endPayPeriod);
-
-			strDate = formatter.format(startPayPeriods);
-
-			payPeriod = strDate + "-" + enDate;
-
-			return pdfGenerate(payPeriod, grossSalary, add, leaveDays, name, addOn, workingDays, month, dat);
+			list.add(maps.get(date.getDay()));
 
 		}
 
-	}
+		for (String s : list) {
+			if (!s.equalsIgnoreCase("Sunday")) {
+				workDays++;
+			}
 
-	private String pdfGenerates(String payPeriod, String payPeriods, int grossSalary, int add, int beforeDays,
-			int afterDays, int workingDays, int afterLeaveDays, int beforeLeaveDays, int leaveDays, String name,
-			int addOn, String month, String dat) throws MalformedURLException, FileNotFoundException {
-		String path = "C:\\Users\\HP\\Downloads\\salarys_slips\\" + name + "_" + month + ".pdf";
+		}
 
+		beforeHolidays = lists.size();
+		lists.removeAll(li);
+		afterHolidays = lists.size();
+
+		diff = beforeHolidays - afterHolidays;
+		workDays = workDays - diff;
+
+		String path = Util.FolderPath + user.get().getFirstName() + user.get().getLastName() + "_" + month + ".pdf";
+		log.warn("folder path set");
+
+		int grossSalary = (int) user.get().getSalary();
+
+		int totalWorkingDays = workDays - saturday;
+
+		int amountPerDay = grossSalary / totalWorkingDays;
+		int leavePerDay = leaves * amountPerDay;
+		int netAmount = (yourWorkingDays * amountPerDay) - leavePerDay;
 		ImageData datas = ImageDataFactory.create(Util.ImagePath);
+		log.warn("image path set");
 		Image alpha = new Image(datas);
 		PdfWriter pdfWriter = new PdfWriter(path);
 		PdfDocument pdfDocument = new PdfDocument(pdfWriter);
 		Document document = new Document(pdfDocument);
 		pdfDocument.setDefaultPageSize(PageSize.A4);
-
-		int beforePerDay = (grossSalary / (workingDays + leaveDays));
-		int afterPerDay = ((grossSalary + add) / (workingDays + leaveDays));
-		int before = beforePerDay * beforeDays - (beforePerDay * beforeLeaveDays);
-		int after = afterPerDay * afterDays - (afterPerDay * afterLeaveDays);
-		float col = 560f;
-		float columnWidth[] = { col };
-
-		Paragraph paras = new Paragraph(Util.ADDRESS);
+		float col = 250f;
+		float columnWidth[] = { col, col };
 		Table table = new Table(columnWidth);
-
-		table.setBackgroundColor(new DeviceRgb(63, 169, 219));
-
-		table.addCell(Util.PaySlip).setTextAlignment(TextAlignment.CENTER);
-
-		float colm[] = { 560 };
-		Table tab = new Table(colm).setBorder(Border.NO_BORDER);
-	
-		tab.addCell(Util.EmployeeInformation
-				+ "                                                                                        " + "Date: " + dat +"\n"+
-				
-		Util.EmployeeNumber  +"     :     "+ PayInfo.EmpNumber+"                                            "+Util.BankName+" : "+PayInfo.BName+"\n"+
-		Util.Name+"                         :     "+name+"                    "+Util.AccountNumber+" : "+PayInfo.ANumber+"\n"+
-		Util.Gender +"                       :     "+ PayInfo.Gender+"\n"+
-		Util.JobTitle +"                     :     "+ PayInfo.JTitle);
-	
-		
-
-		float colWidth[] = { 280, 280 };
-		float colWidths[] = { 280, 140, 140 };
-
-		Table customerInfoTable = new Table(colWidth);
-		Table pay = new Table(colWidths);
-	
-		
-		customerInfoTable.addCell(Util.NumberOfLeavesTaken);
-		customerInfoTable.addCell(String.valueOf(leaveDays));
-		customerInfoTable.addCell(Util.GrossSalary);
-		customerInfoTable.addCell(String.valueOf(grossSalary));
-		customerInfoTable.addCell(Util.NewGrossSalary);
-		customerInfoTable.addCell(String.valueOf(grossSalary + add));
-		customerInfoTable.addCell(Util.BeforePromotion);
-		customerInfoTable.addCell(String.valueOf(before));
-		customerInfoTable.addCell(Util.AfterPromotion);
-		customerInfoTable.addCell(String.valueOf(after));
-
-			pay.addCell(Util.PayPeriods);
-			pay.addCell(payPeriods);
-			pay.addCell(payPeriod);
-			customerInfoTable.addCell(Util.BonusAmount);
-			customerInfoTable.addCell(String.valueOf(addOn));
-			customerInfoTable.addCell(Util.NetAmountPayable);
-			customerInfoTable.addCell(String.valueOf(before + after + addOn));
-
-			document.add(alpha);
-			document.add(paras);
-			document.add(table);
-			document.add(tab);
-			document.add(pay);
-			document.add(customerInfoTable);
-			
-			document.close();
-			return Util.Successfull;
-
-	}
-
-//Pdf Creation		
-	public String pdfGenerate(String payPeriod, int grossSalary, int add, int leaveDays, String name, int addOn,
-			int workingDays, String month, String dat) throws FileNotFoundException, MalformedURLException {
-		String path = "C:\\Users\\HP\\Downloads\\salarys_slips\\" + name + "_" + month + ".pdf";
-
-		ImageData datas = ImageDataFactory.create(Util.ImagePath);
-		Image alpha = new Image(datas);
-		PdfWriter pdfWriter = new PdfWriter(path);
-		PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-		Document document = new Document(pdfDocument);
-		pdfDocument.setDefaultPageSize(PageSize.A4);
-
-		float col = 560f;
-		float columnWidth[] = { col };
-
-		Paragraph paras = new Paragraph(Util.ADDRESS);
-		Table table = new Table(columnWidth);
-
-		table.setBackgroundColor(new DeviceRgb(63, 169, 219));
-
-		table.addCell(Util.PaySlip).setTextAlignment(TextAlignment.CENTER);
-
-		float colm[] = { 560 };
-		Table tab = new Table(colm).setBorder(Border.NO_BORDER);
-		tab.addCell(Util.EmployeeInformation
-				+ "                                                                                        " + "Date: " + dat +"\n"+
-				
-		Util.EmployeeNumber  +"     :     "+ PayInfo.EmpNumber+"                                            "+Util.BankName+" : "+PayInfo.BName+"\n"+
-		Util.Name+"                         :     "+name+"                    "+Util.AccountNumber+" : "+PayInfo.ANumber+"\n"+
-		Util.Gender +"                       :     "+ PayInfo.Gender+"\n"+
-		Util.JobTitle +"                     :     "+ PayInfo.JTitle);
-
-		float colWidth[] = { 280, 280 };
-
-		Table customerInfoTable = new Table(colWidth);
-	
-		customerInfoTable.addCell(Util.PayPeriods);
-		customerInfoTable.addCell(payPeriod);
-		customerInfoTable.addCell(Util.YourWorkingDays);
-		customerInfoTable.addCell(String.valueOf(workingDays));
-		customerInfoTable.addCell(Util.NumberOfLeavesTaken);
-		customerInfoTable.addCell(String.valueOf(leaveDays));
-		customerInfoTable.addCell(Util.TotalWorkingDays);
-		customerInfoTable.addCell(String.valueOf(workingDays + leaveDays));
-		customerInfoTable.addCell(Util.AmountDeductedForLeaves);
-		customerInfoTable.addCell(String.valueOf((grossSalary / workingDays) * leaveDays));
-		customerInfoTable.addCell(Util.BonusAmount);
-		customerInfoTable.addCell(String.valueOf(addOn));
-		customerInfoTable.addCell(Util.AmountPayablePerDay);
-		customerInfoTable.addCell(String.valueOf(grossSalary / (workingDays + leaveDays)));
-		customerInfoTable.addCell(Util.GrossSalary);
-		customerInfoTable.addCell(String.valueOf(grossSalary));
-		customerInfoTable.addCell(Util.NetAmountPayable);
-		customerInfoTable.addCell(String.valueOf((grossSalary - (grossSalary / workingDays) * leaveDays) + addOn));
+		table.setBackgroundColor(new DeviceRgb(63, 169, 219)).setFontColor(Color.WHITE);
+		table.addCell(new Cell().add("Pay Slip").setTextAlignment(TextAlignment.CENTER)
+				.setVerticalAlignment(VerticalAlignment.MIDDLE).setMarginTop(30f).setMarginBottom(30f).setFontSize(30f)
+				.setBorder(Border.NO_BORDER));
+		table.addCell(new Cell().add(Util.ADDRESS).setTextAlignment(TextAlignment.RIGHT).setMarginTop(30f)
+				.setMarginBottom(30f).setBorder(Border.NO_BORDER).setMarginRight(10f));
+		float colWidth[] = { 150, 150, 100, 100 };
+		Table employeeTable = new Table(colWidth);
+		employeeTable.addCell(new Cell(0, 4).add(Util.EmployeeInformation).setBold());
+		employeeTable.addCell(new Cell().add(Util.EmployeeNumber).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell().add(String.valueOf(user.get().getId())).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell().add(Util.Date).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell().add(dtf.format(currentdate)).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell().add(Util.Name).setBorder(Border.NO_BORDER));
+		employeeTable
+				.addCell(new Cell().add(user.get().getFirstName() + " " + user.get().getLastName()).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell().add(Util.BankName).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell().add(user.get().getBankName()).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell().add(Util.JobTitle).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell().add(user.get().getDesignation()).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell().add(Util.AccountNumber).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell().add(user.get().getAccountNumber()).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell().add(Util.MobileNo).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell(0, 4).add(String.valueOf(user.get().getMobileNo())).setBorder(Border.NO_BORDER));
+		Table itemInfo = new Table(columnWidth);
+		itemInfo.addCell(new Cell().add(Util.PayPeriods));
+		itemInfo.addCell(new Cell().add(firstDayMonth + " - " + lastDayOfMonth));
+		itemInfo.addCell(new Cell().add(Util.YourWorkingDays));
+		itemInfo.addCell(new Cell().add(String.valueOf(yourWorkingDays)));
+		itemInfo.addCell(new Cell().add(Util.TotalWorkingDays));
+		itemInfo.addCell(new Cell().add(String.valueOf(totalWorkingDays)));
+		itemInfo.addCell(new Cell().add(Util.NumberOfLeavesTaken));
+		itemInfo.addCell(new Cell().add(String.valueOf(leaves)));
+		itemInfo.addCell(new Cell().add(Util.AmountDeductedForLeaves));
+		itemInfo.addCell(new Cell().add(String.valueOf(leavePerDay)));
+		itemInfo.addCell(new Cell().add(Util.AmountPayablePerDay));
+		itemInfo.addCell(new Cell().add(String.valueOf(amountPerDay)));
+		itemInfo.addCell(new Cell().add(Util.GrossSalary));
+		itemInfo.addCell(new Cell().add(String.valueOf(grossSalary)));
+		itemInfo.addCell(new Cell().add(Util.NetAmountPayable));
+		itemInfo.addCell(new Cell().add(String.valueOf(netAmount)));
 		document.add(alpha);
-		document.add(paras);
 		document.add(table);
-		document.add(tab);
-		document.add(customerInfoTable);
+		document.add(new Paragraph("\n"));
+		document.add(employeeTable);
+		document.add(itemInfo);
+		document.add(new Paragraph("\n(Authorised Singnatory)").setTextAlignment(TextAlignment.RIGHT));
 		document.close();
+		log.warn("Successfully");
 
-		return Util.Successfull;
+		paySlip.setEmpId(empId);
+		paySlip.setJobTitle(user.get().getDesignation());
+		paySlip.setAccountNumber(user.get().getAccountNumber());
+		paySlip.setBankName(user.get().getBankName());
+		paySlip.setName(user.get().getFirstName() + " " + user.get().getLastName());
+		paySlip.setPresentDate(dtf.format(currentdate));
+		paySlip.setMobileNo(user.get().getMobileNo());
+		paySlip.setPayPeriods(firstDayMonth + " - " + lastDayOfMonth);
+		paySlip.setYouWorkingDays(yourWorkingDays);
+		paySlip.setTotalWorkingDays(totalWorkingDays);
+		paySlip.setNumberOfLeavesTaken(leaves);
+		paySlip.setAmountDeductedForLeaves(leavePerDay);
+		paySlip.setAmountPayablePerDay(amountPerDay);
+		paySlip.setGrossSalary(grossSalary);
+		paySlip.setNetAmountPayable(netAmount);
 
+//		salaryModel.setEmpId(empId);
+//		salaryModel.setMonth(month);
+//		salaryModel.setLeaveCounts(leaves);
+//		salaryModel.setName(user.get().getFirstName() + " " + user.get().getLastName());
+//		salaryModel.setWorkedDays(yourWorkingDays);
+//		salaryModel.setTotalWorkingDays(totalWorkingDays);
+//		salaryModel.setYear(year);
+//		salaryRepo.save(salaryModel);
+		return paySlip;
+		
 	}
 
 }

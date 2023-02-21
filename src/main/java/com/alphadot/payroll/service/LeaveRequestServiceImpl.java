@@ -50,7 +50,6 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 				leaveRequestRepo.save(lr);
 				int id = lr.getEmpid();
 				int leaveId= lr.getLeaveid();
-				List<String> dates=lr.getLeavedate();
 				UriComponentsBuilder urlBuilder = ServletUriComponentsBuilder.fromCurrentContextPath()
 						.path("/leave/leave/Accepted/"+id+"/"+leaveId);
 				UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.fromCurrentContextPath()
