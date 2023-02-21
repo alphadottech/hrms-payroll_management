@@ -15,7 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="salary_table")
+
+@Table(catalog = "EmployeeDB", schema = "payroll_schema", name = "salary_table")
 public class SalaryModel {
 
 	@Id
@@ -37,6 +38,9 @@ public class SalaryModel {
 	
 	@Column(name="leave_counts")
 	private int leaveCounts;
+	
+	@Column(name="leave_dates")
+	private String leavedates;
 	
 	@Column(name="days_worked")
 	private int workedDays;
