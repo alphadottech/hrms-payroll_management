@@ -6,11 +6,12 @@ import com.alphadot.payroll.model.LeaveModel;
 
 public interface LeaveService {
 
-	public String saveLeave(LeaveModel leaveModel);
+//
 
 	public List<LeaveModel> getAllEmpLeave();
 
-	public String getLeaveById(int id);
+//
+	public LeaveModel getLeaveById(int id);
 
-	public String updateEmpLeaves(int empId, int leaveCount);
+//
 }

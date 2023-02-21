@@ -12,7 +12,8 @@ import lombok.Data;
 
 
 @Entity
-@Table(name = "Time_sheet")
+
+@Table(catalog = "EmployeeDB", schema = "payroll_schema", name = "Time_sheet")
 @Data
 public class TimeSheetModel {
 

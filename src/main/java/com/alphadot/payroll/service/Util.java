@@ -45,5 +45,13 @@ public class Util {
    public static final int grossSalary = 15000;
    public static final String bankName = "State Bank Of India";
    public static final String accountNumeber = "345201239";
+   public static final String Sunday = "Sunday";
+   public static final String Monday = "Monday";
+   public static final String Tuesday = "Tuesday";
+   public static final String Wednesday = "Wednesday";
+   public static final String Thursday = "Thursday";
+   public static final String Friday = "Friday";
+   public static final String Saturday = "Saturday";
+   public static final String StatusPresent = "Present";
 
 }

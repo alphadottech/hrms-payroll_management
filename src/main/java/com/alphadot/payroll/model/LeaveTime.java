@@ -10,8 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "Leave_Time")
 
+@Table(catalog = "EmployeeDB", schema = "payroll_schema", name = "Leave_Time")
 public class LeaveTime {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

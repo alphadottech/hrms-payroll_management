@@ -3,6 +3,8 @@ package com.alphadot.payroll.controller;
 import java.text.ParseException;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,29 +26,23 @@ public class LeaveController {
 
 	@Autowired
 	public LeaveService leaveService;
-	
+	private static final Logger log=LogManager.getLogger(LeaveController.class);
 
+
+	
 	@GetMapping("/getAllEmpLeaves")
     public ResponseEntity<List<LeaveModel>> getAllLeaves() throws ParseException {
-		
+	log.info("Payroll service: leave:  getAllLeaves Info level log msg");	
 		return new ResponseEntity<>(leaveService.getAllEmpLeave(), HttpStatus.OK);
     }
 	
 
-	@PostMapping("/saveLeave")
-	public ResponseEntity<String> saveLeaveBalance(@RequestBody LeaveModel leaveModel) {
-		
-		return new ResponseEntity<>(leaveService.saveLeave(leaveModel), HttpStatus.OK);
-	}
 	
 	@GetMapping("/getById/{empId}")
-	public ResponseEntity<String> getEmpLeaves(@PathVariable("empId") int empId) {
+	public ResponseEntity<LeaveModel> getEmpLeaves(@PathVariable("empId") int empId) {
+		log.info("Payroll service: leave:  getEmpLeaves Info level log msg");
 		return new ResponseEntity<>(leaveService.getLeaveById(empId), HttpStatus.OK);
 	}
-	
-	@PutMapping("/updateLeave/{empId}/{leaveCount}")
-	public ResponseEntity<String> updateEmpLeaves(@PathVariable("empId") int empId,@PathVariable("leaveCount") int leaveCount) {
-		return new ResponseEntity<>(leaveService.updateEmpLeaves(empId,leaveCount), HttpStatus.OK);
-	}
+
 	
 }
