@@ -29,9 +29,9 @@ public class PayRollController {
 
 
 	@GetMapping("/slip")
-	public ResponseEntity<PaySlip> payrollCreate(@RequestParam("empId") int empId, @RequestParam("month") String month, HttpServletRequest request) throws ParseException, IOException {
+	public ResponseEntity<PaySlip> payrollCreate(@RequestParam("empId") int empId, @RequestParam("month") String month, @RequestParam("year") String year, HttpServletRequest request) throws ParseException, IOException {
 		  LOGGER.info("API Call From IP: " + request.getRemoteHost());
-		return ResponseEntity.ok(payRollService.createPaySlip(empId,month));
+		return ResponseEntity.ok(payRollService.createPaySlip(empId,month,year));
 	}
 	
 	

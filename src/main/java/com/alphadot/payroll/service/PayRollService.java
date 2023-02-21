@@ -1,10 +1,6 @@
 package com.alphadot.payroll.service;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -19,7 +15,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.StringTokenizer;
 import java.util.TreeMap;
 
 import javax.persistence.EntityNotFoundException;
@@ -29,16 +24,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 //import com.alphadot.payroll.model.Employee;
 import com.alphadot.payroll.model.LeaveTime;
 import com.alphadot.payroll.model.PaySlip;
-import com.alphadot.payroll.model.SalaryModel;
 import com.alphadot.payroll.model.TimeSheetModel;
 import com.alphadot.payroll.model.User;
-import com.alphadot.payroll.repository.EmployeeRepo;
 import com.alphadot.payroll.repository.LeaveTimeRepo;
 import com.alphadot.payroll.repository.SalaryRepo;
 import com.alphadot.payroll.repository.TimeSheetRepo;
@@ -79,8 +71,8 @@ public class PayRollService {
 	  @Autowired
 	    private MessageSource messageSource;
 
-	@Value("${holiday.diwali}")
-	private String diwali;
+	@Value("${holiday.republic}")
+	private String republic;
 
 	@Value("${holiday.holi}")
 	private String holi;
@@ -88,16 +80,19 @@ public class PayRollService {
 	@Value("${holiday.rakhi}")
 	private String rakhi;
 
-	@Value("${holiday.abc}")
-	private String abc;
+	@Value("${holiday.independence}")
+	private String independence;
 
-	@Value("${holiday.xyz}")
-	private String xyz;
+	@Value("${holiday.gandhi}")
+	private String gandhi;
 
-	@Value("${holiday.lmn}")
-	private String lmn;
+	@Value("${holiday.dussehra}")
+	private String dussehra;
+	
+	@Value("${holiday.diwali}")
+	private String diwali;
 
-	public PaySlip createPaySlip(int empId, String month) throws ParseException, IOException {
+	public PaySlip createPaySlip(int empId, String month,String year) throws ParseException, IOException {
 
 		log.warn("inside method");
 
@@ -105,14 +100,15 @@ public class PayRollService {
 		li.add(diwali);
 		li.add(holi);
 		li.add(rakhi);
-		li.add(abc);
-		li.add(xyz);
-		li.add(lmn);
-
-		int yourWorkingDays = 0;
+		li.add(independence);
+		li.add(gandhi);
+		li.add(dussehra);
+		li.add(republic);
+		
+	    int yourWorkingDays = 0;
 		int saturday = 2;
 
-		SalaryModel salaryModel = new SalaryModel();
+//		SalaryModel salaryModel = new SalaryModel();
 		Map<String, Integer> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		map.put(Util.January, 1);
 		map.put(Util.February, 2);
@@ -128,7 +124,7 @@ public class PayRollService {
 		map.put(Util.December, 12);
 
 		LocalDate currentdate = LocalDate.now();
-		String year = String.valueOf(currentdate.getYear());
+//		String year = String.valueOf(currentdate.getYear());
 		int leaves = 0;
 
 //		User user = new User();
@@ -296,14 +292,14 @@ public class PayRollService {
 		paySlip.setGrossSalary(grossSalary);
 		paySlip.setNetAmountPayable(netAmount);
 
-		salaryModel.setEmpId(empId);
-		salaryModel.setMonth(month);
-		salaryModel.setLeaveCounts(leaves);
-		salaryModel.setName(user.get().getFirstName() + " " + user.get().getLastName());
-		salaryModel.setWorkedDays(yourWorkingDays);
-		salaryModel.setTotalWorkingDays(totalWorkingDays);
-		salaryModel.setYear(year);
-		salaryRepo.save(salaryModel);
+//		salaryModel.setEmpId(empId);
+//		salaryModel.setMonth(month);
+//		salaryModel.setLeaveCounts(leaves);
+//		salaryModel.setName(user.get().getFirstName() + " " + user.get().getLastName());
+//		salaryModel.setWorkedDays(yourWorkingDays);
+//		salaryModel.setTotalWorkingDays(totalWorkingDays);
+//		salaryModel.setYear(year);
+//		salaryRepo.save(salaryModel);
 		return paySlip;
 		
 	}
