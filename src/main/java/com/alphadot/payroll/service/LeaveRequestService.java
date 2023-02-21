@@ -1,6 +1,7 @@
 package com.alphadot.payroll.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.alphadot.payroll.model.LeaveRequestModel;
 
@@ -13,5 +14,11 @@ public interface LeaveRequestService {
 	public List<LeaveRequestModel> getLeaveDetails();
 
 	public List<LeaveRequestModel> getLeaveRequestDetailsByEmpId(Integer empid);
+	
+//	public String AcceptLeaveRequest(Integer empid, String[] Dates);
+
+	public String AcceptLeaveRequest(Integer empid, Integer leaveId);
+	
+	public String RejectLeaveRequest(Integer empid, Integer leaveId);
 
 }

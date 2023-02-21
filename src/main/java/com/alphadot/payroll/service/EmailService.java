@@ -1,31 +1,88 @@
 package com.alphadot.payroll.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+
+import com.alphadot.payroll.model.LeaveRequestModel;
+import com.alphadot.payroll.model.Mail;
+import com.alphadot.payroll.model.OnLeaveRequestSaveEvent;
+
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 
 @Service
 public class EmailService {
 	
+//	@Autowired
+//	private EmployeeRepo employeeRepo;
+	
 	@Autowired
 	private JavaMailSender javaMailSender;
 	
-	public String sendEmail(String email) {
-		SimpleMailMessage msg = new SimpleMailMessage();
-		msg.setFrom("alphadottest@gmail.com");
-		msg.setTo("spyavenger55@gmail.com");
-		msg.setCc(email);
-		msg.setSubject("Test Subject");
-		msg.setText("Test Body");
+	private final Configuration templateConfiguration;
+
+	
+	 @Value("${app.velocity.templates.location}")
+	    private String basePackagePath;
+	 
+	 @Autowired
+	 public EmailService(JavaMailSender javaMailSender, Configuration templateConfiguration ) {
+		 this.javaMailSender = javaMailSender;
+		 this.templateConfiguration = templateConfiguration;
+	 }
+	
+	public String sendEmail(OnLeaveRequestSaveEvent event, String Url, String Url1, LeaveRequestModel lr) 
+			throws IOException, TemplateException, MessagingException{
 		
-		javaMailSender.send(msg);
+		Mail mail =  new Mail();
+		mail.setSubject("Leave Request");
+		mail.setFrom("mukeshchandalwar.adt@gmail.com");
+		mail.setTo("mbchandalwar02@gmail.com");
+		mail.getModel().put("leaveApprovalLink", Url);
+		mail.getModel().put("leaveRejectionLink", Url1);
+		mail.getModel().put("LeaveId", event.getLeaveRequestModel().getLeaveid().toString() );
+		mail.getModel().put("EmpId", event.getLeaveRequestModel().getEmpid().toString());
+		mail.getModel().put("LeaveDates", event.getLeaveRequestModel().getLeavedate().toString());
+		mail.getModel().put("Status", event.getLeaveRequestModel().getStatus());
 		
-		return "Mail Sent Successfully";
+		 templateConfiguration.setClassForTemplateLoading(getClass(), basePackagePath);
+		 Template template = templateConfiguration.getTemplate("leave_status_change.ftl");
+		 String mailContent = FreeMarkerTemplateUtils.processTemplateIntoString(template, mail.getModel());
+		 mail.setContent(mailContent);
+		 send(mail);
+		 
+		 return "Mail Sent Successfully";
+		 
 		
 	}
 	
-	 
+	public String send(Mail mail) throws MessagingException {
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                StandardCharsets.UTF_8.name());
+
+        helper.setTo(mail.getTo());
+        helper.setText(mail.getContent(), true);
+        helper.setSubject(mail.getSubject());
+        helper.setFrom(mail.getFrom());
+        javaMailSender.send(message);
+        
+        return "Mail Sent Successfully";
+    }
+	
+	
+	
 
 }

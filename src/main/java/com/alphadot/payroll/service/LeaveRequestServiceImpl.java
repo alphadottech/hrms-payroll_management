@@ -3,11 +3,12 @@ package com.alphadot.payroll.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-
-import com.alphadot.payroll.model.Employee;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 import com.alphadot.payroll.model.LeaveRequestModel;
-import com.alphadot.payroll.repository.EmployeeRepo;
+import com.alphadot.payroll.model.OnLeaveRequestSaveEvent;
 import com.alphadot.payroll.repository.LeaveRequestRepo;
 
 
@@ -17,12 +18,13 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
 	@Autowired
 	private LeaveRequestRepo leaveRequestRepo;
-
-	@Autowired
-	private EmailService emailService;
 	
-	@Autowired
-	private EmployeeRepo employeeRepo;
+	private final ApplicationEventPublisher applicationEventPublisher;
+	
+	public LeaveRequestServiceImpl(ApplicationEventPublisher applicationEventPublisher) {
+		this.applicationEventPublisher = applicationEventPublisher;
+	}
+	
 
 	@Override
 	public String saveLeaveRequest(LeaveRequestModel lr) {
@@ -46,11 +48,20 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 				lr.setStatus("Pending");
 
 				leaveRequestRepo.save(lr);
-
-				Employee employee = employeeRepo.findByEmpId(lr.getEmpid());
-				String email = employee.getEmailId();
-				emailService.sendEmail(email);
-
+				int id = lr.getEmpid();
+				int leaveId= lr.getLeaveid();
+				List<String> dates=lr.getLeavedate();
+				UriComponentsBuilder urlBuilder = ServletUriComponentsBuilder.fromCurrentContextPath()
+						.path("/leave/leave/Accepted/"+id+"/"+leaveId);
+				UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.fromCurrentContextPath()
+				  .path("/leave/leave/Rejected/"+id+"/"+leaveId);
+				 
+				
+//				UriComponentsBuilder urlBuilder2 = ServletUriComponentsBuilder.fromHttpUrl("http://localhost:9095/payroll/leave/leave/Rejected/"+id+"/"+leaveId);
+				
+				OnLeaveRequestSaveEvent onLeaveRequestSaveEvent = new OnLeaveRequestSaveEvent(urlBuilder, urlBuilder1, lr);
+				applicationEventPublisher.publishEvent(onLeaveRequestSaveEvent);
+				
 			} else {
 				return "you have selected wrong date OR already requested for selected date";
 			}
@@ -60,8 +71,9 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 		}
 
 		return lr.getLeaveid() + " Leave Request is saved & mail Sent Successfully";
-
-	}
+}
+	
+	
 
 	@Override
 	public List<LeaveRequestModel> getLeaveDetails() {
@@ -80,4 +92,35 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
 	}
 
+
+	@Override
+	public String AcceptLeaveRequest(Integer empid, Integer leaveId) {
+		
+		LeaveRequestModel opt =  leaveRequestRepo.search(empid,leaveId);
+		
+		if(opt!=null) { 
+			opt.setStatus("Accepted");
+			leaveRequestRepo.save(opt);
+			return opt.getLeaveid()+ " leave Request Accepted";
+		}else {
+			return empid+"leave request status already updated";
+		}
+		
+		
+	}
+
+
+	@Override
+	public String RejectLeaveRequest(Integer empid, Integer leaveId) {
+		LeaveRequestModel opt = leaveRequestRepo.search(empid, leaveId);
+
+		if (opt != null) {
+			opt.setStatus("Rejected");
+			leaveRequestRepo.save(opt);
+			return opt.getLeaveid() + " leave Request Rejected";
+		} else {
+			return empid + "leave request status already updated";
+		}
+	}
+	
 }

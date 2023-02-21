@@ -2,8 +2,10 @@ package com.alphadot.payroll.controller;
 
 import java.text.ParseException;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +15,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.alphadot.payroll.model.LeaveModel;
 import com.alphadot.payroll.model.LeaveRequestModel;
+import com.alphadot.payroll.model.OnLeaveRequestSaveEvent;
+import com.alphadot.payroll.repository.LeaveRequestRepo;
 import com.alphadot.payroll.service.LeaveRequestService;
 import com.alphadot.payroll.service.LeaveService;
 
@@ -28,6 +34,12 @@ public class LeaveController {
 	
 	@Autowired
 	private LeaveRequestService leaveRequestService;
+	
+	@Autowired
+	ApplicationEventPublisher applicationEventPublisher;
+	
+	@Autowired
+	LeaveRequestRepo leaveRequestRepo;
 	
 
 	@GetMapping("/getAllEmpLeaves")
@@ -56,9 +68,8 @@ public class LeaveController {
 	@PostMapping("/leaveRequest")
 	public ResponseEntity<String> saveLeaveRequest(@RequestBody LeaveRequestModel lr) {
 		return new ResponseEntity<>(leaveRequestService.saveLeaveRequest(lr), HttpStatus.OK);
-
-	}
-
+		}
+	
 	@GetMapping("/getLeaveDetails")
 	public ResponseEntity<List<LeaveRequestModel>> getLeaveDetails() {
 		return new ResponseEntity<>(leaveRequestService.getLeaveDetails(), HttpStatus.OK);
@@ -68,5 +79,16 @@ public class LeaveController {
 	public ResponseEntity<List<LeaveRequestModel>> getLeaveRequestDetailsByEmpId(@PathVariable("empid") int empid){
 		return new ResponseEntity<>(leaveRequestService.getLeaveRequestDetailsByEmpId(empid),HttpStatus.OK);
 	}
+	
+	@GetMapping("/leave/Accepted/{empid}/{leaveId}")
+	public ResponseEntity<String> AcceptLeaveRequest(@PathVariable("empid") Integer empid, @PathVariable("leaveId") Integer leaveId) {
+		return new ResponseEntity<>(leaveRequestService.AcceptLeaveRequest(empid, leaveId), HttpStatus.OK);		
+	}
+	
+	@GetMapping("/leave/Rejected/{empid}/{leaveId}")
+	public ResponseEntity<String> RejectLeaveRequest(@PathVariable("empid") Integer empid, @PathVariable("leaveId") Integer leaveId) {
+		return new ResponseEntity<>(leaveRequestService.RejectLeaveRequest(empid, leaveId), HttpStatus.OK);		
+	}
+	
 	
 }
