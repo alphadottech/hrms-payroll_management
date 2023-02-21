@@ -32,7 +32,6 @@ import com.alphadot.payroll.model.PaySlip;
 import com.alphadot.payroll.model.TimeSheetModel;
 import com.alphadot.payroll.model.User;
 import com.alphadot.payroll.repository.LeaveTimeRepo;
-import com.alphadot.payroll.repository.SalaryRepo;
 import com.alphadot.payroll.repository.TimeSheetRepo;
 import com.alphadot.payroll.repository.UserRepo;
 import com.itextpdf.io.image.ImageData;
@@ -61,9 +60,6 @@ public class PayRollService {
 
 	@Autowired
 	private LeaveTimeRepo leaveTimeRepo;
-
-	@Autowired
-	private SalaryRepo salaryRepo;
 
 	@Autowired
 	private UserRepo userRepo;
