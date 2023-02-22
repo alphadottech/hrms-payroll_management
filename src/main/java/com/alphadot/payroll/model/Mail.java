@@ -84,5 +84,5 @@ public class Mail {
 	public void setEmpId(int empId) {
 		this.empId = empId;
 	}
-    
-}
+
+   }

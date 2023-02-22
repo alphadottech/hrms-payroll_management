@@ -8,9 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alphadot.payroll.model.TimeSheetModel;
 import com.alphadot.payroll.model.SalaryModel;
-import com.alphadot.payroll.repository.TimeSheetRepo;
 import com.alphadot.payroll.repository.SalaryRepo;
 
 @Service
@@ -19,8 +17,6 @@ public class SalaryServiceImpl implements SalaryService {
 	@Autowired
 	private SalaryRepo salaryRepo;
 	
-	@Autowired
-	private TimeSheetRepo timeSheetRepo;
 	
 	private static final Logger log=LogManager.getLogger(SalaryServiceImpl.class);
 	
@@ -38,7 +34,7 @@ public class SalaryServiceImpl implements SalaryService {
 
 		Optional<SalaryModel> model= salaryRepo.findById(empId);
                 
-      if(model.isEmpty()) {
+      if(model==null) {
     	   throw new NullPointerException("No Data exist with given ID");
        }  
        else {

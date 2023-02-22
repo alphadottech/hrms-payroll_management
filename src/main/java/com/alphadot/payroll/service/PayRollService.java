@@ -62,8 +62,10 @@ public class PayRollService {
 	@Autowired
 	private UserRepo userRepo;
 
+
 	@Autowired
 	private MessageSource messageSource;
+
 
 	@Value("${holiday.republic}")
 	private String republic;
@@ -151,7 +153,7 @@ public class PayRollService {
 		int workDays = 0;
 		int beforeHolidays = 0;
 		int afterHolidays = 0;
-		int diff = 0;
+		
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 		Date startDate = formatter.parse(firstDayMonth);
 		Date endDate = formatter.parse(lastDayOfMonth);
@@ -169,11 +171,11 @@ public class PayRollService {
 				1), date = start.getTime()) {
 
 			localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
-			lists.add(localDate.toString().strip());
+		
 
 			if (date.getDay() != 0) {
-				workDays++;
+				lists.add(localDate.toString());
+				
 			}
 
 		}
@@ -181,9 +183,7 @@ public class PayRollService {
 		beforeHolidays = lists.size();
 		lists.removeAll(li);
 		afterHolidays = lists.size();
-
-		diff = beforeHolidays - afterHolidays;
-		workDays = workDays - diff;
+		workDays = afterHolidays;
 
 		String path = Util.FolderPath + user.get().getFirstName() + user.get().getLastName() + "_" + month + ".pdf";
 		log.warn("folder path set");

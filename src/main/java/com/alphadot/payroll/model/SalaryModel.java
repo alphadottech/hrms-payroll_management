@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-
 @Table(catalog = "EmployeeDB", schema = "payroll_schema", name = "salary_table")
 public class SalaryModel {
 
