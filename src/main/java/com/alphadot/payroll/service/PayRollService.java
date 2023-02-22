@@ -1,6 +1,8 @@
 package com.alphadot.payroll.service;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -16,23 +18,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-
 import javax.persistence.EntityNotFoundException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-
-//import com.alphadot.payroll.model.Employee;
 import com.alphadot.payroll.model.LeaveTime;
 import com.alphadot.payroll.model.PaySlip;
 import com.alphadot.payroll.model.TimeSheetModel;
 import com.alphadot.payroll.model.User;
 import com.alphadot.payroll.repository.LeaveTimeRepo;
-import com.alphadot.payroll.repository.SalaryRepo;
 import com.alphadot.payroll.repository.TimeSheetRepo;
 import com.alphadot.payroll.repository.UserRepo;
 import com.itextpdf.io.image.ImageData;
@@ -63,13 +60,10 @@ public class PayRollService {
 	private LeaveTimeRepo leaveTimeRepo;
 
 	@Autowired
-	private SalaryRepo salaryRepo;
+	private UserRepo userRepo;
 
 	@Autowired
-	private UserRepo userRepo;
-	
-	  @Autowired
-	    private MessageSource messageSource;
+	private MessageSource messageSource;
 
 	@Value("${holiday.republic}")
 	private String republic;
@@ -88,11 +82,11 @@ public class PayRollService {
 
 	@Value("${holiday.dussehra}")
 	private String dussehra;
-	
+
 	@Value("${holiday.diwali}")
 	private String diwali;
 
-	public PaySlip createPaySlip(int empId, String month,String year) throws ParseException, IOException {
+	public PaySlip createPaySlip(int empId, String month, String year) throws ParseException, IOException {
 
 		log.warn("inside method");
 
@@ -104,11 +98,10 @@ public class PayRollService {
 		li.add(gandhi);
 		li.add(dussehra);
 		li.add(republic);
-		
-	    int yourWorkingDays = 0;
-		int saturday = 2;
 
-//		SalaryModel salaryModel = new SalaryModel();
+		int yourWorkingDays = 0;
+		int saturday = Util.SaturdyaValue;
+
 		Map<String, Integer> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		map.put(Util.January, 1);
 		map.put(Util.February, 2);
@@ -124,20 +117,19 @@ public class PayRollService {
 		map.put(Util.December, 12);
 
 		LocalDate currentdate = LocalDate.now();
-//		String year = String.valueOf(currentdate.getYear());
+
 		int leaves = 0;
 
-//		User user = new User();
 		PaySlip paySlip = new PaySlip();
 
 		Optional<User> user = userRepo.findById(empId);
-		
+
 		if (!user.isPresent()) {
-	        String message = messageSource.getMessage("api.error.data.not.found.id", null, Locale.ENGLISH);
-	        log.error(message=message+empId);
-	        throw new EntityNotFoundException(message);
-	    }
-		
+			String message = messageSource.getMessage("api.error.data.not.found.id", null, Locale.ENGLISH);
+			log.error(message = message + empId);
+			throw new EntityNotFoundException(message);
+		}
+
 		List<TimeSheetModel> timeSheetModel = timeSheetRepo.search(empId, month.toUpperCase(), year);
 		List<LeaveTime> leaveModel = leaveTimeRepo.findByEmpIdAndMonth(empId, month.toUpperCase());
 
@@ -151,18 +143,10 @@ public class PayRollService {
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		String monthDate = String.valueOf(map.get(month));
 
-		String firstDayMonth = "01/" + monthDate + "/" + Util.Year;
+		String firstDayMonth = "01/" + monthDate + "/" + year;
 
 		String lastDayOfMonth = (LocalDate.parse(firstDayMonth, DateTimeFormatter.ofPattern("dd/M/yyyy"))
 				.with(TemporalAdjusters.lastDayOfMonth())).format(DateTimeFormatter.ofPattern("dd/M/yyyy"));
-		Map<Integer, String> maps = new HashMap<>();
-		maps.put(0, Util.Sunday);
-		maps.put(1, Util.Monday);
-		maps.put(2, Util.Tuesday);
-		maps.put(3, Util.Wednesday);
-		maps.put(4, Util.Thursday);
-		maps.put(5, Util.Friday);
-		maps.put(6, Util.Saturday);
 
 		int workDays = 0;
 		int beforeHolidays = 0;
@@ -176,7 +160,7 @@ public class PayRollService {
 		start.setTime(startDate);
 		Calendar end = Calendar.getInstance();
 		end.setTime(endDate);
-		List<String> list = new ArrayList<>();
+
 		List<String> lists = new ArrayList<>();
 
 		LocalDate localDate = null;
@@ -188,12 +172,7 @@ public class PayRollService {
 
 			lists.add(localDate.toString().strip());
 
-			list.add(maps.get(date.getDay()));
-
-		}
-
-		for (String s : list) {
-			if (!s.equalsIgnoreCase("Sunday")) {
+			if (date.getDay() != 0) {
 				workDays++;
 			}
 
@@ -210,12 +189,24 @@ public class PayRollService {
 		log.warn("folder path set");
 
 		int grossSalary = (int) user.get().getSalary();
-
 		int totalWorkingDays = workDays - saturday;
-
 		int amountPerDay = grossSalary / totalWorkingDays;
 		int leavePerDay = leaves * amountPerDay;
 		int netAmount = (yourWorkingDays * amountPerDay) - leavePerDay;
+		extracted(yourWorkingDays, currentdate, leaves, user, dtf, firstDayMonth, lastDayOfMonth, path, grossSalary,
+				totalWorkingDays, amountPerDay, leavePerDay, netAmount);
+
+		extracted(empId, yourWorkingDays, currentdate, leaves, paySlip, user, dtf, firstDayMonth, lastDayOfMonth,
+				grossSalary, totalWorkingDays, amountPerDay, leavePerDay, netAmount);
+
+		return paySlip;
+
+	}
+
+	private void extracted(int yourWorkingDays, LocalDate currentdate, int leaves, Optional<User> user,
+			DateTimeFormatter dtf, String firstDayMonth, String lastDayOfMonth, String path, int grossSalary,
+			int totalWorkingDays, int amountPerDay, int leavePerDay, int netAmount)
+			throws MalformedURLException, FileNotFoundException {
 		ImageData datas = ImageDataFactory.create(Util.ImagePath);
 		log.warn("image path set");
 		Image alpha = new Image(datas);
@@ -240,8 +231,8 @@ public class PayRollService {
 		employeeTable.addCell(new Cell().add(Util.Date).setBorder(Border.NO_BORDER));
 		employeeTable.addCell(new Cell().add(dtf.format(currentdate)).setBorder(Border.NO_BORDER));
 		employeeTable.addCell(new Cell().add(Util.Name).setBorder(Border.NO_BORDER));
-		employeeTable
-				.addCell(new Cell().add(user.get().getFirstName() + " " + user.get().getLastName()).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(
+				new Cell().add(user.get().getFirstName() + " " + user.get().getLastName()).setBorder(Border.NO_BORDER));
 		employeeTable.addCell(new Cell().add(Util.BankName).setBorder(Border.NO_BORDER));
 		employeeTable.addCell(new Cell().add(user.get().getBankName()).setBorder(Border.NO_BORDER));
 		employeeTable.addCell(new Cell().add(Util.JobTitle).setBorder(Border.NO_BORDER));
@@ -275,7 +266,11 @@ public class PayRollService {
 		document.add(new Paragraph("\n(Authorised Singnatory)").setTextAlignment(TextAlignment.RIGHT));
 		document.close();
 		log.warn("Successfully");
+	}
 
+	private void extracted(int empId, int yourWorkingDays, LocalDate currentdate, int leaves, PaySlip paySlip,
+			Optional<User> user, DateTimeFormatter dtf, String firstDayMonth, String lastDayOfMonth, int grossSalary,
+			int totalWorkingDays, int amountPerDay, int leavePerDay, int netAmount) {
 		paySlip.setEmpId(empId);
 		paySlip.setJobTitle(user.get().getDesignation());
 		paySlip.setAccountNumber(user.get().getAccountNumber());
@@ -291,17 +286,6 @@ public class PayRollService {
 		paySlip.setAmountPayablePerDay(amountPerDay);
 		paySlip.setGrossSalary(grossSalary);
 		paySlip.setNetAmountPayable(netAmount);
-
-//		salaryModel.setEmpId(empId);
-//		salaryModel.setMonth(month);
-//		salaryModel.setLeaveCounts(leaves);
-//		salaryModel.setName(user.get().getFirstName() + " " + user.get().getLastName());
-//		salaryModel.setWorkedDays(yourWorkingDays);
-//		salaryModel.setTotalWorkingDays(totalWorkingDays);
-//		salaryModel.setYear(year);
-//		salaryRepo.save(salaryModel);
-		return paySlip;
-		
 	}
 
 }

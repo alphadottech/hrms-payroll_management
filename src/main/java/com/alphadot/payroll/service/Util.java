@@ -27,7 +27,7 @@ public class Util {
    public static final String Gender = "Gender";
    public static final String EmployeeNumber = "Employee Number";
    public static final String JobTitle = "Job Title";
-   public static final String Year = "2023";
+
    public static final String Date = "Date";
    public static final String MobileNo = "Mobile No";
    public static final String January = "January";
@@ -42,9 +42,7 @@ public class Util {
    public static final String October = "October";
    public static final String November = "November";
    public static final String December = "December";
-   public static final int grossSalary = 15000;
-   public static final String bankName = "State Bank Of India";
-   public static final String accountNumeber = "345201239";
+
    public static final String Sunday = "Sunday";
    public static final String Monday = "Monday";
    public static final String Tuesday = "Tuesday";
@@ -53,5 +51,6 @@ public class Util {
    public static final String Friday = "Friday";
    public static final String Saturday = "Saturday";
    public static final String StatusPresent = "Present";
+   public static final int SaturdyaValue = 2;
 
 }
