@@ -14,7 +14,12 @@ public interface TimeSheetRepo extends JpaRepository<TimeSheetModel, Integer> {
 
 
 	 TimeSheetModel findByEmployeeIdAndDate(int id, String localDates);
-
+	
+	 
+	 
+	 
+	 
+	 
 	    TimeSheetModel findByEmployeeId(int id);
 
 	    void deleteByEmployeeIdAndDate(int id,String localDates);

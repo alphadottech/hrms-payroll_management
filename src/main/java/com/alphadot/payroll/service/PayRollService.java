@@ -1,8 +1,6 @@
 package com.alphadot.payroll.service;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -10,26 +8,25 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
+
 import javax.persistence.EntityNotFoundException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-import com.alphadot.payroll.model.LeaveTime;
+
 import com.alphadot.payroll.model.PaySlip;
 import com.alphadot.payroll.model.TimeSheetModel;
 import com.alphadot.payroll.model.User;
-import com.alphadot.payroll.repository.LeaveTimeRepo;
 import com.alphadot.payroll.repository.TimeSheetRepo;
 import com.alphadot.payroll.repository.UserRepo;
 import com.itextpdf.io.image.ImageData;
@@ -57,103 +54,49 @@ public class PayRollService {
 	private TimeSheetRepo timeSheetRepo;
 
 	@Autowired
-	private LeaveTimeRepo leaveTimeRepo;
-
-	@Autowired
 	private UserRepo userRepo;
-
 
 	@Autowired
 	private MessageSource messageSource;
 
-
-	@Value("${holiday.republic}")
-	private String republic;
-
-	@Value("${holiday.holi}")
-	private String holi;
-
-	@Value("${holiday.rakhi}")
-	private String rakhi;
-
-	@Value("${holiday.independence}")
-	private String independence;
-
-	@Value("${holiday.gandhi}")
-	private String gandhi;
-
-	@Value("${holiday.dussehra}")
-	private String dussehra;
-
-	@Value("${holiday.diwali}")
-	private String diwali;
+	@Value("${holiday}")
+	private String[] holiday;
 
 	public PaySlip createPaySlip(int empId, String month, String year) throws ParseException, IOException {
+		log.info("inside method");
 
-		log.warn("inside method");
+		 PaySlip paySlip = new PaySlip();		
 
-		List<String> li = new ArrayList<>();
-		li.add(diwali);
-		li.add(holi);
-		li.add(rakhi);
-		li.add(independence);
-		li.add(gandhi);
-		li.add(dussehra);
-		li.add(republic);
+		List<String> li = Arrays.asList(holiday);
+		List<String> lists = new ArrayList<>();
 
-		int yourWorkingDays = 0;
-		int saturday = Util.SaturdyaValue;
-
-		Map<String, Integer> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-		map.put(Util.January, 1);
-		map.put(Util.February, 2);
-		map.put(Util.March, 3);
-		map.put(Util.April, 4);
-		map.put(Util.May, 5);
-		map.put(Util.June, 6);
-		map.put(Util.July, 7);
-		map.put(Util.August, 8);
-		map.put(Util.September, 9);
-		map.put(Util.October, 10);
-		map.put(Util.November, 11);
-		map.put(Util.December, 12);
+		int yourWorkingDays = 0, leaves = 0, workDays = 0, saturday = Util.SaturdyaValue;
 
 		LocalDate currentdate = LocalDate.now();
 
-		int leaves = 0;
+		SimpleDateFormat inputFormat = new SimpleDateFormat("MMMM");
+		SimpleDateFormat outputFormat = new SimpleDateFormat("MM"); // 01-12
 
-		PaySlip paySlip = new PaySlip();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(inputFormat.parse(month));
 
-		Optional<User> user = userRepo.findById(empId);
-
-		if (!user.isPresent()) {
-			String message = messageSource.getMessage("api.error.data.not.found.id", null, Locale.ENGLISH);
-			log.error(message = message + empId);
-			throw new EntityNotFoundException(message);
-		}
-
-		List<TimeSheetModel> timeSheetModel = timeSheetRepo.search(empId, month.toUpperCase(), year);
-		List<LeaveTime> leaveModel = leaveTimeRepo.findByEmpIdAndMonth(empId, month.toUpperCase());
-
+		Optional<User> user = Optional.ofNullable(userRepo.findById(empId).orElseThrow(()-> new EntityNotFoundException("employee not found :"+empId)));
+		
+		List<TimeSheetModel> timeSheetModel = timeSheetRepo.search(empId, month.toUpperCase(), year);		
 		for (TimeSheetModel tm : timeSheetModel) {
-			if (tm.getWorkingHour() != null && tm.getStatus().equalsIgnoreCase(Util.StatusPresent)) {
+			if (tm.getWorkingHour() != null && tm.getStatus().equalsIgnoreCase(Util.StatusPresent))
 				yourWorkingDays++;
-			}
+			else if (tm.getWorkingHour() == null && tm.getStatus().equalsIgnoreCase("Leave"))
+				leaves++;
 		}
 
-		leaves = leaveModel.size();
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		String monthDate = String.valueOf(map.get(month));
+		String monthDate = String.valueOf(outputFormat.format(cal.getTime()));
 
 		String firstDayMonth = "01/" + monthDate + "/" + year;
+		String lastDayOfMonth = (LocalDate.parse(firstDayMonth, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+				.with(TemporalAdjusters.lastDayOfMonth())).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
-		String lastDayOfMonth = (LocalDate.parse(firstDayMonth, DateTimeFormatter.ofPattern("dd/M/yyyy"))
-				.with(TemporalAdjusters.lastDayOfMonth())).format(DateTimeFormatter.ofPattern("dd/M/yyyy"));
-
-		int workDays = 0;
-		int beforeHolidays = 0;
-		int afterHolidays = 0;
-		
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 		Date startDate = formatter.parse(firstDayMonth);
 		Date endDate = formatter.parse(lastDayOfMonth);
@@ -163,52 +106,33 @@ public class PayRollService {
 		Calendar end = Calendar.getInstance();
 		end.setTime(endDate);
 
-		List<String> lists = new ArrayList<>();
-
 		LocalDate localDate = null;
-
-		for (Date date = start.getTime(); start.before(end) || start.equals(end); start.add(Calendar.DATE,
-				1), date = start.getTime()) {
-
-			localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-		
-
-			if (date.getDay() != 0) {
+		while (!start.after(end)) {
+			localDate = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+			if (start.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY)
 				lists.add(localDate.toString());
-				
-			}
 
+			start.add(Calendar.DATE, 1);
 		}
 
-		beforeHolidays = lists.size();
 		lists.removeAll(li);
-		afterHolidays = lists.size();
-		workDays = afterHolidays;
-
+		workDays = lists.size();
 		String path = Util.FolderPath + user.get().getFirstName() + user.get().getLastName() + "_" + month + ".pdf";
-		log.warn("folder path set");
+		log.info("folder path set");
 
-		int grossSalary = (int) user.get().getSalary();
+		float grossSalary = (int) user.get().getSalary();
 		int totalWorkingDays = workDays - saturday;
-		int amountPerDay = grossSalary / totalWorkingDays;
-		int leavePerDay = leaves * amountPerDay;
-		int netAmount = (yourWorkingDays * amountPerDay) - leavePerDay;
-		extracted(yourWorkingDays, currentdate, leaves, user, dtf, firstDayMonth, lastDayOfMonth, path, grossSalary,
-				totalWorkingDays, amountPerDay, leavePerDay, netAmount);
+		float amountPerDay = grossSalary / totalWorkingDays;
+		float leavePerDay = leaves * amountPerDay;
+		float netAmount = (yourWorkingDays * amountPerDay);
 
-		extracted(empId, yourWorkingDays, currentdate, leaves, paySlip, user, dtf, firstDayMonth, lastDayOfMonth,
-				grossSalary, totalWorkingDays, amountPerDay, leavePerDay, netAmount);
+		paySlip = new PaySlip(empId, user.get().getFirstName() + " " + user.get().getLastName(),
+				user.get().getDesignation(), user.get().getMobileNo(), dtf.format(currentdate),
+				user.get().getBankName(), user.get().getAccountNumber(), firstDayMonth + " - " + lastDayOfMonth,
+				yourWorkingDays, totalWorkingDays, leaves, leavePerDay, amountPerDay, grossSalary, netAmount);
 
-		return paySlip;
-
-	}
-
-	private void extracted(int yourWorkingDays, LocalDate currentdate, int leaves, Optional<User> user,
-			DateTimeFormatter dtf, String firstDayMonth, String lastDayOfMonth, String path, int grossSalary,
-			int totalWorkingDays, int amountPerDay, int leavePerDay, int netAmount)
-			throws MalformedURLException, FileNotFoundException {
 		ImageData datas = ImageDataFactory.create(Util.ImagePath);
-		log.warn("image path set");
+		log.info("image path set");
 		Image alpha = new Image(datas);
 		PdfWriter pdfWriter = new PdfWriter(path);
 		PdfDocument pdfDocument = new PdfDocument(pdfWriter);
@@ -231,8 +155,7 @@ public class PayRollService {
 		employeeTable.addCell(new Cell().add(Util.Date).setBorder(Border.NO_BORDER));
 		employeeTable.addCell(new Cell().add(dtf.format(currentdate)).setBorder(Border.NO_BORDER));
 		employeeTable.addCell(new Cell().add(Util.Name).setBorder(Border.NO_BORDER));
-		employeeTable.addCell(
-				new Cell().add(user.get().getFirstName() + " " + user.get().getLastName()).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell().add(user.get().getFirstName() + " " + user.get().getLastName()).setBorder(Border.NO_BORDER));
 		employeeTable.addCell(new Cell().add(Util.BankName).setBorder(Border.NO_BORDER));
 		employeeTable.addCell(new Cell().add(user.get().getBankName()).setBorder(Border.NO_BORDER));
 		employeeTable.addCell(new Cell().add(Util.JobTitle).setBorder(Border.NO_BORDER));
@@ -266,26 +189,6 @@ public class PayRollService {
 		document.add(new Paragraph("\n(Authorised Singnatory)").setTextAlignment(TextAlignment.RIGHT));
 		document.close();
 		log.warn("Successfully");
+		return paySlip;
 	}
-
-	private void extracted(int empId, int yourWorkingDays, LocalDate currentdate, int leaves, PaySlip paySlip,
-			Optional<User> user, DateTimeFormatter dtf, String firstDayMonth, String lastDayOfMonth, int grossSalary,
-			int totalWorkingDays, int amountPerDay, int leavePerDay, int netAmount) {
-		paySlip.setEmpId(empId);
-		paySlip.setJobTitle(user.get().getDesignation());
-		paySlip.setAccountNumber(user.get().getAccountNumber());
-		paySlip.setBankName(user.get().getBankName());
-		paySlip.setName(user.get().getFirstName() + " " + user.get().getLastName());
-		paySlip.setPresentDate(dtf.format(currentdate));
-		paySlip.setMobileNo(user.get().getMobileNo());
-		paySlip.setPayPeriods(firstDayMonth + " - " + lastDayOfMonth);
-		paySlip.setYouWorkingDays(yourWorkingDays);
-		paySlip.setTotalWorkingDays(totalWorkingDays);
-		paySlip.setNumberOfLeavesTaken(leaves);
-		paySlip.setAmountDeductedForLeaves(leavePerDay);
-		paySlip.setAmountPayablePerDay(amountPerDay);
-		paySlip.setGrossSalary(grossSalary);
-		paySlip.setNetAmountPayable(netAmount);
-	}
-
 }
