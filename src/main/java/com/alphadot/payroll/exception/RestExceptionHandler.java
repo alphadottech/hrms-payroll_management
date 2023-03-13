@@ -1,4 +1,4 @@
-package com.alphadot.payroll.utilites.errorhandling;
+package com.alphadot.payroll.exception;
 
 import java.nio.file.AccessDeniedException;
 import java.sql.SQLException;
@@ -26,9 +26,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.alphadot.payroll.utilites.errorResponse.ApiError;
-import com.alphadot.payroll.utilites.errorResponse.ErrorResponse;
-import com.alphadot.payroll.utilites.errorResponse.FieldErrors;
+import com.alphadot.payroll.errorResponse.ApiError;
+import com.alphadot.payroll.errorResponse.ErrorResponse;
+import com.alphadot.payroll.errorResponse.FieldErrors;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice

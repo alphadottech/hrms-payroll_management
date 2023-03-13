@@ -1,8 +1,12 @@
 package com.alphadot.payroll.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PaySlip {
 	
 	private Integer empId;
@@ -17,9 +21,9 @@ public class PaySlip {
 	private int youWorkingDays;
 	private int totalWorkingDays;
 	private int numberOfLeavesTaken;
-	private int amountDeductedForLeaves;
-	private int amountPayablePerDay;
-	private int grossSalary;
-	private int netAmountPayable;
+	private float amountDeductedForLeaves;
+	private float amountPayablePerDay;
+	private float grossSalary;
+	private float netAmountPayable;
 
 }

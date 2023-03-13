@@ -34,7 +34,7 @@ public class SalaryServiceImpl implements SalaryService {
 
 		Optional<SalaryModel> model= salaryRepo.findById(empId);
                 
-      if(model.isEmpty()) {
+      if(model==null) {
     	   throw new NullPointerException("No Data exist with given ID");
        }  
        else {
