@@ -1,4 +1,4 @@
-package com.alphadot.payroll.utilites.errorResponse;
+package com.alphadot.payroll.errorResponse;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

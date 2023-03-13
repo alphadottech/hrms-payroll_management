@@ -47,7 +47,7 @@ public class MailService {
 	@Value("${spring.mail.username}")
 	private String mailFrom;
 
-	@Autowired
+
 	public MailService(JavaMailSender mailSender, Configuration templateConfiguration) {
 		this.mailSender = mailSender;
 		this.templateConfiguration = templateConfiguration;
