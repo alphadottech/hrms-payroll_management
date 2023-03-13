@@ -3,18 +3,22 @@ package com.alphadot.payroll.controller;
 import java.io.IOException;
 import java.text.ParseException;
 
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alphadot.payroll.model.PaySlip;
 import com.alphadot.payroll.service.PayRollService;
+
 
 
 @RestController
@@ -25,6 +29,7 @@ public class PayRollController {
 	@Autowired
 	private PayRollService payRollService;
 
+	
 
 	@GetMapping("/slip")
 	public ResponseEntity<PaySlip> payrollCreate(@RequestParam("empId") int empId, @RequestParam("month") String month, @RequestParam("year") String year, HttpServletRequest request) throws ParseException, IOException {
@@ -32,8 +37,14 @@ public class PayRollController {
 		return ResponseEntity.ok(payRollService.createPaySlip(empId,month,year));
 	}
 	
+
+	@GetMapping("/genPay")
+	public void generatePaySlip() throws IOException {
+		
+		payRollService.generatePaySlip();
+		
 	
-	
+	}
 	
   
 }
