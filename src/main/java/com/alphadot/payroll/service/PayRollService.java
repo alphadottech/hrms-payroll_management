@@ -271,7 +271,7 @@ public class PayRollService {
 
 					ByteArrayOutputStream baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary,
 							paidLeave, date, bankName, accountNumber, designation, adhoc, payPeriod);
-//					sendEmail(baos, name, gmail, monthYear);
+					sendEmail(baos, name, gmail, monthYear);
 				} catch (Exception e) {
 					continue;
 				}
