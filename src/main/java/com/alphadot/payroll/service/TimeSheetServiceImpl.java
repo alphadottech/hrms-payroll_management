@@ -1,6 +1,5 @@
 package com.alphadot.payroll.service;
 
-
 import java.text.DateFormat;
 
 import java.text.ParseException;
@@ -16,7 +15,6 @@ import java.util.Date;
 import java.util.List;
 
 import java.util.Optional;
-
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,56 +35,54 @@ import com.alphadot.payroll.repository.TimeSheetRepo;
 @Service
 public class TimeSheetServiceImpl implements TimeSheetService {
 
-	private static final Logger log=LogManager.getLogger(TimeSheetService.class);
-	
+	private static final Logger log = LogManager.getLogger(TimeSheetService.class);
+
 	@Autowired
 	private TimeSheetRepo timeSheetRepo;
-	
+
 	@Autowired
 	PriorTimeRepository priorTimeRepository;
 
 	@Override
 	public ResponseModel updateCheckIn(int id) {
-		ResponseModel responseModel=new ResponseModel();
+		ResponseModel responseModel = new ResponseModel();
 
-        log.warn("Do not checkIn again once its done");
+		log.warn("Do not checkIn again once its done");
 		TimeSheetModel timeSheetModel = new TimeSheetModel();
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 		LocalDateTime localDateTime = LocalDateTime.now();
 		String time = String.valueOf(dateTimeFormatter.format(localDateTime));
 
 		LocalDate localDate = LocalDate.now();
-		DateTimeFormatter dateFormat =DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		String date = String.valueOf(localDate.format(dateFormat));
 
 		LocalDate currentdate = LocalDate.now();
 		Month currentMonth = currentdate.getMonth();
-		
+
 		timeSheetModel.setDate(date);
 		timeSheetModel.setEmployeeId(id);
-        timeSheetModel.setMonth(String.valueOf(currentMonth));
+		timeSheetModel.setMonth(String.valueOf(currentMonth));
 		timeSheetModel.setCheckIn(time);
-		timeSheetModel.setYear(String.valueOf(currentdate.getYear()));		
+		timeSheetModel.setYear(String.valueOf(currentdate.getYear()));
 		timeSheetModel.setDate(date);
 		timeSheetModel.setEmployeeId(id);
-        timeSheetModel.setMonth(String.valueOf(currentMonth));
+		timeSheetModel.setMonth(String.valueOf(currentMonth));
 		timeSheetModel.setCheckIn(time);
 		timeSheetModel.setYear(String.valueOf(currentdate.getYear()));
 		timeSheetRepo.save(timeSheetModel);
-        
+
 		log.info("successfully done checkIn and returning to controller");
 		responseModel.setMsg("check In successfully AT :" + time);
 		return responseModel;
 	}
 
-	
-	
 	@Override
 	public ResponseModel updateCheckOut(int id) {
-		
-		ResponseModel responseModel=new ResponseModel();
 
-	    log.warn("Do not checkOut again once its done");
+		ResponseModel responseModel = new ResponseModel();
+
+		log.warn("Do not checkOut again once its done");
 
 		TimeSheetModel timeSheetStatus = new TimeSheetModel();
 		LocalDate currentdate = LocalDate.now();
@@ -97,7 +93,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
 		LocalDate localDate = LocalDate.now();
 
-		DateTimeFormatter dateFormat =DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		String date = String.valueOf(localDate.format(dateFormat));
 
 		TimeSheetModel timeSheetModel = timeSheetRepo.findByEmployeeIdAndDate(id, date);
@@ -107,7 +103,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
 		try {
 			timeSheetModel.setCheckOut(time);
-	        
+
 			timeSheetModel.setMonth(String.valueOf(currentMonth));
 			timeSheetModel.setYear(String.valueOf(currentdate.getYear()));
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
@@ -121,93 +117,87 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
 			timeSheetModel.setWorkingHour(differenceInHours + ":" + differenceInMinutes + ":" + differenceInSeconds);
 			timeSheetModel.setStatus("Present");
-            timeSheetModel.setMonth(String.valueOf(currentMonth));
-        	timeSheetModel.setYear(String.valueOf(currentdate.getYear()));
+			timeSheetModel.setMonth(String.valueOf(currentMonth));
+			timeSheetModel.setYear(String.valueOf(currentdate.getYear()));
 			timeSheetRepo.save(timeSheetModel);
 
 			log.info("successfully done checkOut and returning to controller");
-            
+
 			responseModel.setMsg(" checkout successfully AT :" + time);
 			return responseModel;
 		} catch (ParseException e) {
 			log.error("Please do a valid checkOut");
 			responseModel.setMsg("NOt a valid checkout");
-			
+
 			return responseModel;
 		}
 
 	}
 
-	
-	
-	
 	@Override
 	public ResponseModel checkStatus(int empId) {
-		ResponseModel responseModel=new ResponseModel();
+		ResponseModel responseModel = new ResponseModel();
 
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		LocalDateTime localDateTime = LocalDateTime.now();
 		String date = dateTimeFormatter.format(localDateTime);
 		TimeSheetModel timeSheetModel = timeSheetRepo.findByEmployeeIdAndDate(empId, date);
 
-	   	if (timeSheetModel != null){
-  			  if (timeSheetModel.getCheckOut() == null){
-				   log.info("You are checked In today and Not checkOut so you are elligible to checkout");	
-				   responseModel.setTimeSheetStatus(false);
-				   return responseModel;
-	    	      }	
-			  log.info("you are already checkout for the day");	
-			  responseModel.setTimeSheetStatus(null);
-			  return responseModel;
-		     }
-		else{ 
-			log.info("You are Not checked In today So you are elligible to Do CheckIn");			
+		if (timeSheetModel != null) {
+			if (timeSheetModel.getCheckOut() == null) {
+				log.info("You are checked In today and Not checkOut so you are elligible to checkout");
+				responseModel.setTimeSheetStatus(false);
+				return responseModel;
+			}
+			log.info("you are already checkout for the day");
+			responseModel.setTimeSheetStatus(null);
+			return responseModel;
+		} else {
+			log.info("You are Not checked In today So you are elligible to Do CheckIn");
 			responseModel.setTimeSheetStatus(true);
 			return responseModel;
-		   }
+		}
 	}
-	
-	
-	
-	
-	//priorTimeaAjustment
+
+	// priorTimeaAjustment
 	@Override
 	public ResponseModel checkPriorStatus(int empId) {
-		ResponseModel responseModel=new ResponseModel();
+		ResponseModel responseModel = new ResponseModel();
 
-		TimeSheetModel  timeSheetModel;
+		TimeSheetModel timeSheetModel;
 
-		List<String> list=new ArrayList<>();
-  
+		List<String> list = new ArrayList<>();
+
 		SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
-        Calendar cal = Calendar.getInstance();
-  
-        int temp=15;
-        
-          while(temp>0){ 	   
-           	      String date=f.format(cal.getTime());    	   
-         	      cal.add(Calendar.DATE,-1);
-                  timeSheetModel= timeSheetRepo.findByEmployeeIdAndDate(empId, date);
-                    
-                    if(timeSheetModel==null)
-            	           list.add(date);
-           	        else if(timeSheetModel.getCheckOut()==null)
-           	     	       list.add(timeSheetModel.toString());
+		Calendar cal = Calendar.getInstance();
 
-                    temp--;     
-              }
-          responseModel.setPriorResult(list);
-        return responseModel;
+		int temp = 15;
+
+		while (temp > 0) {
+			String date = f.format(cal.getTime());
+			cal.add(Calendar.DATE, -1);
+			timeSheetModel = timeSheetRepo.findByEmployeeIdAndDate(empId, date);
+
+			if (timeSheetModel == null)
+				list.add(date);
+			else if (timeSheetModel.getCheckOut() == null)
+				list.add(timeSheetModel.toString());
+
+			temp--;
+		}
+		responseModel.setPriorResult(list);
+		return responseModel;
 	}
-	
+
 	public Optional<Priortime> savePriorTime(PriorTimeManagementRequest priorTimeManagementRequest)
 			throws ParseException {
 
 		Priortime priortimeuser = new Priortime();
-		if (priorTimeManagementRequest.getCheckIn() != null && !priorTimeManagementRequest.getCheckIn().equals("") ) {
+		if (priorTimeManagementRequest.getCheckIn() != null && !priorTimeManagementRequest.getCheckIn().equals("")) {
 			priortimeuser.setCheckIn(priorTimeManagementRequest.getCheckIn());
 		} else {
-			TimeSheetModel timeSheetModel = timeSheetRepo.findByEmployeeIdAndDate(priorTimeManagementRequest.getEmployeeId(), priorTimeManagementRequest.getDate());
+			TimeSheetModel timeSheetModel = timeSheetRepo.findByEmployeeIdAndDate(
+					priorTimeManagementRequest.getEmployeeId(), priorTimeManagementRequest.getDate());
 			timeSheetModel.getCheckIn();
 			priortimeuser.setCheckIn(timeSheetModel.getCheckIn());
 
@@ -234,8 +224,8 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 		SimpleDateFormat yearFormatter = new SimpleDateFormat("yyyy");
 		Date y = dateFormatter.parse(String.valueOf(priorTimeManagementRequest.getDate()));
 		String year = yearFormatter.format(y);
-		
-        DateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
+
+		DateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
 
 		Date checkin = timeFormat.parse(priortimeuser.getCheckIn());
 		Date checkout = timeFormat.parse(priortimeuser.getCheckOut());
@@ -254,25 +244,21 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
 	}
 
-
-	
 	public TimeSheetModel saveConfirmedDetails(Optional<Priortime> priortime) throws ParseException {
 		Integer employeeId = priortime.get().getEmployeeId();
 		String date = priortime.get().getDate();
-		
 
-		if((priortime.get().getCheckIn())==null || (priortime.get().getCheckIn())==null){
-		
-			TimeSheetModel timesheet = timeSheetRepo.findByEmployeeIdAndDate(employeeId,date);
+		if ((priortime.get().getCheckIn()) == null || (priortime.get().getCheckIn()) == null) {
 
-		timesheet.setCheckIn(priortime.get().getCheckIn());
-		timesheet.setCheckOut(priortime.get().getCheckOut());
-		timesheet.setStatus("PRESENT");
-		timesheet.setWorkingHour(priortime.get().getWorkingHour());
+			TimeSheetModel timesheet = timeSheetRepo.findByEmployeeIdAndDate(employeeId, date);
 
-		return timeSheetRepo.save(timesheet);
-	}
-		else {
+			timesheet.setCheckIn(priortime.get().getCheckIn());
+			timesheet.setCheckOut(priortime.get().getCheckOut());
+			timesheet.setStatus("PRESENT");
+			timesheet.setWorkingHour(priortime.get().getWorkingHour());
+
+			return timeSheetRepo.save(timesheet);
+		} else {
 			TimeSheetModel timesheet = new TimeSheetModel();
 			timesheet.setCheckIn(priortime.get().getCheckIn());
 			timesheet.setCheckOut(priortime.get().getCheckOut());
@@ -285,30 +271,34 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 			return timeSheetRepo.save(timesheet);
 
 		}
-		
+
 	}
-
-
 
 	public List<TimeSheetModel> empAttendence(int empId, LocalDate fromDate, LocalDate toDate) {
-	 String startDate=String.valueOf(fromDate);
-	 String endDate=String.valueOf(toDate);
-		
-     List<TimeSheetModel> list=timeSheetRepo.findAllByEmployeeId(empId,startDate,endDate);
-     if(list.isEmpty())
-    	 throw new NullPointerException("No attendence data available with given ID");
-		
-     return list;
+
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+		String startDate = String.valueOf(dateTimeFormatter.format(fromDate));
+		String endDate = String.valueOf(dateTimeFormatter.format(toDate));
+
+
+		List<TimeSheetModel> list = timeSheetRepo.findAllByEmployeeId(empId, startDate, endDate);
+		if (list.isEmpty())
+			throw new NullPointerException("No attendence data available with given ID");
+
+		return list;
 	}
-
-
 
 	@Override
 	public List<TimeSheetModel> allEmpAttendence(LocalDate fromDate, LocalDate toDate) {
-     String startDate=String.valueOf(fromDate);
-	 String endDate=String.valueOf(toDate);
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+		String startDate = String.valueOf(dateTimeFormatter.format(fromDate));
+		String endDate = String.valueOf(dateTimeFormatter.format(toDate));
+
+
 		
-     List<TimeSheetModel> list=timeSheetRepo.findAllByEmployeeId(startDate,endDate);
-		return list;	
+		List<TimeSheetModel> list = timeSheetRepo.findAllByEmployeeId(startDate, endDate);
+		return list;
 	}
 }
