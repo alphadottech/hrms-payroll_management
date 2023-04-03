@@ -78,6 +78,29 @@ public class MailService {
 		send(mail);
 	}
 
+	
+	 /**
+     * Send an email to the user indicating an account change event with the correct
+     * status
+     */
+    public void sendAccountChangeEmail(String action, String actionStatus, String to)
+            throws IOException, TemplateException, MessagingException {
+        Mail mail = new Mail();
+        mail.setSubject("Timesheet Saved");
+        mail.setTo(to);
+        mail.setFrom(mailFrom);
+        mail.getModel().put("userName", to);
+        mail.getModel().put("action", action);
+        mail.getModel().put("actionStatus", actionStatus);
+
+        templateConfiguration.setClassForTemplateLoading(getClass(), basePackagePath);
+        Template template = templateConfiguration.getTemplate("account-activity-change.ftl");
+        String mailContent = FreeMarkerTemplateUtils.processTemplateIntoString(template, mail.getModel());
+        mail.setContent(mailContent);
+        send(mail);
+    }
+    
+    
 	/**
 	 * Sends a simple mail as a MIME Multipart message
 	 * 
