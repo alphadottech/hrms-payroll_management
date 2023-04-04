@@ -7,27 +7,6 @@
             }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </style>
 <![endif]--><!-- Progressive Enhancements -->
 <div style="display: none; font-size: 1px; line-height: 1px; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; font-family: sans-serif;">
@@ -76,7 +55,18 @@
                                             <br></br><span style="font-weight: 400;">Action: <strong>${action}</strong></span>
                                             <br></br><span
                                                 style="font-weight: 400;">Status: <strong>${actionStatus}</strong></span>
-
+                                             <p class=""
+                                                                    style="margin: 20px 0; font-size: 16px; mso-line-height-rule: exactly; line-height: 24px;">
+                                                                    <span style="font-weight: 400;">
+                                                                     <label for="Email">Email</label>:-<a  id = "Email">${Email}</a><br>
+                                                                    <label for="CheckIn">CheckIn</label>:-<a  id = "CheckIn">${CheckIn}</a><br>
+                                                                    <label for="CheckOut">CheckOut</label>:-<a id = "CheckOut">${CheckOut}</a><br>
+                                                                    <label for="Date">Date</label>:-<a id = "Date" >${Date}</a><br>
+                                                                 <label for="Year">Year</label>:-<a  id = "Year" >${Year}</a><br>
+                                                                  <label for="Month">Month</label>:-<a id = "Month" >${Month}</a><br>
+                                                                   <label for="Working Hours">WorkingHour</label>:-<a id = "WorkingHour" >${WorkingHour}</a><br>
+                                                                  </p>                                                                        
+                                                                </span><br />   
                                             <div class=""
                                                  style="border-top: 0; font-size: 1px; mso-line-height-rule: exactly; line-height: 1px; max-height: 0; margin: 20px 0; overflow: hidden;">
                                                 ​

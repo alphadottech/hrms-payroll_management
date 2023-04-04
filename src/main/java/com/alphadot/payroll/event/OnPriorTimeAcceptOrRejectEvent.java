@@ -19,13 +19,13 @@ import org.springframework.context.ApplicationEvent;
 
 import com.alphadot.payroll.model.Priortime;
 
-public class OnPriorTimeApprovalEvent extends ApplicationEvent {
+public class OnPriorTimeAcceptOrRejectEvent extends ApplicationEvent {
 
 	private Optional<Priortime> priortime;
 	private String action;
 	private String actionStatus;
 
-	public OnPriorTimeApprovalEvent(Optional<Priortime> priortime, String action, String actionStatus) {
+	public OnPriorTimeAcceptOrRejectEvent(Optional<Priortime> priortime, String action, String actionStatus) {
 		super(priortime);
 		this.priortime = priortime;
 		this.action = action;

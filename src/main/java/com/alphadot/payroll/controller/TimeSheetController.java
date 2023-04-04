@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.alphadot.payroll.event.OnPriorTimeApprovalEvent;
+import com.alphadot.payroll.event.OnPriorTimeAcceptOrRejectEvent;
 import com.alphadot.payroll.event.OnPriorTimeDetailsSavedEvent;
 import com.alphadot.payroll.exception.PriorTimeAdjustmentException;
 import com.alphadot.payroll.model.Priortime;
@@ -114,42 +114,45 @@ public class TimeSheetController {
 				throws ParseException {
 
 			return ((Optional<Priortime>) timeSheetService.savePriorTime(priorTimeManagementRequest)).map(priorTimeuser -> {
-				int priortimeId=priorTimeuser.getPriortimeId();
-	            UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.fromCurrentContextPath()
-						.path("/timeSheet/updatePriorTime/Accepted/"+priortimeId);
+				int priortimeId = priorTimeuser.getPriortimeId();
+				UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.fromCurrentContextPath()
+						.path("/timeSheet/updatePriorTime/Accepted/" + priortimeId);
 				UriComponentsBuilder urlBuilder2 = ServletUriComponentsBuilder.fromCurrentContextPath()
-						.path("/timeSheet/updatePriorTime/Rejected/"+priortimeId);
-				OnPriorTimeDetailsSavedEvent onPriorTimeDetailsSavedEvent = new OnPriorTimeDetailsSavedEvent(
-						priorTimeuser, urlBuilder1, urlBuilder2);
+						.path("/timeSheet/updatePriorTime/Rejected/" + priortimeId);
+				OnPriorTimeDetailsSavedEvent onPriorTimeDetailsSavedEvent = new OnPriorTimeDetailsSavedEvent(priorTimeuser,
+						urlBuilder1, urlBuilder2);
 				applicationEventPublisher.publishEvent(onPriorTimeDetailsSavedEvent);
 				return ResponseEntity.ok(new ApiResponse(true, "Mail sent successfully."));
-			}).orElseThrow(
-					() -> new PriorTimeAdjustmentException(priorTimeManagementRequest.getEmail(), "Missing user details in database"));
+			}).orElseThrow(() -> new PriorTimeAdjustmentException(priorTimeManagementRequest.getEmail(),
+					"Missing user details in database"));
 		}
 
-
-		@GetMapping("/updatePriorTime/Accepted/{priortimeId}") 
-		public ResponseEntity<ApiResponse> updatePriorTimeAccepted(@PathVariable(name = "priortimeId") int priortimeId ) throws ParseException {
+		@GetMapping("/updatePriorTime/Accepted/{priortimeId}")
+		public ResponseEntity<ApiResponse> updatePriorTimeAccepted(@PathVariable(name = "priortimeId") int priortimeId)
+				throws ParseException {
 			Optional<Priortime> priortime = priorTimeRepository.findById(priortimeId);
-	        timeSheetService.saveConfirmedDetails(priortime);
-	        priortime.get().setStatus("Accepted");
-	        priorTimeRepository.save(priortime.get());
-	       String email= priortime.get().getEmail();
-	        OnPriorTimeApprovalEvent onPriortimeApprovalEvent = new OnPriorTimeApprovalEvent(priortime , "PriorTimesheet Entry", "Approved");
-					
+			timeSheetService.saveConfirmedDetails(priortime);
+			priortime.get().setStatus("Accepted");
+			priorTimeRepository.save(priortime.get());
+			String email = priortime.get().getEmail();
+			OnPriorTimeAcceptOrRejectEvent onPriortimeApprovalEvent = new OnPriorTimeAcceptOrRejectEvent(priortime,
+					"PriorTimesheet Entry", "Approved");
+
 			applicationEventPublisher.publishEvent(onPriortimeApprovalEvent);
 			return ResponseEntity.ok(new ApiResponse(true, "Details for PriorTime Timesheet entry updated successfully"));
 
-	}
-
-
+		}
 
 		@GetMapping("/updatePriorTime/Rejected/{priortimeId}")
-		public String updatePriorTimeRejected(@PathVariable(name = "priortimeId") int priortimeId) {
-	        Optional<Priortime> priortime = priorTimeRepository.findById(priortimeId);
-		    priortime.get().setStatus("Rejected");
+		public ResponseEntity<ApiResponse> updatePriorTimeRejected(@PathVariable(name = "priortimeId") int priortimeId) {
+			Optional<Priortime> priortime = priorTimeRepository.findById(priortimeId);
+			priortime.get().setStatus("Rejected");
 			priorTimeRepository.save(priortime.get());
+			OnPriorTimeAcceptOrRejectEvent onPriortimeApprovalEvent = new OnPriorTimeAcceptOrRejectEvent(priortime,
+					"PriorTimesheet Entry", "Rejected");
 
-	        return "Rejected";
+			applicationEventPublisher.publishEvent(onPriortimeApprovalEvent);
+			return ResponseEntity.ok(new ApiResponse(true, "Details for PriorTime Timesheet entry updated as Rejected"));
+
 		}
 }

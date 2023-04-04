@@ -23,13 +23,13 @@ import org.springframework.mail.MailSendException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import com.alphadot.payroll.event.OnPriorTimeApprovalEvent;
+import com.alphadot.payroll.event.OnPriorTimeAcceptOrRejectEvent;
 import com.alphadot.payroll.service.MailService;
 
 import freemarker.template.TemplateException;
 
 @Component
-public class OnPriorTimeApprovedListener implements ApplicationListener<OnPriorTimeApprovalEvent> {
+public class OnPriorTimeApprovedListener implements ApplicationListener<OnPriorTimeAcceptOrRejectEvent> {
 
   //  private static final Logger logger = Logger.getLogger(OnPriorTimeApprovedListener.class);
     private final MailService mailService;
@@ -45,24 +45,24 @@ public class OnPriorTimeApprovedListener implements ApplicationListener<OnPriorT
      */
     @Override
     @Async
-    public void onApplicationEvent(OnPriorTimeApprovalEvent onPriortimeApprovalEvent) {
-        sendAccountChangeEmail(onPriortimeApprovalEvent);
+    public void onApplicationEvent(OnPriorTimeAcceptOrRejectEvent onPriortimeApprovalEvent) {
+        sendAccountChangeEmailApproved(onPriortimeApprovalEvent);
     }
 
     /**
      * Send email verification to the user and persist the token in the database.
      */
-    private void sendAccountChangeEmail(OnPriorTimeApprovalEvent event) {
-      //  User user = event.getUser();
+    private void sendAccountChangeEmailApproved(OnPriorTimeAcceptOrRejectEvent event) {
         String action = event.getAction();
         String actionStatus = event.getActionStatus();
         String recipientAddress = event.getPriortime().get().getEmail();
 
         try {
-            mailService.sendAccountChangeEmail(action, actionStatus, recipientAddress);
+            mailService.sendAccountChangeEmail(event,action, actionStatus, recipientAddress);
         } catch (IOException | TemplateException | MessagingException e) {
-           // logger.error(e);
             throw new MailSendException(recipientAddress);
         }
     }
+    
+
 }

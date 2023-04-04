@@ -20,13 +20,13 @@ import java.nio.charset.StandardCharsets;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
+import com.alphadot.payroll.event.OnPriorTimeAcceptOrRejectEvent;
 import com.alphadot.payroll.event.OnPriorTimeDetailsSavedEvent;
 import com.alphadot.payroll.model.Mail;
 
@@ -83,7 +83,7 @@ public class MailService {
      * Send an email to the user indicating an account change event with the correct
      * status
      */
-    public void sendAccountChangeEmail(String action, String actionStatus, String to)
+    public void sendAccountChangeEmail(OnPriorTimeAcceptOrRejectEvent event,String action, String actionStatus, String to)
             throws IOException, TemplateException, MessagingException {
         Mail mail = new Mail();
         mail.setSubject("Timesheet Saved");
@@ -92,6 +92,13 @@ public class MailService {
         mail.getModel().put("userName", to);
         mail.getModel().put("action", action);
         mail.getModel().put("actionStatus", actionStatus);
+        mail.getModel().put("CheckIn", event.getPriortime().get().getCheckIn());
+        mail.getModel().put("CheckOut", event.getPriortime().get().getCheckOut());
+        mail.getModel().put("Date", event.getPriortime().get().getDate());
+        mail.getModel().put("Email", event.getPriortime().get().getEmail());
+        mail.getModel().put("Month", event.getPriortime().get().getMonth());
+        mail.getModel().put("Year", event.getPriortime().get().getYear());
+        mail.getModel().put("WorkingHour", event.getPriortime().get().getWorkingHour());
 
         templateConfiguration.setClassForTemplateLoading(getClass(), basePackagePath);
         Template template = templateConfiguration.getTemplate("account-activity-change.ftl");
