@@ -193,11 +193,10 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 			throws ParseException {
 
 		Priortime priortimeuser = new Priortime();
-		if (priorTimeManagementRequest.getCheckIn() != null && !priorTimeManagementRequest.getCheckIn().equals("")) {
+		if (priorTimeManagementRequest.getCheckIn() != null && !priorTimeManagementRequest.getCheckIn().equals("") ) {
 			priortimeuser.setCheckIn(priorTimeManagementRequest.getCheckIn());
 		} else {
-			TimeSheetModel timeSheetModel = timeSheetRepo.findByEmployeeIdAndDate(
-					priorTimeManagementRequest.getEmployeeId(), priorTimeManagementRequest.getDate());
+			TimeSheetModel timeSheetModel = timeSheetRepo.findByEmployeeIdAndDate(priorTimeManagementRequest.getEmployeeId(), priorTimeManagementRequest.getDate());
 			timeSheetModel.getCheckIn();
 			priortimeuser.setCheckIn(timeSheetModel.getCheckIn());
 
@@ -216,16 +215,22 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 		priortimeuser.setEmployeeId(priorTimeManagementRequest.getEmployeeId());
 
 		SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
-
-		SimpleDateFormat monthFormatter = new SimpleDateFormat("MMMM");
-		Date d = dateFormatter.parse(String.valueOf(priorTimeManagementRequest.getDate()));
-		String month = monthFormatter.format(d);
-
+		SimpleDateFormat monthFormatter = new SimpleDateFormat("MM");
+		
+		
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		LocalDate localDateTime = LocalDate.parse(priorTimeManagementRequest.getDate(), dateTimeFormatter);
+		String date = dateTimeFormatter.format(localDateTime);
+		Month m=localDateTime.getMonth();
+		priortimeuser.setMonth(m.toString());
+		
 		SimpleDateFormat yearFormatter = new SimpleDateFormat("yyyy");
 		Date y = dateFormatter.parse(String.valueOf(priorTimeManagementRequest.getDate()));
 		String year = yearFormatter.format(y);
-
-		DateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
+		priortimeuser.setYear(year.toUpperCase());
+		
+		
+        DateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
 
 		Date checkin = timeFormat.parse(priortimeuser.getCheckIn());
 		Date checkout = timeFormat.parse(priortimeuser.getCheckOut());
@@ -233,33 +238,21 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 		long differenceInHours = (differenceInMilliSeconds / (60 * 60 * 1000)) % 24;
 		long differenceInMinutes = (differenceInMilliSeconds / (60 * 1000)) % 60;
 		long differenceInSeconds = (differenceInMilliSeconds / 1000) % 60;
-
 		priortimeuser.setWorkingHour(differenceInHours + ":" + differenceInMinutes + ":" + differenceInSeconds);
-		priortimeuser.setMonth(month.toUpperCase());
-		priortimeuser.setYear(year.toUpperCase());
-
+		
 		Priortime priortime = priorTimeRepository.save(priortimeuser);
 
 		return Optional.ofNullable(priortime);
 
 	}
 
+
+	
 	public TimeSheetModel saveConfirmedDetails(Optional<Priortime> priortime) throws ParseException {
 		Integer employeeId = priortime.get().getEmployeeId();
 		String date = priortime.get().getDate();
+		TimeSheetModel timesheet = timeSheetRepo.findByEmployeeIdAndDate(employeeId,date);
 
-		if ((priortime.get().getCheckIn()) == null || (priortime.get().getCheckIn()) == null) {
-
-			TimeSheetModel timesheet = timeSheetRepo.findByEmployeeIdAndDate(employeeId, date);
-
-			timesheet.setCheckIn(priortime.get().getCheckIn());
-			timesheet.setCheckOut(priortime.get().getCheckOut());
-			timesheet.setStatus("PRESENT");
-			timesheet.setWorkingHour(priortime.get().getWorkingHour());
-
-			return timeSheetRepo.save(timesheet);
-		} else {
-			TimeSheetModel timesheet = new TimeSheetModel();
 			timesheet.setCheckIn(priortime.get().getCheckIn());
 			timesheet.setCheckOut(priortime.get().getCheckOut());
 			timesheet.setDate(priortime.get().getDate());
@@ -270,9 +263,10 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 			timesheet.setStatus("PRESENT");
 			return timeSheetRepo.save(timesheet);
 
-		}
-
+	
 	}
+
+
 
 	public List<TimeSheetModel> empAttendence(int empId, LocalDate fromDate, LocalDate toDate) {
 
