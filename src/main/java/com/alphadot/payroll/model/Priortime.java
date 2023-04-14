@@ -10,7 +10,7 @@ import javax.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "priortime_table")
+@Table(catalog = "EmployeeDB", schema = "payroll_schema", name = "priortime_table")
 @Data
 public class Priortime {
 
