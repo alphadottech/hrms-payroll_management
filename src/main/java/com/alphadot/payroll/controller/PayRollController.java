@@ -14,10 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.alphadot.payroll.model.PaySlip;
 import com.alphadot.payroll.service.PayRollService;
-
 
 
 @RestController
@@ -39,11 +39,9 @@ public class PayRollController {
 	
 
 	@GetMapping("/genPayAll")
-	public void generatePaySlip() throws IOException, ParseException {
-		
-		payRollService.generatePaySlip();
-		
-	
+	public  String generatePaySlip(@RequestParam("file") MultipartFile file) throws IOException, ParseException {
+
+		return payRollService.generatePaySlip(file);
 	}
 	
 
