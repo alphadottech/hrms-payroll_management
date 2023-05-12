@@ -20,21 +20,21 @@ public class TimeSheetModel {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="timeSheet_id",columnDefinition = "serial")
 	private int timeSheetId;
-	
+
 	@Column(name = "employee_id")
-	 private int employeeId; 
-		
+	private int employeeId;
+
 	@Column(name = "checkOut")
-	    private String checkOut;
-	
+	private String checkOut;
+
 	@Column(name = "checkIn")
-	    private String checkIn;
-	
+	private String checkIn;
+
 	@Column(name = "workingHour")
-	    private String workingHour;
-	
+	private String workingHour;
+
 	@Column(name = "date")
-	    private String date;
+	private String date;
 
 	@Column(name="status")
 	private String status;
@@ -44,6 +44,28 @@ public class TimeSheetModel {
 
 	@Column(name="year")
 	private String year;
+
+	@Column(name="leaveInterval")
+	private String leaveInterval;
+
+	public boolean getIntervalStatus() {
+		return intervalStatus;
+	}
+
+	public void setIntervalStatus(boolean intervalStatus) {
+		this.intervalStatus = intervalStatus;
+	}
+
+	@Column(name="intervalStatus")
+	private boolean intervalStatus;
+
+	public String getLeaveInterval() {
+		return leaveInterval;
+	}
+
+	public void setLeaveInterval(String leaveInterval) {
+		this.leaveInterval = leaveInterval;
+	}
 
 	public int getTimeSheetId() {
 		return timeSheetId;
@@ -118,7 +140,7 @@ public class TimeSheetModel {
 	}
 
 	public TimeSheetModel(int timeSheetId, int employeeId, String checkOut, String checkIn, String workingHour,
-			String date, String status, String month, String year) {
+						  String date, String status, String month, String year) {
 		super();
 		this.timeSheetId = timeSheetId;
 		this.employeeId = employeeId;
@@ -142,7 +164,7 @@ public class TimeSheetModel {
 				+ ", checkIn=" + checkIn + ", workingHour=" + workingHour + ", date=" + date + ", status=" + status
 				+ ", month=" + month + ", year=" + year + "]";
 	}
-	
-	
-	
+
+
+
 }
