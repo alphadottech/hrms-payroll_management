@@ -48,97 +48,10 @@ public class TimeSheetModel {
 	@Column(name="leaveInterval")
 	private String leaveInterval;
 
-	public boolean getIntervalStatus() {
-		return intervalStatus;
-	}
-
-	public void setIntervalStatus(boolean intervalStatus) {
-		this.intervalStatus = intervalStatus;
-	}
-
 	@Column(name="intervalStatus")
-	private boolean intervalStatus;
+	private Boolean intervalStatus;
 
-	public String getLeaveInterval() {
-		return leaveInterval;
-	}
-
-	public void setLeaveInterval(String leaveInterval) {
-		this.leaveInterval = leaveInterval;
-	}
-
-	public int getTimeSheetId() {
-		return timeSheetId;
-	}
-
-	public void setTimeSheetId(int timeSheetId) {
-		this.timeSheetId = timeSheetId;
-	}
-
-	public int getEmployeeId() {
-		return employeeId;
-	}
-
-	public void setEmployeeId(int employeeId) {
-		this.employeeId = employeeId;
-	}
-
-	public String getCheckOut() {
-		return checkOut;
-	}
-
-	public void setCheckOut(String checkOut) {
-		this.checkOut = checkOut;
-	}
-
-	public String getCheckIn() {
-		return checkIn;
-	}
-
-	public void setCheckIn(String checkIn) {
-		this.checkIn = checkIn;
-	}
-
-	public String getWorkingHour() {
-		return workingHour;
-	}
-
-	public void setWorkingHour(String workingHour) {
-		this.workingHour = workingHour;
-	}
-
-	public String getDate() {
-		return date;
-	}
-
-	public void setDate(String date) {
-		this.date = date;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
-	public String getMonth() {
-		return month;
-	}
-
-	public void setMonth(String month) {
-		this.month = month;
-	}
-
-	public String getYear() {
-		return year;
-	}
-
-	public void setYear(String year) {
-		this.year = year;
-	}
-
+	
 	public TimeSheetModel(int timeSheetId, int employeeId, String checkOut, String checkIn, String workingHour,
 						  String date, String status, String month, String year) {
 		super();
