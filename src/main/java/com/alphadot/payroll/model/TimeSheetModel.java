@@ -20,21 +20,21 @@ public class TimeSheetModel {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="timeSheet_id",columnDefinition = "serial")
 	private int timeSheetId;
-	
+
 	@Column(name = "employee_id")
-	 private int employeeId; 
-		
+	private int employeeId;
+
 	@Column(name = "checkOut")
-	    private String checkOut;
-	
+	private String checkOut;
+
 	@Column(name = "checkIn")
-	    private String checkIn;
-	
+	private String checkIn;
+
 	@Column(name = "workingHour")
-	    private String workingHour;
-	
+	private String workingHour;
+
 	@Column(name = "date")
-	    private String date;
+	private String date;
 
 	@Column(name="status")
 	private String status;
@@ -45,80 +45,15 @@ public class TimeSheetModel {
 	@Column(name="year")
 	private String year;
 
-	public int getTimeSheetId() {
-		return timeSheetId;
-	}
+	@Column(name="leaveInterval")
+	private String leaveInterval;
 
-	public void setTimeSheetId(int timeSheetId) {
-		this.timeSheetId = timeSheetId;
-	}
+	@Column(name="intervalStatus")
+	private Boolean intervalStatus;
 
-	public int getEmployeeId() {
-		return employeeId;
-	}
-
-	public void setEmployeeId(int employeeId) {
-		this.employeeId = employeeId;
-	}
-
-	public String getCheckOut() {
-		return checkOut;
-	}
-
-	public void setCheckOut(String checkOut) {
-		this.checkOut = checkOut;
-	}
-
-	public String getCheckIn() {
-		return checkIn;
-	}
-
-	public void setCheckIn(String checkIn) {
-		this.checkIn = checkIn;
-	}
-
-	public String getWorkingHour() {
-		return workingHour;
-	}
-
-	public void setWorkingHour(String workingHour) {
-		this.workingHour = workingHour;
-	}
-
-	public String getDate() {
-		return date;
-	}
-
-	public void setDate(String date) {
-		this.date = date;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
-	public String getMonth() {
-		return month;
-	}
-
-	public void setMonth(String month) {
-		this.month = month;
-	}
-
-	public String getYear() {
-		return year;
-	}
-
-	public void setYear(String year) {
-		this.year = year;
-	}
-
+	
 	public TimeSheetModel(int timeSheetId, int employeeId, String checkOut, String checkIn, String workingHour,
-			String date, String status, String month, String year) {
+						  String date, String status, String month, String year) {
 		super();
 		this.timeSheetId = timeSheetId;
 		this.employeeId = employeeId;
@@ -142,7 +77,7 @@ public class TimeSheetModel {
 				+ ", checkIn=" + checkIn + ", workingHour=" + workingHour + ", date=" + date + ", status=" + status
 				+ ", month=" + month + ", year=" + year + "]";
 	}
-	
-	
-	
+
+
+
 }

@@ -1,5 +1,6 @@
 package com.alphadot.payroll.service;
 
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -17,9 +18,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import javax.activation.DataSource;
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.util.ByteArrayDataSource;
 import javax.persistence.EntityNotFoundException;
@@ -35,6 +36,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.alphadot.payroll.model.ImageModel;
 import com.alphadot.payroll.model.PaySlip;
 import com.alphadot.payroll.model.TimeSheetModel;
@@ -204,11 +207,11 @@ public class PayRollService {
 		float amountPerDay = grossSalary / totalWorkingDays;
 		float leavePerDay = leaves * amountPerDay;
 		float netAmount = (yourWorkingDays * amountPerDay);
-              netAmount=  netAmount +adhoc;
+		netAmount=  netAmount +adhoc;
 		paySlip = new PaySlip(empId, name, user.get().getDesignation(),
 				dtf.format(currentdate), user.get().getBankName(), user.get().getAccountNumber(),
 				firstDayMonth + " - " + lastDayOfMonth, yourWorkingDays, totalWorkingDays, leaves, leavePerDay,
-				 grossSalary, netAmount,adhoc);
+				grossSalary, netAmount,adhoc);
 		ImageModel img = new ImageModel();
 
 		ImageData datas = ImageDataFactory.create(imgRepo.search());
@@ -283,7 +286,9 @@ public class PayRollService {
 	public  String generatePaySlip(MultipartFile file) throws IOException, ParseException {
 		String empId = "", name = "", workingDays = "", present = "", leave = "", halfDay = "", salary = "",
 				paidLeave = "", bankName = "", accountNumber = "", gmail = "", designation = "";
+
          String sheetName = "";
+
 		int adhoc = 0;
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		SimpleDateFormat inputFormat = new SimpleDateFormat("MMMM");
@@ -292,18 +297,20 @@ public class PayRollService {
 		String projDir = System.getProperty("user.dir");
 		XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
 		DataFormatter dataFormatter = new DataFormatter();
-		
+
+
 		for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-		    XSSFSheet sh = workbook.getSheetAt(i);
-		    
-		    // Check if the sheet has any rows
-		    if (sh.getLastRowNum() > 0) {
-		        // This sheet has content, so print its name
-		       sheetName=  sh.getSheetName();
-		    }
+			XSSFSheet sh = workbook.getSheetAt(i);
+
+			// Check if the sheet has any rows
+			if (sh.getLastRowNum() > 0) {
+				// This sheet has content, so print its name
+				sheetName=  sh.getSheetName();
+			}
 		}
 		XSSFSheet sheet = workbook.getSheet(sheetName);
-		
+
+
 		LocalDate currentdate = LocalDate.now();
 		LocalDate earlier = currentdate.minusMonths(1);
 
@@ -341,6 +348,7 @@ public class PayRollService {
 					 baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary,
 							paidLeave, date, bankName, accountNumber, designation, adhoc, payPeriod);
 					
+
 					sendEmail(baos, name, gmail, monthYear);
 				} catch (Exception e) {
 					continue;
@@ -349,17 +357,28 @@ public class PayRollService {
 				break;
 			}
 		}
-           return "Mail Send Successfully";
+
+		return "Mail Send Successfully";
+
 	}
 
 	public ByteArrayOutputStream createPdf(String empId, String name, String totalworkingDays, String present,
-			String leave, String halfDay, String salary, String paidLeave, String date, String bankName,
-			String accountNumber, String designation, int adhoc, String payPeriod) throws SQLException, IOException {
+										   String leave, String halfDay, String salary, String paidLeave, String date, String bankName,
+										   String accountNumber, String designation, int adhoc, String payPeriod) throws SQLException, IOException {
 
+		int leaves=0;
+		int x=Integer.parseInt(leave);
+		int y=Integer.parseInt(paidLeave);
 		float grossSalary = Float.valueOf(salary);
 		int totalWorkingDays = Integer.parseInt(totalworkingDays);
-		int leaves = Integer.parseInt(leave) - Integer.parseInt(paidLeave);
-		int yourWorkingDays = Integer.parseInt(present) + Integer.parseInt(paidLeave);
+
+		int yourWorkingDays = Integer.parseInt(present)+y;
+
+		if(yourWorkingDays>leaves)
+			yourWorkingDays = yourWorkingDays-leaves;
+		else {
+			yourWorkingDays=0;
+		}
 
 		float amountPerDay = grossSalary / totalWorkingDays;
 
@@ -372,6 +391,8 @@ public class PayRollService {
 			netAmount = 0;
 			adhoc = 0;
 		}
+		String add = String.valueOf(adhoc);
+	 add = add.contains("-") ? add.replace("-","") : add;
 
 		ImageData datas = ImageDataFactory.create(imgRepo.search());
 		log.info("image path set");
@@ -420,7 +441,7 @@ public class PayRollService {
 		itemInfo.addCell(new Cell().add(Util.AmountDeductedForLeaves));
 		itemInfo.addCell(new Cell().add(String.format("%.2f", leavePerDay)));
 		itemInfo.addCell(new Cell().add(Util.Adhoc));
-		itemInfo.addCell(new Cell().add(String.valueOf(adhoc)));
+		itemInfo.addCell(new Cell().add(add));
 		itemInfo.addCell(new Cell().add(Util.GrossSalary));
 		itemInfo.addCell(new Cell().add(String.valueOf(salary)));
 		itemInfo.addCell(new Cell().add(Util.NetAmountPayable));
@@ -445,7 +466,7 @@ public class PayRollService {
 		MimeMessageHelper mimeMessageHelper;
 
 		try {
-			
+
 			DataSource source = new ByteArrayDataSource(baos.toByteArray(), "application/octet-stream");
 			mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 			mimeMessageHelper.setFrom(sender);
