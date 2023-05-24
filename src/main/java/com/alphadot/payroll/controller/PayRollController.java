@@ -23,7 +23,6 @@ import com.alphadot.payroll.service.PayRollService;
 
 
 
-
 @RestController
 public class PayRollController {
 
@@ -41,9 +40,13 @@ public class PayRollController {
 
 
 	@GetMapping("/genPayAll")
-	public String generatePaySlip(@RequestParam("file") MultipartFile file) throws IOException, ParseException {
+
+	public  String generatePaySlip(@RequestParam("file") MultipartFile file) throws IOException, ParseException {
 
 		return payRollService.generatePaySlip(file);
 	}
+	
+
 
 }
+

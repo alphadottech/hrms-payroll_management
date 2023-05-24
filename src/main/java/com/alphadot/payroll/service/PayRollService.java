@@ -61,6 +61,66 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.VerticalAlignment;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.activation.DataSource;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import javax.mail.util.ByteArrayDataSource;
+import javax.persistence.EntityNotFoundException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.alphadot.payroll.model.ImageModel;
+import com.alphadot.payroll.model.PaySlip;
+import com.alphadot.payroll.model.TimeSheetModel;
+import com.alphadot.payroll.model.User;
+import com.alphadot.payroll.repository.ImageRepo;
+import com.alphadot.payroll.repository.TimeSheetRepo;
+import com.alphadot.payroll.repository.UserRepo;
+import com.itextpdf.io.image.ImageData;
+import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.kernel.color.Color;
+import com.itextpdf.kernel.color.DeviceRgb;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.border.Border;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Image;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.property.TextAlignment;
+import com.itextpdf.layout.property.VerticalAlignment;
+
 @Service
 public class PayRollService {
 
@@ -226,7 +286,9 @@ public class PayRollService {
 	public  String generatePaySlip(MultipartFile file) throws IOException, ParseException {
 		String empId = "", name = "", workingDays = "", present = "", leave = "", halfDay = "", salary = "",
 				paidLeave = "", bankName = "", accountNumber = "", gmail = "", designation = "";
-		String sheetName = "";
+
+         String sheetName = "";
+
 		int adhoc = 0;
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		SimpleDateFormat inputFormat = new SimpleDateFormat("MMMM");
@@ -235,6 +297,7 @@ public class PayRollService {
 		String projDir = System.getProperty("user.dir");
 		XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
 		DataFormatter dataFormatter = new DataFormatter();
+
 
 		for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
 			XSSFSheet sh = workbook.getSheetAt(i);
@@ -246,6 +309,7 @@ public class PayRollService {
 			}
 		}
 		XSSFSheet sheet = workbook.getSheet(sheetName);
+
 
 		LocalDate currentdate = LocalDate.now();
 		LocalDate earlier = currentdate.minusMonths(1);
@@ -281,8 +345,9 @@ public class PayRollService {
 					gmail = dataFormatter.formatCellValue(row.getCell(11));
 					adhoc = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(12)));
 
-					baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary,
+					 baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary,
 							paidLeave, date, bankName, accountNumber, designation, adhoc, payPeriod);
+					
 
 					sendEmail(baos, name, gmail, monthYear);
 				} catch (Exception e) {
@@ -292,7 +357,9 @@ public class PayRollService {
 				break;
 			}
 		}
+
 		return "Mail Send Successfully";
+
 	}
 
 	public ByteArrayOutputStream createPdf(String empId, String name, String totalworkingDays, String present,
