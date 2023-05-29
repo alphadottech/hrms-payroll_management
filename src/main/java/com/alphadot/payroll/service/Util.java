@@ -4,7 +4,6 @@ package com.alphadot.payroll.service;
 import com.alphadot.payroll.dto.CurrentDateTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
