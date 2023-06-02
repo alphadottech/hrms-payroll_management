@@ -7,8 +7,8 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -45,7 +45,8 @@ import com.alphadot.payroll.service.TimeSheetService;
 @RequestMapping("/timeSheet")
 public class TimeSheetController {
 
-	private static final Logger log = LogManager.getLogger(TimeSheetController.class);
+	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
 	@Autowired
 	private TimeSheetService timeSheetService;
 
@@ -62,7 +63,7 @@ public class TimeSheetController {
 	@PostMapping("/checkIn/{empId}")
 	public ResponseEntity<String> saveCheckIn(@PathVariable int empId, HttpServletRequest request)
 			throws ParseException {
-		log.info("API Call From IP: " + request.getRemoteHost());
+		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		return ResponseEntity.ok(timeSheetService.updateCheckIn(empId));
 	}
 
@@ -70,21 +71,21 @@ public class TimeSheetController {
 	@PutMapping("/checkOut/{empId}")
 	public ResponseEntity<String> saveCheckOut(@PathVariable int empId, HttpServletRequest request)
 			throws ParseException {
-		log.info("API Call From IP: " + request.getRemoteHost());
+		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		return new ResponseEntity<>(timeSheetService.updateCheckOut(empId), HttpStatus.OK);
 	}
 
 	@PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
 	@PostMapping("/checkStatus/{empId}")
 	public ResponseEntity<CheckStatusDTO> checkStatus(@PathVariable int empId, HttpServletRequest request) {
-		log.info("API Call From IP: " + request.getRemoteHost());
+		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		return new ResponseEntity<>(timeSheetService.checkStatus(empId), HttpStatus.OK);
 	}
 
 	@PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
 	@GetMapping("/priorTimeAdjustment/{empId}")
 	public ResponseEntity<ResponseModel> priorTimeAdjustment(@PathVariable int empId, HttpServletRequest request) {
-		log.info("API Call From IP: " + request.getRemoteHost());
+		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		return new ResponseEntity<>(timeSheetService.checkPriorStatus(empId), HttpStatus.OK);
 	}
 
@@ -94,7 +95,7 @@ public class TimeSheetController {
 			@RequestParam("fromDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
 			@RequestParam("toDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate,
 			HttpServletRequest request) {
-		log.info("API Call From IP: " + request.getRemoteHost());
+		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		return new ResponseEntity<>(timeSheetService.empAttendence(empId, fromDate, toDate), HttpStatus.OK);
 	}
 
@@ -104,7 +105,7 @@ public class TimeSheetController {
 			@RequestParam("fromDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
 			@RequestParam("toDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate,
 			HttpServletRequest request) {
-		log.info("API Call From IP: " + request.getRemoteHost());
+		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		return new ResponseEntity<>(timeSheetService.allEmpAttendence(fromDate, toDate), HttpStatus.OK);
 	}
 
@@ -112,7 +113,7 @@ public class TimeSheetController {
 	@PostMapping("/updatePriorTime")
 	public ResponseEntity updatePriorTimeByDate(@RequestBody PriorTimeManagementRequest priorTimeManagementRequest,
 			HttpServletRequest request) throws ParseException {
-		log.info("API Call From IP: " + request.getRemoteHost());
+		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		return ((Optional<Priortime>) timeSheetService.savePriorTime(priorTimeManagementRequest)).map(priorTimeuser -> {
 			int priortimeId = priorTimeuser.getPriortimeId();
 			UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -131,7 +132,7 @@ public class TimeSheetController {
 	@GetMapping("/updatePriorTime/Accepted/{priortimeId}")
 	public ResponseEntity<ApiResponse> updatePriorTimeAccepted(@PathVariable(name = "priortimeId") int priortimeId,
 			HttpServletRequest request) throws ParseException {
-		log.info("API Call From IP: " + request.getRemoteHost());
+		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		Optional<Priortime> priortime = priorTimeRepository.findById(priortimeId);
 		timeSheetService.saveConfirmedDetails(priortime);
 		priortime.get().setStatus("Accepted");
@@ -149,7 +150,7 @@ public class TimeSheetController {
 	@GetMapping("/updatePriorTime/Rejected/{priortimeId}")
 	public ResponseEntity<ApiResponse> updatePriorTimeRejected(@PathVariable(name = "priortimeId") int priortimeId,
 			HttpServletRequest request) {
-		log.info("API Call From IP: " + request.getRemoteHost());
+		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		Optional<Priortime> priortime = priorTimeRepository.findById(priortimeId);
 		priortime.get().setStatus("Rejected");
 		priorTimeRepository.save(priortime.get());
@@ -164,7 +165,7 @@ public class TimeSheetController {
 	@PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
 	@PutMapping("/pause/{empId}")
 	public ResponseEntity<String> pauseWorkingTime(@PathVariable int empId, HttpServletRequest request) {
-		log.info("API Call From IP: " + request.getRemoteHost());
+		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		return new ResponseEntity<>(timeSheetService.pauseWorkingTime(empId), HttpStatus.OK);
 	}
 
@@ -172,7 +173,7 @@ public class TimeSheetController {
 	@PatchMapping("/resume/{empId}")
 	public ResponseEntity<String> resumeWorkingTime(@PathVariable int empId, HttpServletRequest request)
 			throws ParseException {
-		log.info("API Call From IP: " + request.getRemoteHost());
+		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		return new ResponseEntity<>(timeSheetService.resumeWorkingTime(empId), HttpStatus.OK);
 	}
 }
