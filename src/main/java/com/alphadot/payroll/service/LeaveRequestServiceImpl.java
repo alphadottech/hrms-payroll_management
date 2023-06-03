@@ -2,38 +2,36 @@ package com.alphadot.payroll.service;
 
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
+
 import com.alphadot.payroll.model.LeaveRequestModel;
 import com.alphadot.payroll.model.OnLeaveRequestSaveEvent;
 import com.alphadot.payroll.repository.LeaveRequestRepo;
-
-
 
 @Service
 public class LeaveRequestServiceImpl implements LeaveRequestService {
 
 	@Autowired
 	private LeaveRequestRepo leaveRequestRepo;
-	
+
 	private final ApplicationEventPublisher applicationEventPublisher;
-	
-	private static final Logger log=LogManager.getLogger(LeaveServiceImpl.class);
-	
+
+	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
 	public LeaveRequestServiceImpl(ApplicationEventPublisher applicationEventPublisher) {
 		this.applicationEventPublisher = applicationEventPublisher;
 	}
-	
 
 	@Override
 	public String saveLeaveRequest(LeaveRequestModel lr) {
-		
-		 log.info("Payroll service: LeaveRequestServiceImpl:  saveLeaveRequest Info level log msg");
+
+		LOGGER.info("Payroll service: LeaveRequestServiceImpl:  saveLeaveRequest Info level log msg");
 		List<LeaveRequestModel> opt = leaveRequestRepo.findByempid(lr.getEmpid());
 
 		int counter = 0;
@@ -54,18 +52,18 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
 				leaveRequestRepo.save(lr);
 				int id = lr.getEmpid();
-				int leaveId= lr.getLeaveid();
+				int leaveId = lr.getLeaveid();
 				UriComponentsBuilder urlBuilder = ServletUriComponentsBuilder.fromCurrentContextPath()
-						.path("/leave/leave/Accepted/"+id+"/"+leaveId);
+						.path("/leave/leave/Accepted/" + id + "/" + leaveId);
 				UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.fromCurrentContextPath()
-				  .path("/leave/leave/Rejected/"+id+"/"+leaveId);
-				 
-				
+						.path("/leave/leave/Rejected/" + id + "/" + leaveId);
+
 //				UriComponentsBuilder urlBuilder2 = ServletUriComponentsBuilder.fromHttpUrl("http://localhost:9095/payroll/leave/leave/Rejected/"+id+"/"+leaveId);
-				
-				OnLeaveRequestSaveEvent onLeaveRequestSaveEvent = new OnLeaveRequestSaveEvent(urlBuilder, urlBuilder1, lr);
+
+				OnLeaveRequestSaveEvent onLeaveRequestSaveEvent = new OnLeaveRequestSaveEvent(urlBuilder, urlBuilder1,
+						lr);
 				applicationEventPublisher.publishEvent(onLeaveRequestSaveEvent);
-				
+
 			} else {
 				return "you have selected wrong date OR already requested for selected date";
 			}
@@ -75,22 +73,20 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 		}
 
 		return lr.getLeaveid() + " Leave Request is saved & mail Sent Successfully";
-}
-	
-	
+	}
 
 	@Override
 	public List<LeaveRequestModel> getLeaveDetails() {
-		 log.info("Payroll service: LeaveRequestServiceImpl:  getLeaveDetails Info level log msg");
+		LOGGER.info("Payroll service: LeaveRequestServiceImpl:  getLeaveDetails Info level log msg");
 		List<LeaveRequestModel> leavelist = leaveRequestRepo.findAll();
 		return leavelist;
 	}
 
 	@Override
 	public List<LeaveRequestModel> getLeaveRequestDetailsByEmpId(Integer empid) {
-		log.info("Payroll service: LeaveRequestServiceImpl:  getLeaveRequestDetailsByEmpId Info level log msg");
+		LOGGER.info("Payroll service: LeaveRequestServiceImpl:  getLeaveRequestDetailsByEmpId Info level log msg");
 		List<LeaveRequestModel> opt = leaveRequestRepo.findByempid(empid);
-		if(!opt.isEmpty()) {
+		if (!opt.isEmpty()) {
 			return opt;
 		} else {
 			return null;
@@ -98,23 +94,20 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
 	}
 
-
 	@Override
 	public String AcceptLeaveRequest(Integer empid, Integer leaveId) {
-		
-		LeaveRequestModel opt =  leaveRequestRepo.search(empid,leaveId);
-		
-		if(opt!=null) { 
+
+		LeaveRequestModel opt = leaveRequestRepo.search(empid, leaveId);
+
+		if (opt != null) {
 			opt.setStatus("Accepted");
 			leaveRequestRepo.save(opt);
-			return opt.getLeaveid()+ " leave Request Accepted";
-		}else {
-			return empid+"leave request status already updated";
+			return opt.getLeaveid() + " leave Request Accepted";
+		} else {
+			return empid + "leave request status already updated";
 		}
-		
-		
-	}
 
+	}
 
 	@Override
 	public String RejectLeaveRequest(Integer empid, Integer leaveId) {
@@ -128,5 +121,5 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 			return empid + "leave request status already updated";
 		}
 	}
-	
+
 }

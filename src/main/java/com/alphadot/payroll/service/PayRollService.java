@@ -1,6 +1,5 @@
 package com.alphadot.payroll.service;
 
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -25,12 +24,12 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.util.ByteArrayDataSource;
 import javax.persistence.EntityNotFoundException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -64,7 +63,8 @@ import com.itextpdf.layout.property.VerticalAlignment;
 @Service
 public class PayRollService {
 
-	private static final Logger log = LogManager.getLogger(PayRollService.class);
+	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
 	@Autowired
 	private JavaMailSender javaMailSender;
 
@@ -82,9 +82,9 @@ public class PayRollService {
 	@Value("${holiday}")
 	private String[] holiday;
 
-	public PaySlip createPaySlip(int empId, String month, String year,int adhoc)
+	public PaySlip createPaySlip(int empId, String month, String year, int adhoc)
 			throws ParseException, IOException, SQLException {
-		log.info("inside method");
+		LOGGER.info("inside method");
 		String monthYear = month + " " + year;
 		PaySlip paySlip = new PaySlip();
 
@@ -108,8 +108,8 @@ public class PayRollService {
 		yourWorkingDays = timeSheetModel.stream()
 				.filter(x -> x.getWorkingHour() != null && x.getStatus().equalsIgnoreCase(Util.StatusPresent))
 				.collect(Collectors.toList()).size();
-		leaves = timeSheetModel.stream()
-				.filter(x -> x.getWorkingHour() == null && (x.getCheckIn()==null && x.getStatus().equalsIgnoreCase("Leave")))
+		leaves = timeSheetModel.stream().filter(
+				x -> x.getWorkingHour() == null && (x.getCheckIn() == null && x.getStatus().equalsIgnoreCase("Leave")))
 				.collect(Collectors.toList()).size();
 
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -140,22 +140,21 @@ public class PayRollService {
 		lists.removeAll(holidays);
 		workDays = lists.size();
 
-		log.info("folder path set");
+		LOGGER.info("folder path set");
 
 		float grossSalary = (int) user.get().getSalary();
 		int totalWorkingDays = workDays - saturday;
 		float amountPerDay = grossSalary / totalWorkingDays;
 		float leavePerDay = leaves * amountPerDay;
 		float netAmount = (yourWorkingDays * amountPerDay);
-		netAmount=  netAmount +adhoc;
-		paySlip = new PaySlip(empId, name, user.get().getDesignation(),
-				dtf.format(currentdate), user.get().getBankName(), user.get().getAccountNumber(),
-				firstDayMonth + " - " + lastDayOfMonth, yourWorkingDays, totalWorkingDays, leaves, leavePerDay,
-				grossSalary, netAmount,adhoc);
+		netAmount = netAmount + adhoc;
+		paySlip = new PaySlip(empId, name, user.get().getDesignation(), dtf.format(currentdate),
+				user.get().getBankName(), user.get().getAccountNumber(), firstDayMonth + " - " + lastDayOfMonth,
+				yourWorkingDays, totalWorkingDays, leaves, leavePerDay, grossSalary, netAmount, adhoc);
 		ImageModel img = new ImageModel();
 
 		ImageData datas = ImageDataFactory.create(imgRepo.search());
-		log.info("image path set");
+		LOGGER.info("image path set");
 		Image alpha = new Image(datas);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PdfWriter pdfWriter = new PdfWriter(baos);
@@ -215,7 +214,7 @@ public class PayRollService {
 		document.add(itemInfo);
 		document.add(new Paragraph("\n(Authorised Singnatory)").setTextAlignment(TextAlignment.RIGHT));
 		document.close();
-		log.warn("Successfully");
+		LOGGER.warn("Successfully");
 
 		sendEmail(baos, name, user.get().getEmail(), monthYear);
 		return paySlip;
@@ -223,11 +222,11 @@ public class PayRollService {
 
 	// Excel Pay Slip
 
-	public  String generatePaySlip(MultipartFile file) throws IOException, ParseException {
+	public String generatePaySlip(MultipartFile file) throws IOException, ParseException {
 		String empId = "", name = "", workingDays = "", present = "", leave = "", halfDay = "", salary = "",
 				paidLeave = "", bankName = "", accountNumber = "", gmail = "", designation = "";
 
-         String sheetName = "";
+		String sheetName = "";
 
 		int adhoc = 0;
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -238,18 +237,16 @@ public class PayRollService {
 		XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
 		DataFormatter dataFormatter = new DataFormatter();
 
-
 		for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
 			XSSFSheet sh = workbook.getSheetAt(i);
 
 			// Check if the sheet has any rows
 			if (sh.getLastRowNum() > 0) {
 				// This sheet has content, so print its name
-				sheetName=  sh.getSheetName();
+				sheetName = sh.getSheetName();
 			}
 		}
 		XSSFSheet sheet = workbook.getSheet(sheetName);
-
 
 		LocalDate currentdate = LocalDate.now();
 		LocalDate earlier = currentdate.minusMonths(1);
@@ -285,9 +282,8 @@ public class PayRollService {
 					gmail = dataFormatter.formatCellValue(row.getCell(11));
 					adhoc = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(12)));
 
-					 baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary,
-							paidLeave, date, bankName, accountNumber, designation, adhoc, payPeriod);
-					
+					baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary, paidLeave, date,
+							bankName, accountNumber, designation, adhoc, payPeriod);
 
 					sendEmail(baos, name, gmail, monthYear);
 				} catch (Exception e) {
@@ -303,25 +299,20 @@ public class PayRollService {
 	}
 
 	public ByteArrayOutputStream createPdf(String empId, String name, String totalworkingDays, String present,
-										   String leave, String halfDay, String salary, String paidLeave, String date, String bankName,
-										   String accountNumber, String designation, int adhoc, String payPeriod) throws SQLException, IOException {
-
-		int leaves=0;
-		int x=Integer.parseInt(leave);
-		int y=Integer.parseInt(paidLeave);
+			String leave, String halfDay, String salary, String paidLeave, String date, String bankName,
+			String accountNumber, String designation, int adhoc, String payPeriod) throws SQLException, IOException {
+		int leaves = 0;
+		int x = Integer.parseInt(leave);
+		int y = Integer.parseInt(paidLeave);
 		float grossSalary = Float.valueOf(salary);
 		int totalWorkingDays = Integer.parseInt(totalworkingDays);
-
-		int yourWorkingDays = Integer.parseInt(present)+y;
-
-		if(yourWorkingDays>leaves)
-			yourWorkingDays = yourWorkingDays-leaves;
+		int yourWorkingDays = Integer.parseInt(present) + y;
+		if (yourWorkingDays > leaves)
+			yourWorkingDays = yourWorkingDays - leaves;
 		else {
-			yourWorkingDays=0;
+			yourWorkingDays = 0;
 		}
-
 		float amountPerDay = grossSalary / totalWorkingDays;
-
 		float HalfDays = Integer.parseInt(halfDay) * amountPerDay / 2;
 		float leavePerDay = leaves * amountPerDay;
 		float netAmount = (yourWorkingDays * amountPerDay) - HalfDays;
@@ -332,10 +323,10 @@ public class PayRollService {
 			adhoc = 0;
 		}
 		String add = String.valueOf(adhoc);
-	 add = add.contains("-") ? add.replace("-","") : add;
+		add = add.contains("-") ? add.replace("-", "") : add;
 
 		ImageData datas = ImageDataFactory.create(imgRepo.search());
-		log.info("image path set");
+		LOGGER.info("image path set");
 		Image alpha = new Image(datas);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PdfWriter pdfWriter = new PdfWriter(baos);
@@ -393,20 +384,16 @@ public class PayRollService {
 		document.add(itemInfo);
 		document.add(new Paragraph("\n(Authorised Signatory )").setTextAlignment(TextAlignment.RIGHT));
 		document.close();
-
-		log.info("Successfully");
+		LOGGER.info("Successfully");
 		return baos;
 	}
 
 	public void sendEmail(ByteArrayOutputStream baos, String name, String gmail, String monthYear) {
 		String massage = Util.msg.replace("[Name]", name).replace("[Your Name]", "AlphaDot Technologies")
 				.replace("[Month, Year]", monthYear);
-
 		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 		MimeMessageHelper mimeMessageHelper;
-
 		try {
-
 			DataSource source = new ByteArrayDataSource(baos.toByteArray(), "application/octet-stream");
 			mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 			mimeMessageHelper.setFrom(sender);
@@ -414,17 +401,10 @@ public class PayRollService {
 			mimeMessageHelper.setText(massage);
 			mimeMessageHelper.setSubject("Salary Slip" + "-" + monthYear);
 			mimeMessageHelper.addAttachment(name + ".pdf", source);
-
 			javaMailSender.send(mimeMessage);
-
-			log.info("Mail send Successfully");
+			LOGGER.info("Mail send Successfully");
+		} catch (MessagingException e) {
+			LOGGER.info("Error");
 		}
-
-		catch (MessagingException e) {
-			log.info("Error");
-
-		}
-
 	}
-
 }

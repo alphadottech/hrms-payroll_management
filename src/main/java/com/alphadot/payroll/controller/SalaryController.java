@@ -4,8 +4,8 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,22 +22,22 @@ import com.alphadot.payroll.service.SalaryService;
 @RequestMapping("/salary")
 public class SalaryController {
 
+	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
 	@Autowired
 	private SalaryService salaryService;
-
-	private static final Logger log = LogManager.getLogger(SalaryController.class);
 
 	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
 	@GetMapping("/getAllEmpSalary")
 	public ResponseEntity<List<SalaryModel>> getAllEmpSalary() throws ParseException {
-		log.info("Payroll service: salary:  getAllEmpSalary() Info level log msg");
+		LOGGER.info("Payroll service: salary:  getAllEmpSalary() Info level log msg");
 		return new ResponseEntity<>(salaryService.getAllEmpSalary(), HttpStatus.OK);
 	}
 
 	@PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
 	@GetMapping("/getSalaryById/{empId}")
 	public ResponseEntity<Optional<SalaryModel>> getSalaryById(@PathVariable("empId") int empId) {
-		log.info("Payroll service: salary:  getSalaryById Info level log msg");
+		LOGGER.info("Payroll service: salary:  getSalaryById Info level log msg");
 		return new ResponseEntity<>(salaryService.getSalaryById(empId), HttpStatus.OK);
 	}
 }
