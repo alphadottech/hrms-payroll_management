@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import javax.mail.MessagingException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.mail.MailSendException;
@@ -16,37 +18,37 @@ import freemarker.template.TemplateException;
 
 public class OnPriorTimeRejectedListener implements ApplicationListener<OnPriorTimeAcceptOrRejectEvent> {
 
-	 private final MailService mailService;
+	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-	    @Autowired
-	    public OnPriorTimeRejectedListener(MailService mailService) {
-	        this.mailService = mailService;
-	    }
+	private final MailService mailService;
 
-	    /**
-	     * As soon as a registration event is complete, invoke the email verification
-	     * asynchronously in an another thread pool
-	     */
-	    @Override
-	    @Async
-	    public void onApplicationEvent(OnPriorTimeAcceptOrRejectEvent onPriortimeApprovalEvent) {
-	        sendAccountChangeEmailRejected(onPriortimeApprovalEvent);
-	    }
+	@Autowired
+	public OnPriorTimeRejectedListener(MailService mailService) {
+		this.mailService = mailService;
+	}
 
-	    /**
-	     * Send email verification to the user and persist the token in the database.
-	     */
-	    private void sendAccountChangeEmailRejected(OnPriorTimeAcceptOrRejectEvent event) {
-	      //  User user = event.getUser();
-	        String action = event.getAction();
-	        String actionStatus = event.getActionStatus();
-	        String recipientAddress = event.getPriortime().get().getEmail();
+	/**
+	 * As soon as a registration event is complete, invoke the email verification
+	 * asynchronously in an another thread pool
+	 */
+	@Override
+	@Async
+	public void onApplicationEvent(OnPriorTimeAcceptOrRejectEvent onPriortimeApprovalEvent) {
+		sendAccountChangeEmailRejected(onPriortimeApprovalEvent);
+	}
 
-	        try {
-	            mailService.sendAccountChangeEmail(event,action, actionStatus, recipientAddress);
-	        } catch (IOException | TemplateException | MessagingException e) {
-	           // logger.error(e);
-	            throw new MailSendException(recipientAddress);
-	        }
-	    }
+	/**
+	 * Send email verification to the user and persist the token in the database.
+	 */
+	private void sendAccountChangeEmailRejected(OnPriorTimeAcceptOrRejectEvent event) {
+		LOGGER.info("sendAccountChangeEmailRejected");
+		String action = event.getAction();
+		String actionStatus = event.getActionStatus();
+		String recipientAddress = event.getPriortime().get().getEmail();
+		try {
+			mailService.sendAccountChangeEmail(event, action, actionStatus, recipientAddress);
+		} catch (IOException | TemplateException | MessagingException e) {
+			throw new MailSendException(recipientAddress);
+		}
+	}
 }
