@@ -38,7 +38,7 @@
 			<appender-ref ref="fileLogger" />
 			<AppenderRef ref="consoleLogger" />
 		</Logger>
-		<Logger name="com.alphadot.payroll" level="INFO" additivity="false">
+		<Logger name="com.adt.payroll" level="INFO" additivity="false">
 			<appender-ref ref="fileLogger" />
 			<AppenderRef ref="consoleLogger" />
 		</Logger>
