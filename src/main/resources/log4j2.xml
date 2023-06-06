@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn">
+	<Properties>
+		<Property name="basePath">logs</Property>
+		<Property name="pattern">%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} %X{traceId}/%X{spanId} - %msg%n</Property>
+	</Properties>
+	<Appenders>
+		<RollingFile name="fileLogger"
+			fileName="${basePath}/payroll-log.log"
+			filePattern="${basePath}/payroll-log-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout>
+				<pattern>${pattern}</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="10MB" />
+			</Policies>
+			<!-- Max 10 files will be created everyday -->
+			<DefaultRolloverStrategy max="10">
+				<Delete basePath="${basePathr}" maxDepth="10">
+					<!-- Delete all files older than 30 days -->
+					<IfLastModified age="30d" />
+				</Delete>
+			</DefaultRolloverStrategy>
+		</RollingFile>
+		<Console name="consoleLogger" target="SYSTEM_OUT">
+			<PatternLayout>
+				<pattern>${pattern}</pattern>
+			</PatternLayout>
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Root level="ERROR">
+			<appender-ref ref="fileLogger" />
+			<AppenderRef ref="consoleLogger" />
+		</Root>
+		<Logger name="org.springframework.boot" level="INFO" additivity="false">
+			<appender-ref ref="fileLogger" />
+			<AppenderRef ref="consoleLogger" />
+		</Logger>
+		<Logger name="com.adt.payroll" level="INFO" additivity="false">
+			<appender-ref ref="fileLogger" />
+			<AppenderRef ref="consoleLogger" />
+		</Logger>
+	</Loggers>
+</Configuration>

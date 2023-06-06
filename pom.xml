@@ -9,7 +9,7 @@
 		<version>2.7.7</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.alphadot.payroll</groupId>
+	<groupId>com.adt</groupId>
 	<artifactId>payroll</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>payroll</name>
