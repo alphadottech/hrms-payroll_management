@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import lombok.Data;
 
@@ -51,6 +52,8 @@ public class TimeSheetModel {
 	@Column(name="intervalStatus")
 	private Boolean intervalStatus;
 
+	@Transient
+    private String employeeName;
 	
 	public TimeSheetModel(int timeSheetId, int employeeId, String checkOut, String checkIn, String workingHour,
 						  String date, String status, String month, String year) {
