@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +22,12 @@ import org.springframework.stereotype.Service;
 import com.adt.payroll.dto.CheckStatusDTO;
 import com.adt.payroll.dto.CurrentDateTime;
 import com.adt.payroll.dto.TimesheetDTO;
+import com.adt.payroll.model.Employee;
 import com.adt.payroll.model.Priortime;
 import com.adt.payroll.model.TimeSheetModel;
 import com.adt.payroll.model.payload.PriorTimeManagementRequest;
 import com.adt.payroll.msg.ResponseModel;
+import com.adt.payroll.repository.EmployeeRepo;
 import com.adt.payroll.repository.PriorTimeRepository;
 import com.adt.payroll.repository.TimeSheetRepo;
 
@@ -41,7 +44,8 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
 	@Autowired
 	private Util util;
-
+	@Autowired
+	private EmployeeRepo employeeRepo;
 	@Override
 	public String updateCheckIn(int empId) {
 		CurrentDateTime currentDateTime = util.getDateTime();
@@ -274,7 +278,16 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		String startDate = String.valueOf(dateTimeFormatter.format(fromDate));
 		String endDate = String.valueOf(dateTimeFormatter.format(toDate));
-		List<TimeSheetModel> list = timeSheetRepo.findAllByEmployeeId(startDate, endDate);
+		List<TimeSheetModel> list = timeSheetRepo.findAllByEmployeeId(startDate, endDate).stream()
+				.filter(e -> !e.equals(null)).map(e -> {
+					Optional<Employee> t = employeeRepo.findById(e.getEmployeeId());
+					if (t.isPresent()) {
+						e.setEmployeeName(t.get().getFirstName() + " " + t.get().getLastName());
+					} else {
+						e.setEmployeeName("NOT AVAILABLE");
+					}
+					return e;
+				}).collect(Collectors.toList());
 		return list;
 	}
 
