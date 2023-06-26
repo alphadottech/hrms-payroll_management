@@ -21,18 +21,40 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public List<SalaryModel> getAllEmpSalary() {
-		List<SalaryModel> list = salaryRepo.findAll();
+		List<SalaryModel> list=salaryRepo.findAll();
 		LOGGER.info("Payroll service: SalaryServiceImpl:  getAllEmpSalary Info level log msg");
+
 		return list;
 	}
 
-	public Optional<SalaryModel> getSalaryById(int empId) {
+	public Optional<SalaryModel> getSalaryById(String empId) {
 		LOGGER.info("Payroll service: SalaryServiceImpl:  getSalaryById Info level log msg");
-		Optional<SalaryModel> model = salaryRepo.findById(empId);
-		if (model == null) {
+
+		Optional<SalaryModel> model= salaryRepo.findByEmpId(empId);
+
+		if(model==null) {
 			throw new NullPointerException("No Data exist with given ID");
-		} else {
+		}
+		else {
 			return model;
+		}
+
+	}
+
+	@Override
+	public String saveSalary(SalaryModel salaryModel) {
+		salaryModel.setEmpName(salaryModel.getEmpName().toLowerCase());
+		return "saved"+salaryRepo.save(salaryModel).getEmpId();
+	}
+
+	@Override
+	public List<SalaryModel> searchByName(String name) {
+		if(!name.isEmpty()) {
+			List<SalaryModel> empList = salaryRepo.searchByEmpName(name.toLowerCase());
+			return empList;
+		}
+	      else{
+			  return null;
 		}
 	}
 }
