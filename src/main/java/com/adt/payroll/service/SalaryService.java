@@ -8,6 +8,10 @@ import com.adt.payroll.model.SalaryModel;
 public interface SalaryService {
 
 	public List<SalaryModel> getAllEmpSalary();
-	
-	public Optional<SalaryModel> getSalaryById(int empId);
+
+	public Optional<SalaryModel> getSalaryById(Integer empId);
+
+	public String saveSalary(SalaryModel salaryModel);
+
+	List<SalaryModel> searchByName(String name);
 }

@@ -10,7 +10,7 @@ import javax.persistence.Table;
 import lombok.Data;
 @Data
 @Entity
-@Table(name="image")
+@Table(catalog = "EmployeeDB", schema = "payroll_schema", name = "image")
 public class ImageModel {
 	
 	@Id
