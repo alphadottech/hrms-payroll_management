@@ -43,17 +43,21 @@ public class EmailService {
 		 this.templateConfiguration = templateConfiguration;
 	 }
 	
-	public String sendEmail(OnLeaveRequestSaveEvent event, String Url, String Url1, LeaveRequestModel lr) 
+	public String sendEmail(OnLeaveRequestSaveEvent event, String Url, String Url1, LeaveRequestModel lr)
 			throws IOException, TemplateException, MessagingException{
 		
 		Mail mail =  new Mail();
 		mail.setSubject("Leave Request");
 		mail.setFrom("mukeshchandalwar.adt@gmail.com");
-		mail.setTo("mbchandalwar02@gmail.com");
+		mail.setTo("dhananjaybobde.adt@gmail.com");
 		mail.getModel().put("leaveApprovalLink", Url);
 		mail.getModel().put("leaveRejectionLink", Url1);
 		mail.getModel().put("LeaveId", event.getLeaveRequestModel().getLeaveid().toString() );
 		mail.getModel().put("EmpId", event.getLeaveRequestModel().getEmpid().toString());
+		mail.getModel().put("Name", event.getLeaveRequestModel().getName());
+		mail.getModel().put("LeaveBalance", event.getLeaveRequestModel().getLeaveBalance().toString());
+		mail.getModel().put("LeaveType", event.getLeaveRequestModel().getLeaveType());
+		mail.getModel().put("Reason", event.getLeaveRequestModel().getLeaveReason());
 		mail.getModel().put("LeaveDates", event.getLeaveRequestModel().getLeavedate().toString());
 		mail.getModel().put("Status", event.getLeaveRequestModel().getStatus());
 		
