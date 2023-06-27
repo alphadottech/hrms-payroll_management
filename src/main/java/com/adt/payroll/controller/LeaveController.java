@@ -71,7 +71,7 @@ public class LeaveController {
 		return new ResponseEntity<>(leaveRequestService.getLeaveRequestDetailsByEmpId(empId), HttpStatus.OK);
 	}
 
-//	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
+	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
 	@GetMapping("/leave/Accepted/{empid}/{leaveId}/{leaveDates}")
 	public ResponseEntity<String> AcceptLeaveRequest(@PathVariable("empid") Integer empid,
 			@PathVariable("leaveId") Integer leaveId,@PathVariable("leaveDates") Integer leaveDate) {
@@ -79,7 +79,7 @@ public class LeaveController {
 		return new ResponseEntity<>(leaveRequestService.AcceptLeaveRequest(empid, leaveId,leaveDate), HttpStatus.OK);
 	}
 
-//	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
+	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
 	@GetMapping("/leave/Rejected/{empid}/{leaveId}")
 	public ResponseEntity<String> RejectLeaveRequest(@PathVariable("empid") Integer empid,
 			@PathVariable("leaveId") Integer leaveId) {

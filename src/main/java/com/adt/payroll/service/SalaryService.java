@@ -9,7 +9,7 @@ public interface SalaryService {
 
 	public List<SalaryModel> getAllEmpSalary();
 
-	public Optional<SalaryModel> getSalaryById(String empId);
+	public Optional<SalaryModel> getSalaryById(Integer empId);
 
 	public String saveSalary(SalaryModel salaryModel);
 

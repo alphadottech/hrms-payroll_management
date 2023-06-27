@@ -27,7 +27,7 @@ public class SalaryServiceImpl implements SalaryService {
 		return list;
 	}
 
-	public Optional<SalaryModel> getSalaryById(String empId) {
+	public Optional<SalaryModel> getSalaryById(Integer empId) {
 		LOGGER.info("Payroll service: SalaryServiceImpl:  getSalaryById Info level log msg");
 
 		Optional<SalaryModel> model= salaryRepo.findByEmpId(empId);

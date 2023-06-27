@@ -457,7 +457,7 @@ public class PayRollServiceImpl implements PayRollService {
     @Override
     public byte[] viewPay(SalaryModel salaryModel, String month, String year) throws ParseException, UnsupportedEncodingException {
         log.info("inside method");
-        int empId = Integer.parseInt(salaryModel.getEmpId());
+        int empId = salaryModel.getEmpId();
         PayRecord payRecords = payRecordRepo.findByEmpId(empId);
         if(payRecords!=null){
             if(payRecords.getEmpId() == empId && payRecords.getMonth().equalsIgnoreCase(month) && payRecords.getYear().equalsIgnoreCase(year))

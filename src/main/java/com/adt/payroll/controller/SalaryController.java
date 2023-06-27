@@ -24,7 +24,7 @@ public class SalaryController {
     @Autowired
     private SalaryService salaryService;
 
-//    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
     @GetMapping("/getAllEmpSalary")
     public ResponseEntity<List<SalaryModel>> getAllEmpSalary() throws ParseException {
         LOGGER.info("Payroll service: salary:  getAllEmpSalary() Info level log msg");
@@ -33,7 +33,7 @@ public class SalaryController {
 
     @PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
     @GetMapping("/getSalaryById/{empId}")
-    public ResponseEntity<Optional<SalaryModel>> getSalaryById(@PathVariable("empId") String empId) {
+    public ResponseEntity<Optional<SalaryModel>> getSalaryById(@PathVariable("empId") Integer empId) {
 		LOGGER.info("Payroll service: salary:  getSalaryById Info level log msg");
 		return new ResponseEntity<>(salaryService.getSalaryById(empId), HttpStatus.OK);
     }

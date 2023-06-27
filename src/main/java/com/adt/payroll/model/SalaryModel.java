@@ -28,7 +28,7 @@ public class SalaryModel {
     private String empName;
 
     @Column(name = "emp_id")
-    private String empId;
+    private Integer empId;
 
     @Column(name = "email")
     private String email;
