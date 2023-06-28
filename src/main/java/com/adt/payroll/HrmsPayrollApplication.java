@@ -1,14 +1,20 @@
 package com.adt.payroll;
 
+import com.adt.payroll.service.TableDataExtractor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-
+@EnableScheduling
 public class HrmsPayrollApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(HrmsPayrollApplication.class, args);
+
+		ConfigurableApplicationContext context= SpringApplication.run(HrmsPayrollApplication.class, args);
+
+		TableDataExtractor dataExtractor = context.getBean(TableDataExtractor.class);
 	}
 
 }

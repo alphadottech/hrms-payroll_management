@@ -1,138 +1,142 @@
-<!-- [if !mso]><!--><!--![endif]--><!-- Normalize Styles --><!-- [if gte mso 9]>
-<style type="text/css">
-            /* What it does: Normalize space between bullets and text. */
-            /* https://litmus.com/community/discussions/1093-bulletproof-lists-using-ul-and-li */
-            li {
-                text-indent: -1em;
-            }
-</style>
-<![endif]--><!-- Progressive Enhancements -->
-<div style="display: none; font-size: 1px; line-height: 1px; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; font-family: sans-serif;">
-    &nbsp;
-</div>
-<table style="background: #F7F8FA; border: 0; border-radius: 0; width: 100%;" cellspacing="0" cellpadding="0">
-<tbody>
-<tr>
-    <td class="tw-body" style="padding: 15px 15px 0;" align="center">
-        <table style="background: #F7F8FA; border: 0; border-radius: 0;" cellspacing="0" cellpadding="0">
-            <tbody>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leave Approval Notification</title>
+   <style>
+          body {
+              font-family: Arial, sans-serif;
+              color: #333;
+              margin: 0;
+              padding: 0;
+          }
+
+          .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              background-color: #f5f5f5;
+              border-radius: 5px;
+          }
+
+          h1 {
+              color: #333;
+              font-size: 24px;
+              margin-bottom: 20px;
+          }
+
+          p {
+              font-size: 16px;
+              line-height: 24px;
+              margin-bottom: 20px;
+          }
+
+          table {
+              border-collapse: collapse;
+              width: 100%;
+          }
+
+          th, td {
+              padding: 10px;
+              text-align: left;
+              border-bottom: 1px solid #ddd;
+          }
+
+          th {
+              background-color: #f2f2f2;
+              font-weight: bold;
+          }
+
+          .button {
+              color: #fff;
+              display: inline-block;
+              padding: 10px 20px;
+              background-color: #316fea;
+              text-decoration: none;
+              border-radius: 4px;
+              font-weight: bold;
+              margin-right: 10px;
+          }
+
+          .button.reject {
+           color: #fff;
+            background-color: #8c190d;
+          }
+
+          .button:hover {
+              background-color: #1e4bb5;
+          }
+
+          .signature {
+              margin-top: 45px;
+              font-size: 16px;
+          }
+
+          .signature p {
+              margin: 5px 0;
+          }
+
+          .support {
+              font-size: 16px;
+              margin-top: 20px;
+          }
+
+          .support a {
+              color: #316fea;
+              text-decoration: none;
+          }
+      </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Leave Approval Notification</h1>
+        <p>
+            Dear <span id="Name">${Name}</span>,
+            <br>
+            Your leave request details are as follows:
+        </p>
+
+        <table>
             <tr>
-                <td class="" style="width: 600px;" align="center">
-                    <p style="padding: 5px 5px 5px; font-size: 13px; margin: 0 0 0px; color: #316fea;" align="right">
-                    </p>
-                    <table style="background: #ffffff; border: 0px; border-radius: 4px; width: 99.6672%; overflow: hidden;"
-                           cellspacing="0" cellpadding="0">
-                        <tbody>
-                        <tr>
-                            <td class="" style="padding: 0px; width: 100%;" align="center">
-                                <table style="background: #336f85; border: 0px; border-radius: 0px; width: 599px; height: 53px; margin-left: auto; margin-right: auto;"
-                                       cellspacing="0" cellpadding="0">
-                                    <tbody>
-                                    <tr>
+                <th>Leave Type</th>
+                <td><span id="LeaveType">${LeaveType}</span></td>
+            </tr>
+            <tr>
+                <th>Leave Dates</th>
+                <td><span id="LeaveDates">${LeaveDates}</span></td>
+            </tr>
+            <tr>
+                <th>Leave Reason</th>
+                <td><span id="Reason">${Reason}</span></td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td><span id="Status">Pending</span></td>
+            </tr>
+        </table>
 
-                                        <td class="tw-card-header"
-                                            style="padding: 5px 5px px; width: 366px; color: #ffff; text-decoration: none; font-family: sans-serif;"
-                                            align="center"><span
-                                                style="font-weight: 600;">Leave Request Details</span></td>
+        <p>
+            Available Leave: <span id="LeaveBalance">${LeaveBalance} days</span>
+        </p>
 
-                                    </tr>
-                                    </tbody>
-                                </table>
-                                <p><br/><br/></p>
-                                <table dir="ltr" style="border: 0; width: 100%;" cellspacing="0" cellpadding="0">
-                                    <tbody>
-                                    <tr>
-                                        <td class="tw-card-body"
-                                            style="padding: 20px 35px; text-align: left; color: #6f6f6f; font-family: sans-serif; border-top: 0;">
-                                          
-                          
-							<h1 class="tw-h1"
-                                                                    style="font-size: 24px; font-weight: bold; mso-line-height-rule: exactly; line-height: 32px; margin: 0 0 20px; color: #474747;">
-                                                                    Hello mbchandalwar02@gmail.com</h1>
-                                                                <p class=""
-                                                                    style="margin: 20px 0; font-size: 16px; mso-line-height-rule: exactly; line-height: 24px;">
-                                                                    <span style="font-weight: 400;">
-                                                                     <label for="LeaveId">Leave id</label>:-<a  id = "LeaveId">${LeaveId}</a><br>
-                                                                    <label for="EmpId">Employee Id</label>:-<a  id = "EmpId">${EmpId}</a><br>
-                                                                    <label for="LeaveDates">Leave Dates</label>:-<a id = "LeaveDates">${LeaveDates}</a><br>
-                                                                    <label for="Status">Status</label>:-<a id = "Status" >${Status}</a><br>
-                                                                
-                                                                  </p>                                                                        
-                                                                </span><br />
+        <p>
+            Please take the appropriate action on this leave request.
+        </p>
 
-                                            <table style="border: 0; width: 100%;" cellspacing="0" cellpadding="0">
-                                                <tbody>  
-                                                <tr>
-                                                    <td>
-                                                        <table class="button mobile-w-full"
-                                                               style="border: 0px; border-radius: 7px; margin: 0px auto; width: 200px; background-color: #0e3611; height: 50px;"
-                                                               cellspacing="0" cellpadding="0" align="center">
-                                                            <tbody>
-                                                            <tr>
-                                                                <td class="button__td "
-                                                                    style="border-radius: 7px; text-align: center; width: 523px;"><!-- [if mso]>
-                                                                    <a href="" class="button__a" target="_blank"
-                                                                       style="border-radius: 4px; color: #FFFFFF; display: block; font-family: sans-serif; font-size: 18px; font-weight: bold; mso-height-rule: exactly; line-height: 1.1; padding: 14px 18px; text-decoration: none; text-transform: none; border: 1px solid #316FEA;"> </a>
-                                                                    <![endif]--> <!-- [if !mso]><!--> <a
-                                                                            class="button__a"
-                                                                            style="border-radius: 4px; color: #ffffff; display: block; font-family: sans-serif; font-size: 18px; font-weight: bold; mso-height-rule: exactly; line-height: 1.1; padding: 14px 18px; text-decoration: none; text-transform: none; border: 0;"
-                                                                            href="${leaveApprovalLink}"
-                                                                            target="_blank"
-                                                                            rel="noopener">Approve
-                                                                        </a> <!--![endif]--></td>
-                                                            </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
+        <a class="button" href="${leaveApprovalLink}" target="_blank" rel="noopener">Approve</a>
+        <a class="button reject" href="${leaveRejectionLink}" target="_blank" rel="noopener">Reject</a>
 
-					   <table style="border: 0; width: 100%;" cellspacing="0" cellpadding="0">
-                                                <tbody>  
-                                                <tr>
-                                                    <td>
-                                                        <table class="button mobile-w-full"
-                                                               style="border: 0px; border-radius: 7px; margin: -50px auto; width: 200px; background-color: #8c190d; height: 50px;"
-                                                               cellspacing="0" cellpadding="0" align="center">
-                                                            <tbody>
-                                                            <tr>
-                                                                <td class="button__td "
-                                                                    style="border-radius: 7px; text-align: center; width: 523px;"><!-- [if mso]>
-                                                                    <a href="" class="button__a" target="_blank"
-                                                                       style="border-radius: 4px; color: #FFFFFF; display: block; font-family: sans-serif; font-size: 18px; font-weight: bold; mso-height-rule: exactly; line-height: 1.1; padding: 14px 18px; text-decoration: none; text-transform: none; border: 1px solid #316FEA;"> </a>
-                                                                    <![endif]--> <!-- [if !mso]><!--> <a
-                                                                            class="button__a"
-                                                                            style="border-radius: 4px; color: #ffffff; display: block; font-family: sans-serif; font-size: 18px; font-weight: bold; mso-height-rule: exactly; line-height: 1.1; padding: 14px 18px; text-decoration: none; text-transform: none; border: 0;"
-                                                                            href="${leaveRejectionLink}"
-                                                                            target="_blank"
-                                                                            rel="noopener">Reject
-                                                                        </a> <!--![endif]--></td>
-                                                            </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
-                                            <div class=""
-                                                 style="border-top: 0; font-size: 1px; mso-line-height-rule: exactly; line-height: 1px; max-height: 0; margin: 20px 0; overflow: hidden;">
-                                                ​
-                                            </div>
-                                            <p class=""
-                                               style="margin: 20px 0; font-size: 16px; mso-line-height-rule: exactly; line-height: 24px;">
-                                                Contact our support team if you have any questions or concerns.&nbsp;<a
-                                                    style="color: #316fea; text-decoration: none;"
-                                                    href="javascript:void(0);" target="_blank" rel="noopener">Ask us any
-                                                question</a></p>
-                                            <p class="tw-signoff"
-                                               style="margin: 45px 0 5px; font-size: 16px; mso-line-height-rule: exactly; line-height: 24px;">
-                                                Our best, <br/> The Customer Engagement App team</p>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+        <div class="support">
+            <p>
+                Contact our support team if you have any questions or concerns.
+                <br>
+                <a href="javascript:void(0);" target="_blank" rel="noopener">teamhr.adt@gmail.com</a>
+            </p>
+        </div>
+
+        <div class="signature">
+            <p>Our best,</p>
+            <p>Alpha Dot Technology</p>
+        </div>
+    </div>
+</body>
+</html>
