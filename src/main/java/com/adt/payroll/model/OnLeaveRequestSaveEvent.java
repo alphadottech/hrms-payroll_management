@@ -8,12 +8,15 @@ public class OnLeaveRequestSaveEvent extends ApplicationEvent {
 	private transient UriComponentsBuilder redirectUrl;
 	private transient UriComponentsBuilder redirectUrl1;
 	private LeaveRequestModel leaveRequestModel;
+
+
 	public OnLeaveRequestSaveEvent(UriComponentsBuilder redirectUrl, UriComponentsBuilder redirectUrl1,
-			LeaveRequestModel leaveRequestModel) {
+								   LeaveRequestModel leaveRequestModel) {
 		super(leaveRequestModel);
 		this.redirectUrl = redirectUrl;
 		this.redirectUrl1 = redirectUrl1;
 		this.leaveRequestModel = leaveRequestModel;
+
 	}
 	public UriComponentsBuilder getRedirectUrl() {
 		return redirectUrl;

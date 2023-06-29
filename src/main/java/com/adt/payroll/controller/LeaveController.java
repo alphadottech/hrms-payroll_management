@@ -10,12 +10,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.adt.payroll.model.LeaveModel;
 import com.adt.payroll.model.LeaveRequestModel;
@@ -41,21 +36,21 @@ public class LeaveController {
 	@Autowired
 	LeaveRequestRepo leaveRequestRepo;
 
-	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
+//	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
 	@GetMapping("/getAllEmpLeaves")
 	public ResponseEntity<List<LeaveModel>> getAllLeaves() throws ParseException {
 		LOGGER.info("Payroll service: leave:  getAllLeaves Info level log msg");
 		return new ResponseEntity<>(leaveService.getAllEmpLeave(), HttpStatus.OK);
 	}
 
-	@PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
+//	@PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
 	@GetMapping("/getById/{empId}")
 	public ResponseEntity<LeaveModel> getEmpLeaves(@PathVariable("empId") int empId) {
 		LOGGER.info("Payroll service: leave:  getEmpLeaves Info level log msg");
 		return new ResponseEntity<>(leaveService.getLeaveById(empId), HttpStatus.OK);
 	}
 
-	@PreAuthorize("@auth.allow('ROLE_USER')")
+//	@PreAuthorize("@auth.allow('ROLE_USER')")
 	@PostMapping("/leaveRequest")
 	public ResponseEntity<String> saveLeaveRequest(@RequestBody LeaveRequestModel lr) {
 		LOGGER.info("Payroll service: leave:  saveLeaveRequest Info level log msg");
@@ -77,11 +72,11 @@ public class LeaveController {
 	}
 
 	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
-	@GetMapping("/leave/Accepted/{empid}/{leaveId}")
+	@GetMapping("/leave/Accepted/{empid}/{leaveId}/{leaveDates}")
 	public ResponseEntity<String> AcceptLeaveRequest(@PathVariable("empid") Integer empid,
-			@PathVariable("leaveId") Integer leaveId) {
+			@PathVariable("leaveId") Integer leaveId,@PathVariable("leaveDates") Integer leaveDate) {
 		LOGGER.info("Payroll service: leave:  AcceptLeaveRequest Info level log msg");
-		return new ResponseEntity<>(leaveRequestService.AcceptLeaveRequest(empid, leaveId), HttpStatus.OK);
+		return new ResponseEntity<>(leaveRequestService.AcceptLeaveRequest(empid, leaveId,leaveDate), HttpStatus.OK);
 	}
 
 	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
