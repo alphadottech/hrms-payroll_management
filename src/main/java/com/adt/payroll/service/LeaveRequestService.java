@@ -14,7 +14,7 @@ public interface LeaveRequestService {
 
 	public List<LeaveRequestModel> getLeaveRequestDetailsByEmpId(Integer empid);
 
-	public String AcceptLeaveRequest(Integer empid, Integer leaveId);
+	public String AcceptLeaveRequest(Integer empid, Integer leaveId,Integer leaveDate);
 	
 	public String RejectLeaveRequest(Integer empid, Integer leaveId);
 

@@ -36,7 +36,7 @@ public class OnLeaveRequestSaveEventListener implements ApplicationListener<OnLe
 
 	private void sendEmail(OnLeaveRequestSaveEvent event) {
 		LeaveRequestModel leaveRequestModel = event.getLeaveRequestModel();
-		String emailApprovalUrl = event.getRedirectUrl().toUriString();
+        String emailApprovalUrl = event.getRedirectUrl().toUriString();
 		String emailRejectionUrl = event.getRedirectUrl1().toUriString();
 
 		try {
