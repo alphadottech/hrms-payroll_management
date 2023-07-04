@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Base64;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,11 +52,11 @@ public class PayRollController {
     }
 
     @PostMapping("/viewPay")
-    public void viewPay(HttpServletRequest request, HttpServletResponse response,@RequestBody SalaryModel salaryModel, @RequestParam("month") String month , @RequestParam("year") String year) throws ParseException, IOException {
+    public String viewPay(HttpServletRequest request, HttpServletResponse response,@RequestBody SalaryModel salaryModel, @RequestParam("month") String month , @RequestParam("year") String year) throws ParseException, IOException {
         response.setContentType("application/pdf");
-       byte[] payPdf= payRollService.viewPay(salaryModel,month,year);
-        response.setContentLength(payPdf.length);
-        response.getOutputStream().write(payPdf);
+        byte[] payPdf= payRollService.viewPay(salaryModel,month,year);
+        String base64String = Base64.getEncoder().encodeToString(payPdf);
+        return base64String;
 
     }
 
