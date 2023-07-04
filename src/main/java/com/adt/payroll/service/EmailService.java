@@ -24,28 +24,28 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 
 @Service
 public class EmailService {
-	
-//	@Autowired
-//	private EmployeeRepo employeeRepo;
-	
+
+	//	@Autowired
+	//	private EmployeeRepo employeeRepo;
+
 	@Autowired
 	private JavaMailSender javaMailSender;
-	
+
 	private final Configuration templateConfiguration;
 
-	
-	 @Value("${app.velocity.templates.location}")
-	    private String basePackagePath;
-	 
-	 @Autowired
-	 public EmailService(JavaMailSender javaMailSender, Configuration templateConfiguration ) {
-		 this.javaMailSender = javaMailSender;
-		 this.templateConfiguration = templateConfiguration;
-	 }
-	
+
+	@Value("${app.velocity.templates.location}")
+	private String basePackagePath;
+
+	@Autowired
+	public EmailService(JavaMailSender javaMailSender, Configuration templateConfiguration ) {
+		this.javaMailSender = javaMailSender;
+		this.templateConfiguration = templateConfiguration;
+	}
+
 	public String sendEmail(OnLeaveRequestSaveEvent event, String Url, String Url1, LeaveRequestModel lr)
 			throws IOException, TemplateException, MessagingException{
-		
+
 		Mail mail =  new Mail();
 		mail.setSubject("Leave Request");
 		mail.setFrom("mukeshchandalwar.adt@gmail.com");
@@ -60,33 +60,33 @@ public class EmailService {
 		mail.getModel().put("Reason", event.getLeaveRequestModel().getLeaveReason());
 		mail.getModel().put("LeaveDates", event.getLeaveRequestModel().getLeavedate().toString());
 		mail.getModel().put("Status", event.getLeaveRequestModel().getStatus());
-		
-		 templateConfiguration.setClassForTemplateLoading(getClass(), basePackagePath);
-		 Template template = templateConfiguration.getTemplate("leave_status_change.ftl");
-		 String mailContent = FreeMarkerTemplateUtils.processTemplateIntoString(template, mail.getModel());
-		 mail.setContent(mailContent);
-		 send(mail);
-		 
-		 return "Mail Sent Successfully";
-		 
-		
-	}
-	
-	public String send(Mail mail) throws MessagingException {
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                StandardCharsets.UTF_8.name());
 
-        helper.setTo(mail.getTo());
-        helper.setText(mail.getContent(), true);
-        helper.setSubject(mail.getSubject());
-        helper.setFrom(mail.getFrom());
-        javaMailSender.send(message);
-        
-        return "Mail Sent Successfully";
-    }
-	
-	
-	
+		templateConfiguration.setClassForTemplateLoading(getClass(), basePackagePath);
+		Template template = templateConfiguration.getTemplate("leave_status_change.ftl");
+		String mailContent = FreeMarkerTemplateUtils.processTemplateIntoString(template, mail.getModel());
+		mail.setContent(mailContent);
+		send(mail);
+
+		return "Mail Sent Successfully";
+
+
+	}
+
+	public String send(Mail mail) throws MessagingException {
+		MimeMessage message = javaMailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+				StandardCharsets.UTF_8.name());
+
+		helper.setTo(mail.getTo());
+		helper.setText(mail.getContent(), true);
+		helper.setSubject(mail.getSubject());
+		helper.setFrom(mail.getFrom());
+		javaMailSender.send(message);
+
+		return "Mail Sent Successfully";
+	}
+
+
+
 
 }
