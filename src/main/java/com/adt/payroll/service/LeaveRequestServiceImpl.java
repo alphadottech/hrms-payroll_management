@@ -25,11 +25,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 	@Autowired
 	private LeaveRepository leaveRepository;
 
-
-
 	private final ApplicationEventPublisher applicationEventPublisher;
-
-
 
 	public LeaveRequestServiceImpl(ApplicationEventPublisher applicationEventPublisher) {
 		this.applicationEventPublisher = applicationEventPublisher;
@@ -39,42 +35,42 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 	public String saveLeaveRequest(LeaveRequestModel lr) {
 
 		LOGGER.info("Payroll service: LeaveRequestServiceImpl:  saveLeaveRequest Info level log msg");
+
 		List<LeaveRequestModel> opt = leaveRequestRepo.findByempid(lr.getEmpid());
-
 		int counter = 0;
-
-			for (LeaveRequestModel lrm : opt) {
-				List<String> dbld = lrm.getLeavedate();
-				List<String> uild = lr.getLeavedate();
-				for (String tempLd : uild) {
-					if (dbld.contains(tempLd)) {
-						counter++;
-					}
+		for (LeaveRequestModel lrm : opt) {
+			List<String> dbld = lrm.getLeavedate();
+			List<String> uild = lr.getLeavedate();
+			for (String tempLd : uild) {
+				if (dbld.contains(tempLd)) {
+					counter++;
 				}
 			}
-			if (counter == 0) {
-				//List<String> li = lr.getLeavedate();
+		}
+		if (counter == 0) {
+			//List<String> li = lr.getLeavedate();
 			//	lr.setLeavedate(li);
-				lr.setStatus("Pending");
+			lr.setStatus("Pending");
 
+			leaveRequestRepo.save(lr);
+			int id = lr.getEmpid();
+			int leaveId = lr.getLeaveid();
+			UriComponentsBuilder urlBuilder = ServletUriComponentsBuilder.fromCurrentContextPath()
+					.path("/leave/leave/Accepted/" + id + "/" + leaveId+ "/"+lr.getLeavedate().size());
+			UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.fromCurrentContextPath()
+					.path("/leave/leave/Rejected/" + id + "/" + leaveId);
+			
+			System.out.println(urlBuilder.toUriString());
+			System.out.println(urlBuilder1.toUriString());
 
-				leaveRequestRepo.save(lr);
-				int id = lr.getEmpid();
-				int leaveId = lr.getLeaveid();
-				UriComponentsBuilder urlBuilder = ServletUriComponentsBuilder.fromCurrentContextPath()
-						.path("/leave/leave/Accepted/" + id + "/" + leaveId+ "/"+lr.getLeavedate().size());
-				UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.fromCurrentContextPath()
-						.path("/leave/leave/Rejected/" + id + "/" + leaveId);
+			//				UriComponentsBuilder urlBuilder2 = ServletUriComponentsBuilder.fromHttpUrl("http://localhost:9095/payroll/leave/leave/Rejected/"+id+"/"+leaveId);
 
-//				UriComponentsBuilder urlBuilder2 = ServletUriComponentsBuilder.fromHttpUrl("http://localhost:9095/payroll/leave/leave/Rejected/"+id+"/"+leaveId);
+			OnLeaveRequestSaveEvent onLeaveRequestSaveEvent = new OnLeaveRequestSaveEvent(urlBuilder, urlBuilder1, lr);
+			applicationEventPublisher.publishEvent(onLeaveRequestSaveEvent);
 
-				OnLeaveRequestSaveEvent onLeaveRequestSaveEvent = new OnLeaveRequestSaveEvent(urlBuilder, urlBuilder1,
-						lr);
-				applicationEventPublisher.publishEvent(onLeaveRequestSaveEvent);
-
-			} else {
-				return "you have selected wrong date OR already requested for selected date";
-			}
+		} else {
+			return "you have selected wrong date OR already requested for selected date";
+		}
 
 
 		return lr.getLeaveid() + " Leave Request is saved & mail Sent Successfully";
@@ -104,10 +100,8 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
 		LeaveRequestModel opt = leaveRequestRepo.search(empid, leaveId);
 
-
 		if (opt != null && opt.getStatus().equalsIgnoreCase("Pending")) {
 			LeaveModel leaveModel = leaveRepository.findByEmpId(empid);
-
 
 			if(leaveModel.getLeaveBalance()>=leaveDate) {
 				opt.setStatus("Accepted");
