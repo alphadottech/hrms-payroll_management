@@ -204,7 +204,8 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 		priortimeuser.setDate(priorTimeManagementRequest.getDate());
 		priortimeuser.setEmail(priorTimeManagementRequest.getEmail());
 		priortimeuser.setEmployeeId(priorTimeManagementRequest.getEmployeeId());
-		SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
+		
+		SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat monthFormatter = new SimpleDateFormat("MMMM");
 		Date d = dateFormatter.parse(String.valueOf(priorTimeManagementRequest.getDate()));
 		String month = monthFormatter.format(d);
@@ -218,9 +219,11 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 		long differenceInHours = (differenceInMilliSeconds / (60 * 60 * 1000)) % 24;
 		long differenceInMinutes = (differenceInMilliSeconds / (60 * 1000)) % 60;
 		long differenceInSeconds = (differenceInMilliSeconds / 1000) % 60;
+		
 		priortimeuser.setWorkingHour(differenceInHours + ":" + differenceInMinutes + ":" + differenceInSeconds);
 		priortimeuser.setMonth(month.toUpperCase());
 		priortimeuser.setYear(year.toUpperCase());
+		
 		Priortime priortime = priorTimeRepository.save(priortimeuser);
 		return Optional.ofNullable(priortime);
 	}

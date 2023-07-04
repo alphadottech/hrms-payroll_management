@@ -1,3 +1,4 @@
+
 package com.adt.payroll.controller;
 
 import java.text.ParseException;
@@ -36,21 +37,21 @@ public class LeaveController {
 	@Autowired
 	LeaveRequestRepo leaveRequestRepo;
 
-//	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
+	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
 	@GetMapping("/getAllEmpLeaves")
 	public ResponseEntity<List<LeaveModel>> getAllLeaves() throws ParseException {
 		LOGGER.info("Payroll service: leave:  getAllLeaves Info level log msg");
 		return new ResponseEntity<>(leaveService.getAllEmpLeave(), HttpStatus.OK);
 	}
 
-//	@PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
+	@PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
 	@GetMapping("/getById/{empId}")
 	public ResponseEntity<LeaveModel> getEmpLeaves(@PathVariable("empId") int empId) {
 		LOGGER.info("Payroll service: leave:  getEmpLeaves Info level log msg");
 		return new ResponseEntity<>(leaveService.getLeaveById(empId), HttpStatus.OK);
 	}
 
-//	@PreAuthorize("@auth.allow('ROLE_USER')")
+	@PreAuthorize("@auth.allow('ROLE_USER')")
 	@PostMapping("/leaveRequest")
 	public ResponseEntity<String> saveLeaveRequest(@RequestBody LeaveRequestModel lr) {
 		LOGGER.info("Payroll service: leave:  saveLeaveRequest Info level log msg");

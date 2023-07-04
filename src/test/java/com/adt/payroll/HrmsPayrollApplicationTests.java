@@ -22,16 +22,16 @@ class HrmsPayrollApplicationTests {
 	void contextLoads() {
 	}
 
-	
+
 	@Autowired
-private LeaveService leveService;
+	private LeaveService leveService;
 
-@MockBean
-private LeaveRepository leaveRepo;
+	@MockBean
+	private LeaveRepository leaveRepo;
 
-public void getAllEmpLeave() {
-	when(leaveRepo.findAll()).thenReturn(Stream.of(new LeaveModel(1,1,1)).collect(Collectors.toList()));
-	assertEquals(1, leveService.getAllEmpLeave().size());
-}
+	public void getAllEmpLeave() {
+//		when(leaveRepo.findAll()).thenReturn(Stream.of(new LeaveModel(1,1,1)).collect(Collectors.toList()));
+		assertEquals(1, leveService.getAllEmpLeave().size());
+	}
 
 }
