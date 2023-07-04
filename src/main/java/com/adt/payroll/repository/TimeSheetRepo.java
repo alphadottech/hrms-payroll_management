@@ -13,9 +13,6 @@ import com.adt.payroll.model.TimeSheetModel;
 
 public interface TimeSheetRepo extends JpaRepository<TimeSheetModel, Integer> {
 
-
-
-
 	Optional<TimeSheetModel> findByEmployeeIdAndDate(int id, String localDates);
 
 	TimeSheetModel findByEmployeeId(int id);

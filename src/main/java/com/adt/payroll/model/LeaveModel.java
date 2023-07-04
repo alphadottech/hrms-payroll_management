@@ -16,10 +16,6 @@ import javax.persistence.Table;
 public class LeaveModel {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="serial_id",columnDefinition = "serial")
-	private int serialId;
-	
 	@Column(name="empid")
 	private int empId;
 	

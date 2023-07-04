@@ -12,29 +12,23 @@
  * limitations under the License.
  */
 package com.adt.payroll.event.listener;
-import java.io.IOException;
-
-import javax.mail.MessagingException;
-
 import org.springframework.context.ApplicationListener;
-import org.springframework.mail.MailSendException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.adt.payroll.event.OnPriorTimeDetailsSavedEvent;
-import com.adt.payroll.model.Priortime;
-import com.adt.payroll.service.MailService;
-
-import freemarker.template.TemplateException;
+import com.adt.payroll.service.CommonEmailService;
 
 @Component
 public class OnPriorTimeDetailsSavedListener implements ApplicationListener<OnPriorTimeDetailsSavedEvent> {
 
    
-    private final MailService mailService;
+//    private final MailService mailService;
+    
+    private CommonEmailService emailService;
 
-    public OnPriorTimeDetailsSavedListener( MailService mailService) {
-        this.mailService = mailService;
+    public OnPriorTimeDetailsSavedListener(CommonEmailService emailService) {
+        this.emailService = emailService;
     }
 
     /**
@@ -44,23 +38,24 @@ public class OnPriorTimeDetailsSavedListener implements ApplicationListener<OnPr
     @Override
     @Async
     public void onApplicationEvent(OnPriorTimeDetailsSavedEvent onUserRegistrationCompleteEvent) {
-        sendEmailVerification(onUserRegistrationCompleteEvent);
+//        sendEmailVerification(onUserRegistrationCompleteEvent);
+        emailService.sendEmailVerification(onUserRegistrationCompleteEvent);
     }
 
     /**
      * Send email verification to the user and persist the token in the database.
      */
-    private void sendEmailVerification(OnPriorTimeDetailsSavedEvent event) {
-        Priortime priortime = event.getPriorTime();
-        String recipientAddress = priortime.getEmail();
-        String emailConfirmationUrl1 = event.getRedirectUrl1().toUriString();
-        String emailConfirmationUrl2 = event.getRedirectUrl2().toUriString();
-
-
-        try {
-            mailService.sendEmailVerification(event,emailConfirmationUrl1, emailConfirmationUrl2,recipientAddress);
-        } catch (IOException | TemplateException | MessagingException e) {
-            throw new MailSendException(recipientAddress);
-        }
-    }
+//    private void sendEmailVerification(OnPriorTimeDetailsSavedEvent event) {
+//        Priortime priortime = event.getPriorTime();
+//        String recipientAddress = priortime.getEmail();
+//        String emailConfirmationUrl1 = event.getRedirectUrl1().toUriString();
+//        String emailConfirmationUrl2 = event.getRedirectUrl2().toUriString();
+//
+//
+//        try {
+//            emailService.sendEmailVerification(event,emailConfirmationUrl1, emailConfirmationUrl2,recipientAddress);
+//        } catch (IOException | TemplateException | MessagingException e) {
+//            throw new MailSendException(recipientAddress);
+//        }
+//    }
 }

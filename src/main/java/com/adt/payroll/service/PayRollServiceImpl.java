@@ -57,11 +57,13 @@ import java.util.stream.Collectors;
 public class PayRollServiceImpl implements PayRollService {
 
     private static final Logger log = LogManager.getLogger(PayRollServiceImpl.class);
+   
     @Autowired
     private JavaMailSender javaMailSender;
 
-    @Value("${spring.mail.username}")
-    private String sender;
+//    @Value("${spring.mail.username}")
+//    private String sender;
+    
     @Autowired
     private TimeSheetRepo timeSheetRepo;
 
@@ -78,6 +80,9 @@ public class PayRollServiceImpl implements PayRollService {
 
     @Value("${holiday}")
     private String[] holiday;
+    
+    @Autowired
+    private CommonEmailService mailService;
 
     public PaySlip createPaySlip(int empId, String month, String year)
             throws ParseException, IOException, SQLException {
@@ -221,7 +226,10 @@ public class PayRollServiceImpl implements PayRollService {
         document.close();
         log.warn("Successfully");
 
-        sendEmail(baos, name, user.get().getEmail(), monthYear);
+        //sendEmail(baos, name, user.get().getEmail(), monthYear);
+        
+        mailService.sendEmail(baos, name, user.get().getEmail(), monthYear);
+        
         return paySlip;
     }
 
@@ -320,7 +328,10 @@ public class PayRollServiceImpl implements PayRollService {
                             paidLeave, date, bankName, accountNumber, designation, joiningDate, adhoc, adhoc1, adhoc2, adhoc3, payPeriod);
 
 
-                    sendEmail(baos, name, gmail, monthYear);
+//                    sendEmail(baos, name, gmail, monthYear);
+                    
+                    mailService.sendEmail(baos, name, gmail, monthYear);
+                    
                 } catch (Exception e) {
                     continue;
                 }
@@ -426,32 +437,32 @@ public class PayRollServiceImpl implements PayRollService {
         return baos;
     }
 
-    public void sendEmail(ByteArrayOutputStream baos, String name, String gmail, String monthYear) {
-        String massage = Util.msg.replace("[Name]", name).replace("[Your Name]", "AlphaDot Technologies")
-                .replace("[Month, Year]", monthYear);
-
-        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-        MimeMessageHelper mimeMessageHelper;
-
-        try {
-
-            DataSource source = new ByteArrayDataSource(baos.toByteArray(), "application/octet-stream");
-            mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
-            mimeMessageHelper.setFrom(sender);
-            mimeMessageHelper.setTo(gmail);
-            mimeMessageHelper.setText(massage);
-            mimeMessageHelper.setSubject("Salary Slip" + "-" + monthYear);
-            mimeMessageHelper.addAttachment(name + ".pdf", source);
-
-            javaMailSender.send(mimeMessage);
-
-            log.info("Mail send Successfully");
-        } catch (MessagingException e) {
-            log.info("Error");
-
-        }
-
-    }
+//    public void sendEmail(ByteArrayOutputStream baos, String name, String gmail, String monthYear) {
+//        String massage = Util.msg.replace("[Name]", name).replace("[Your Name]", "AlphaDot Technologies")
+//                .replace("[Month, Year]", monthYear);
+//
+//        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+//        MimeMessageHelper mimeMessageHelper;
+//
+//        try {
+//
+//            DataSource source = new ByteArrayDataSource(baos.toByteArray(), "application/octet-stream");
+//            mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+//            mimeMessageHelper.setFrom(sender);
+//            mimeMessageHelper.setTo(gmail);
+//            mimeMessageHelper.setText(massage);
+//            mimeMessageHelper.setSubject("Salary Slip" + "-" + monthYear);
+//            mimeMessageHelper.addAttachment(name + ".pdf", source);
+//
+//            javaMailSender.send(mimeMessage);
+//
+//            log.info("Mail send Successfully");
+//        } catch (MessagingException e) {
+//            log.info("Error");
+//
+//        }
+//
+//    }
 
 
     @Override

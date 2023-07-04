@@ -16,7 +16,6 @@ public class OnLeaveRequestSaveEvent extends ApplicationEvent {
 		this.redirectUrl = redirectUrl;
 		this.redirectUrl1 = redirectUrl1;
 		this.leaveRequestModel = leaveRequestModel;
-
 	}
 	public UriComponentsBuilder getRedirectUrl() {
 		return redirectUrl;
