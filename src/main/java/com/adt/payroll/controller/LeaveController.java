@@ -1,9 +1,11 @@
 
 package com.adt.payroll.controller;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 
+import freemarker.template.TemplateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,8 @@ import com.adt.payroll.model.LeaveRequestModel;
 import com.adt.payroll.repository.LeaveRequestRepo;
 import com.adt.payroll.service.LeaveRequestService;
 import com.adt.payroll.service.LeaveService;
+
+import javax.mail.MessagingException;
 
 @RestController
 @RequestMapping("/leave")
@@ -75,7 +79,7 @@ public class LeaveController {
 	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
 	@GetMapping("/leave/Accepted/{empid}/{leaveId}/{leaveDates}")
 	public ResponseEntity<String> AcceptLeaveRequest(@PathVariable("empid") Integer empid,
-			@PathVariable("leaveId") Integer leaveId,@PathVariable("leaveDates") Integer leaveDate) {
+			@PathVariable("leaveId") Integer leaveId,@PathVariable("leaveDates") Integer leaveDate) throws TemplateException, MessagingException, IOException {
 		LOGGER.info("Payroll service: leave:  AcceptLeaveRequest Info level log msg");
 		return new ResponseEntity<>(leaveRequestService.AcceptLeaveRequest(empid, leaveId,leaveDate), HttpStatus.OK);
 	}
@@ -83,7 +87,7 @@ public class LeaveController {
 	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
 	@GetMapping("/leave/Rejected/{empid}/{leaveId}")
 	public ResponseEntity<String> RejectLeaveRequest(@PathVariable("empid") Integer empid,
-			@PathVariable("leaveId") Integer leaveId) {
+			@PathVariable("leaveId") Integer leaveId) throws TemplateException, MessagingException, IOException {
 		LOGGER.info("Payroll service: leave:  RejectLeaveRequest Info level log msg");
 		return new ResponseEntity<>(leaveRequestService.RejectLeaveRequest(empid, leaveId), HttpStatus.OK);
 	}
