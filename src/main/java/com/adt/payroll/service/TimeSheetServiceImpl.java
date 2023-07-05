@@ -4,6 +4,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -255,18 +258,45 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 		}
 		return null;
 	}
-
+//-------------------------------------------------------------------------------------------------------------------------
+//	@Override
+//	public List<TimesheetDTO> empAttendence(int empId, LocalDate fromDate, LocalDate toDate) {
+//		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+//		String startDate = String.valueOf(dateTimeFormatter.format(fromDate));
+//		String endDate = String.valueOf(dateTimeFormatter.format(toDate));
+//		List<TimeSheetModel> timeSheetModelList = timeSheetRepo.findAllByEmployeeId(empId, startDate, endDate);
+//		if (timeSheetModelList.isEmpty()) {
+//			throw new NullPointerException("No attendence data available with given ID: " + empId);
+//		}
+//		List<TimesheetDTO> timesheetDTOList = new ArrayList<TimesheetDTO>();
+//		for (TimeSheetModel timeSheetModel : timeSheetModelList) {
+//			TimesheetDTO timesheetDTO = TimesheetDTO.builder().employeeId(timeSheetModel.getEmployeeId())
+//					.date(timeSheetModel.getDate()).checkIn(timeSheetModel.getCheckIn())
+//					.checkOut(timeSheetModel.getCheckOut()).workingHour(timeSheetModel.getWorkingHour())
+//					.leaveInterval(timeSheetModel.getLeaveInterval()).status(timeSheetModel.getStatus()).build();
+//			timesheetDTOList.add(timesheetDTO);
+//		}
+//		return timesheetDTOList;
+//	}
+	
+	// JIRA no. - HRMS-88
 	@Override
-	public List<TimesheetDTO> empAttendence(int empId, LocalDate fromDate, LocalDate toDate) {
-		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-		String startDate = String.valueOf(dateTimeFormatter.format(fromDate));
-		String endDate = String.valueOf(dateTimeFormatter.format(toDate));
-		List<TimeSheetModel> timeSheetModelList = timeSheetRepo.findAllByEmployeeId(empId, startDate, endDate);
-		if (timeSheetModelList.isEmpty()) {
-			throw new NullPointerException("No attendence data available with given ID: " + empId);
-		}
+	public List<TimesheetDTO> empAttendence(int empId, String fromDate, String toDate) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy"); 
+ 		LocalDate startDate = LocalDate.parse(fromDate, formatter);
+		LocalDate endDate = LocalDate.parse(toDate, formatter);
+		List<TimeSheetModel> list = timeSheetRepo.findAllByEmployeeId(empId);
+		List<TimeSheetModel> list2= list.stream().filter(t->{
+			LocalDate date = LocalDate.parse(t.getDate(), formatter);
+			int d1=date.compareTo(startDate);
+			int d2=date.compareTo(endDate);
+			if((d1>0 && d2<0) || d1==0 || 0==d2) {
+				return true;
+			}
+			return false;
+		}).collect(Collectors.toList());
 		List<TimesheetDTO> timesheetDTOList = new ArrayList<TimesheetDTO>();
-		for (TimeSheetModel timeSheetModel : timeSheetModelList) {
+		for (TimeSheetModel timeSheetModel : list2) {
 			TimesheetDTO timesheetDTO = TimesheetDTO.builder().employeeId(timeSheetModel.getEmployeeId())
 					.date(timeSheetModel.getDate()).checkIn(timeSheetModel.getCheckIn())
 					.checkOut(timeSheetModel.getCheckOut()).workingHour(timeSheetModel.getWorkingHour())
@@ -275,7 +305,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 		}
 		return timesheetDTOList;
 	}
-
+//---------------------------------------------------------------------------------------------------------------------
 	@Override
 	public List<TimeSheetModel> allEmpAttendence(LocalDate fromDate, LocalDate toDate) {
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
