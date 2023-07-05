@@ -1,5 +1,6 @@
 package com.adt.payroll.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,18 +14,23 @@ import com.adt.payroll.model.TimeSheetModel;
 
 public interface TimeSheetRepo extends JpaRepository<TimeSheetModel, Integer> {
 
-
-
-
 	Optional<TimeSheetModel> findByEmployeeIdAndDate(int id, String localDates);
 
 	TimeSheetModel findByEmployeeId(int id);
 
 	void deleteByEmployeeIdAndDate(int id,String localDates);
+	
+//------------------------------------------------------------------------------------------------------------------------------------
+//	@Query(value="select * from payroll_schema.time_sheet c where c.employee_id=?1 AND c.date BETWEEN ?2 AND ?3",nativeQuery = true )
+//	List<TimeSheetModel> findAllByEmployeeId(int empId, String startDate, String endDate);
+	
+//	@Query(value = "SELECT * FROM payroll_schema.time_sheet c WHERE c.employee_id = ?1 AND c.date >= ?2 AND c.date <= ?3", nativeQuery = true)
+//	List<TimeSheetModel> findAllByEmployeeId(int empId, LocalDateTime startDate, LocalDateTime endDate);
 
-	@Query(value="select * from payroll_schema.time_sheet c where c.employee_id=?1 AND c.date BETWEEN ?2 AND ?3",nativeQuery = true )
-	List<TimeSheetModel> findAllByEmployeeId(int empId, String startDate, String endDate);
+	// JIRA no. - HRMS-88
+	List<TimeSheetModel> findAllByEmployeeId(int empId);
 
+//------------------------------------------------------------------------------------------------------------------------------------	
 	@Query(value="select * from payroll_schema.time_sheet c where c.date BETWEEN ?1 AND ?2",nativeQuery = true )
 	List<TimeSheetModel> findAllByEmployeeId(String startDate, String endDate);
 
@@ -33,7 +39,6 @@ public interface TimeSheetRepo extends JpaRepository<TimeSheetModel, Integer> {
 
 	@Query(value = "select * from payroll_schema.time_sheet where (employee_id=?1 and month=?2) and year=?3",nativeQuery = true)
 	List<TimeSheetModel> search(int id, String month,String year);
-	List<TimeSheetModel> findAllByEmployeeId(int empId);
 
 	TimeSheetModel save(Optional<Priortime> priortime);
 

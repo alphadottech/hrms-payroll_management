@@ -88,14 +88,16 @@ public class TimeSheetController {
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		return new ResponseEntity<>(timeSheetService.checkPriorStatus(empId), HttpStatus.OK);
 	}
-
+//--------------------------------------------------------------------------------------------------------------------------------
+	
 	@PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
 	@GetMapping("/empAttendence")
 	public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") int empId,
-			@RequestParam("fromDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
-			@RequestParam("toDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate,
+			@RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String fromDate,
+			@RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String toDate,
 			HttpServletRequest request) {
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
+		
 		return new ResponseEntity<>(timeSheetService.empAttendence(empId, fromDate, toDate), HttpStatus.OK);
 	}
 
@@ -111,11 +113,14 @@ public class TimeSheetController {
 
 	@PreAuthorize("@auth.allow('ROLE_USER')")
 	@PostMapping("/updatePriorTime")
-	public ResponseEntity updatePriorTimeByDate(@RequestBody PriorTimeManagementRequest priorTimeManagementRequest,
+	public ResponseEntity<ApiResponse> updatePriorTimeByDate(@RequestBody PriorTimeManagementRequest priorTimeManagementRequest,
 			HttpServletRequest request) throws ParseException {
+		
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
+		
 		return ((Optional<Priortime>) timeSheetService.savePriorTime(priorTimeManagementRequest)).map(priorTimeuser -> {
 			int priortimeId = priorTimeuser.getPriortimeId();
+			
 			UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.fromCurrentContextPath()
 					.path("/timeSheet/updatePriorTime/Accepted/" + priortimeId);
 			UriComponentsBuilder urlBuilder2 = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -123,6 +128,7 @@ public class TimeSheetController {
 			OnPriorTimeDetailsSavedEvent onPriorTimeDetailsSavedEvent = new OnPriorTimeDetailsSavedEvent(priorTimeuser,
 					urlBuilder1, urlBuilder2);
 			applicationEventPublisher.publishEvent(onPriorTimeDetailsSavedEvent);
+			
 			return ResponseEntity.ok(new ApiResponse(true, "Mail sent successfully."));
 		}).orElseThrow(() -> new PriorTimeAdjustmentException(priorTimeManagementRequest.getEmail(),
 				"Missing user details in database"));
