@@ -88,14 +88,16 @@ public class TimeSheetController {
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		return new ResponseEntity<>(timeSheetService.checkPriorStatus(empId), HttpStatus.OK);
 	}
-
+//--------------------------------------------------------------------------------------------------------------------------------
+	
 	@PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
 	@GetMapping("/empAttendence")
 	public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") int empId,
-			@RequestParam("fromDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
-			@RequestParam("toDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate,
+			@RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String fromDate,
+			@RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String toDate,
 			HttpServletRequest request) {
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
+		
 		return new ResponseEntity<>(timeSheetService.empAttendence(empId, fromDate, toDate), HttpStatus.OK);
 	}
 
