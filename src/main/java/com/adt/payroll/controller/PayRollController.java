@@ -36,7 +36,7 @@ public class PayRollController {
     @Autowired
     private TimeSheetRepo timeSheetRepo;
 
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+    @PreAuthorize("@auth.allow('ROLE_ADMIN') or @auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
     @GetMapping("/slip")
     public ResponseEntity<PaySlip> payrollCreate(@RequestParam("empId") int empId, @RequestParam("month") String month, @RequestParam("year") String year, HttpServletRequest request) throws ParseException, IOException, InvalidFormatException, SQLException {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
@@ -50,7 +50,7 @@ public class PayRollController {
 
         return payRollService.generatePaySlip(file);
     }
-
+    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
     @PostMapping("/viewPay")
     public String viewPay(HttpServletRequest request, HttpServletResponse response,@RequestBody SalaryModel salaryModel, @RequestParam("month") String month , @RequestParam("year") String year) throws ParseException, IOException {
         response.setContentType("application/pdf");

@@ -21,6 +21,9 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
+import com.adt.payroll.dto.EmployeeExpenseDTO;
+import com.adt.payroll.event.OnEmployeeExpenseAcceptOrRejectEvent;
+import com.adt.payroll.event.OnEmployeeExpenseDetailsSavedEvent;
 import com.adt.payroll.event.OnPriorTimeAcceptOrRejectEvent;
 import com.adt.payroll.event.OnPriorTimeDetailsSavedEvent;
 import com.adt.payroll.model.LeaveRequestModel;
@@ -44,6 +47,9 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 
 	@Value("${spring.mail.username}")
 	private String sender;
+	
+	@Value("${spring.mail.username}")
+	private String mailFrom;
 
 	private Configuration templateConfiguration;
 
@@ -237,5 +243,71 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 			e.printStackTrace();
 		}
 	}
+	
+	public void sendEmployeeExpenseVerification(OnEmployeeExpenseDetailsSavedEvent event, String emailVerificationUrl1, String to) throws IOException, TemplateException, MessagingException {
+		EmployeeExpenseDTO employeeExpenseDTO =event.getEmployeeExpenseDTO();
+		Mail mail = new Mail();
+		mail.setSubject("Employee Expense Request...");
+		mail.setTo(to);
+		mail.setFrom(mailFrom);
+		mail.getModel().put("expenseId",employeeExpenseDTO.getExpenseId()+"");
+		mail.getModel().put("EmployeeName",employeeExpenseDTO.getEmpName());
+		mail.getModel().put("approveEmployeeExpenseLink1", emailVerificationUrl1);
+		mail.getModel().put("Email",to);
+		mail.getModel().put("expenseAmount", employeeExpenseDTO.getExpenseAmount());
+		mail.getModel().put("comments", employeeExpenseDTO.getEmployeeComments());
+		mail.getModel().put("expenseDescription", employeeExpenseDTO.getExpenseDescription());
+		mail.getModel().put("expenseCategory", employeeExpenseDTO.getExpenseCategory());
+		mail.getModel().put("paymentDate", employeeExpenseDTO.getPaymentDate());
+		mail.getModel().put("paymentMode", employeeExpenseDTO.getPaymentMode());
+		mail.getModel().put("submitDate", employeeExpenseDTO.getSubmitDate());
+		if( employeeExpenseDTO.getInvoices() != null) {
+			mail.setAttachments(employeeExpenseDTO.getInvoices());
+		}
+		templateConfiguration.setClassForTemplateLoading(getClass(), basePackagePath);
+		Template template = templateConfiguration.getTemplate("employee_expense_request.ftl");
+		String mailContent = FreeMarkerTemplateUtils.processTemplateIntoString(template, mail.getModel());
+		mail.setContent(mailContent);
+		send(mail);
+	}
+
+	public void sendEmployeeExpenseApprovalEmail(OnEmployeeExpenseAcceptOrRejectEvent event, String action, String actionStatus, String to)
+			throws IOException, TemplateException, MessagingException {
+		EmployeeExpenseDTO employeeExpenseDTO = event.getEmployeeExpenseDTO();
+		Mail mail = new Mail();
+		mail.setSubject("Expense Approval");
+		mail.setTo(to);
+		mail.setFrom(mailFrom);
+		mail.getModel().put("employeeName", employeeExpenseDTO.getEmpName());
+		mail.getModel().put("Email", to);
+		mail.getModel().put("action", action);
+		mail.getModel().put("actionStatus", actionStatus);
+		mail.getModel().put("expenseAmount", employeeExpenseDTO.getExpenseAmount());
+		mail.getModel().put("Comments", employeeExpenseDTO.getEmployeeComments());
+		mail.getModel().put("expenseDescription", employeeExpenseDTO.getExpenseDescription());
+		mail.getModel().put("expenseCategory", employeeExpenseDTO.getExpenseCategory());
+		mail.getModel().put("paymentDate", employeeExpenseDTO.getPaymentDate());
+		mail.getModel().put("paymentMode", employeeExpenseDTO.getPaymentMode());
+		mail.getModel().put("submitDate", employeeExpenseDTO.getSubmitDate());
+		if(employeeExpenseDTO.getInvoices() != null) {
+			mail.setAttachments(employeeExpenseDTO.getInvoices());
+		}
+		templateConfiguration.setClassForTemplateLoading(getClass(), basePackagePath);
+		Template template = templateConfiguration.getTemplate("employee_expense_approve.ftl");
+		String mailContent = FreeMarkerTemplateUtils.processTemplateIntoString(template, mail.getModel());
+		mail.setContent(mailContent);
+		send(mail);
+	}
+
+	@Override
+	public void sendAccountChangeEmailApproved(OnEmployeeExpenseAcceptOrRejectEvent event)
+			throws IOException, TemplateException, MessagingException {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
+	
+	
 
 }
