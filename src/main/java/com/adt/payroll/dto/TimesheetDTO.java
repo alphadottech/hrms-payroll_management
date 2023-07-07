@@ -1,5 +1,4 @@
 package com.adt.payroll.dto;
-
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,9 +7,9 @@ import lombok.Data;
 public class TimesheetDTO {
     private int employeeId;
     private String date;
-    private String checkOut;
-    private String checkIn;
-    private String workingHour;
-    private String leaveInterval;
     private String status;
+    private String workingHour;
+    private String checkIn;
+    private String checkOut;
+    private String leaveInterval;
 }
