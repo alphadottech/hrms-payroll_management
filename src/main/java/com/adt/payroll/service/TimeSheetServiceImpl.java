@@ -130,7 +130,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 				long differenceInMinutes = (differenceInMilliSeconds / (60 * 1000)) % 60;
 				long differenceInSeconds = (differenceInMilliSeconds / 1000) % 60;
 				timeSheetModel
-						.setWorkingHour(differenceInHours + ":" + differenceInMinutes + ":" + differenceInSeconds);
+				.setWorkingHour(differenceInHours + ":" + differenceInMinutes + ":" + differenceInSeconds);
 				if (timeSheetModel.getLeaveInterval() != null && !timeSheetModel.getLeaveInterval().isEmpty()) {
 					if (!timeSheetModel.getIntervalStatus()) {
 						return "Please Resume Your Break";
@@ -231,48 +231,64 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 		return responseModel;
 	}
 
+	//*** JIRA:- HRMS-91 ***
 	public Optional<Priortime> savePriorTime(PriorTimeManagementRequest priorTimeManagementRequest)
 			throws ParseException {
 		Priortime priortimeuser = new Priortime();
+
 		if (priorTimeManagementRequest.getCheckIn() != null && !priorTimeManagementRequest.getCheckIn().equals("")) {
 			priortimeuser.setCheckIn(priorTimeManagementRequest.getCheckIn());
 		} else {
 			Optional<TimeSheetModel> timeSheetModelData = timeSheetRepo.findByEmployeeIdAndDate(
 					priorTimeManagementRequest.getEmployeeId(), priorTimeManagementRequest.getDate());
-			priortimeuser.setCheckIn(timeSheetModelData.get().getCheckIn());
+
+			if(timeSheetModelData.isPresent())
+				priortimeuser.setCheckIn(timeSheetModelData.get().getCheckIn());
+			else
+				return null;
 		}
 		if (priorTimeManagementRequest.getCheckOut() != null && !priorTimeManagementRequest.getCheckOut().equals("")) {
 			priortimeuser.setCheckOut(priorTimeManagementRequest.getCheckOut());
 		} else {
+
 			String checkout = timeSheetRepo.findCheckOutByEmployeeIdAndDate(priorTimeManagementRequest.getEmployeeId(),
 					priorTimeManagementRequest.getDate());
+
 			priortimeuser.setCheckOut(checkout);
 		}
 		priortimeuser.setDate(priorTimeManagementRequest.getDate());
-		priortimeuser.setEmail(priorTimeManagementRequest.getEmail());
-		priortimeuser.setEmployeeId(priorTimeManagementRequest.getEmployeeId());
 
-		SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat monthFormatter = new SimpleDateFormat("MMMM");
-		Date d = dateFormatter.parse(String.valueOf(priorTimeManagementRequest.getDate()));
-		String month = monthFormatter.format(d);
-		SimpleDateFormat yearFormatter = new SimpleDateFormat("yyyy");
-		Date y = dateFormatter.parse(String.valueOf(priorTimeManagementRequest.getDate()));
-		String year = yearFormatter.format(y);
-		DateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
-		Date checkin = timeFormat.parse(priortimeuser.getCheckIn());
-		Date checkout = timeFormat.parse(priortimeuser.getCheckOut());
-		long differenceInMilliSeconds = Math.abs(checkin.getTime() - checkout.getTime());
-		long differenceInHours = (differenceInMilliSeconds / (60 * 60 * 1000)) % 24;
-		long differenceInMinutes = (differenceInMilliSeconds / (60 * 1000)) % 60;
-		long differenceInSeconds = (differenceInMilliSeconds / 1000) % 60;
+		//*** Get the User info from the DB ***
+		Optional<User> userData = userRepo.findById(priorTimeManagementRequest.getEmployeeId());
 
-		priortimeuser.setWorkingHour(differenceInHours + ":" + differenceInMinutes + ":" + differenceInSeconds);
-		priortimeuser.setMonth(month.toUpperCase());
-		priortimeuser.setYear(year.toUpperCase());
+		if(userData.isPresent()) {
 
-		Priortime priortime = priorTimeRepository.save(priortimeuser);
-		return Optional.ofNullable(priortime);
+			priortimeuser.setEmail(userData.get().getEmail());
+			priortimeuser.setEmployeeId(userData.get().getId());
+
+			SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat monthFormatter = new SimpleDateFormat("MMMM");
+			Date d = dateFormatter.parse(String.valueOf(priorTimeManagementRequest.getDate()));
+			String month = monthFormatter.format(d);
+			SimpleDateFormat yearFormatter = new SimpleDateFormat("yyyy");
+			Date y = dateFormatter.parse(String.valueOf(priorTimeManagementRequest.getDate()));
+			String year = yearFormatter.format(y);
+			DateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
+			Date checkin = timeFormat.parse(priortimeuser.getCheckIn());
+			Date checkout = timeFormat.parse(priortimeuser.getCheckOut());
+			long differenceInMilliSeconds = Math.abs(checkin.getTime() - checkout.getTime());
+			long differenceInHours = (differenceInMilliSeconds / (60 * 60 * 1000)) % 24;
+			long differenceInMinutes = (differenceInMilliSeconds / (60 * 1000)) % 60;
+			long differenceInSeconds = (differenceInMilliSeconds / 1000) % 60;
+
+			priortimeuser.setWorkingHour(differenceInHours + ":" + differenceInMinutes + ":" + differenceInSeconds);
+			priortimeuser.setMonth(month.toUpperCase());
+			priortimeuser.setYear(year.toUpperCase());
+
+			Priortime priortime = priorTimeRepository.save(priortimeuser);
+			return Optional.ofNullable(priortime);
+		}
+		return null;
 	}
 
 	public TimeSheetModel saveConfirmedDetails(Optional<Priortime> priortime) throws ParseException {
@@ -303,52 +319,52 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 		return null;
 	}
 
-//	@Override
-//	public List<TimesheetDTO> empAttendence(int empId, LocalDate fromDate, LocalDate toDate) {
-//		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-//		String startDate = String.valueOf(dateTimeFormatter.format(fromDate));
-//		String endDate = String.valueOf(dateTimeFormatter.format(toDate));
-//		List<TimeSheetModel> timeSheetModelList = timeSheetRepo.findAllByEmployeeId(empId, startDate, endDate);
-//		if (timeSheetModelList.isEmpty()) {
-//			throw new NullPointerException("No attendence data available with given ID: " + empId);
-//		}
-//		List<TimesheetDTO> timesheetDTOList = new ArrayList<TimesheetDTO>();
-//		for (TimeSheetModel timeSheetModel : timeSheetModelList) {
-//			TimesheetDTO timesheetDTO = TimesheetDTO.builder().employeeId(timeSheetModel.getEmployeeId())
-//					.date(timeSheetModel.getDate()).checkIn(timeSheetModel.getCheckIn())
-//					.checkOut(timeSheetModel.getCheckOut()).workingHour(timeSheetModel.getWorkingHour())
-//					.leaveInterval(timeSheetModel.getLeaveInterval()).status(timeSheetModel.getStatus()).build();
-//			timesheetDTOList.add(timesheetDTO);
-//		}
-//		return timesheetDTOList;
-//	}
-	
+	//	@Override
+	//	public List<TimesheetDTO> empAttendence(int empId, LocalDate fromDate, LocalDate toDate) {
+	//		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+	//		String startDate = String.valueOf(dateTimeFormatter.format(fromDate));
+	//		String endDate = String.valueOf(dateTimeFormatter.format(toDate));
+	//		List<TimeSheetModel> timeSheetModelList = timeSheetRepo.findAllByEmployeeId(empId, startDate, endDate);
+	//		if (timeSheetModelList.isEmpty()) {
+	//			throw new NullPointerException("No attendence data available with given ID: " + empId);
+	//		}
+	//		List<TimesheetDTO> timesheetDTOList = new ArrayList<TimesheetDTO>();
+	//		for (TimeSheetModel timeSheetModel : timeSheetModelList) {
+	//			TimesheetDTO timesheetDTO = TimesheetDTO.builder().employeeId(timeSheetModel.getEmployeeId())
+	//					.date(timeSheetModel.getDate()).checkIn(timeSheetModel.getCheckIn())
+	//					.checkOut(timeSheetModel.getCheckOut()).workingHour(timeSheetModel.getWorkingHour())
+	//					.leaveInterval(timeSheetModel.getLeaveInterval()).status(timeSheetModel.getStatus()).build();
+	//			timesheetDTOList.add(timesheetDTO);
+	//		}
+	//		return timesheetDTOList;
+	//	}
+
 	// JIRA no. - HRMS-88
-		@Override
-		public List<TimesheetDTO> empAttendence(int empId, String fromDate, String toDate) {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy"); 
-	 		LocalDate startDate = LocalDate.parse(fromDate, formatter);
-			LocalDate endDate = LocalDate.parse(toDate, formatter);
-			List<TimeSheetModel> list = timeSheetRepo.findAllByEmployeeId(empId);
-			List<TimeSheetModel> list2= list.stream().filter(t->{
-				LocalDate date = LocalDate.parse(t.getDate(), formatter);
-				int d1=date.compareTo(startDate);
-				int d2=date.compareTo(endDate);
-				if((d1>0 && d2<0) || d1==0 || 0==d2) {
-					return true;
-				}
-				return false;
-			}).collect(Collectors.toList());
-			List<TimesheetDTO> timesheetDTOList = new ArrayList<TimesheetDTO>();
-			for (TimeSheetModel timeSheetModel : list2) {
-				TimesheetDTO timesheetDTO = TimesheetDTO.builder().employeeId(timeSheetModel.getEmployeeId())
-						.date(timeSheetModel.getDate()).checkIn(timeSheetModel.getCheckIn())
-						.checkOut(timeSheetModel.getCheckOut()).workingHour(timeSheetModel.getWorkingHour())
-						.leaveInterval(timeSheetModel.getLeaveInterval()).status(timeSheetModel.getStatus()).build();
-				timesheetDTOList.add(timesheetDTO);
+	@Override
+	public List<TimesheetDTO> empAttendence(int empId, String fromDate, String toDate) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy"); 
+		LocalDate startDate = LocalDate.parse(fromDate, formatter);
+		LocalDate endDate = LocalDate.parse(toDate, formatter);
+		List<TimeSheetModel> list = timeSheetRepo.findAllByEmployeeId(empId);
+		List<TimeSheetModel> list2= list.stream().filter(t->{
+			LocalDate date = LocalDate.parse(t.getDate(), formatter);
+			int d1=date.compareTo(startDate);
+			int d2=date.compareTo(endDate);
+			if((d1>0 && d2<0) || d1==0 || 0==d2) {
+				return true;
 			}
-			return timesheetDTOList;
+			return false;
+		}).collect(Collectors.toList());
+		List<TimesheetDTO> timesheetDTOList = new ArrayList<TimesheetDTO>();
+		for (TimeSheetModel timeSheetModel : list2) {
+			TimesheetDTO timesheetDTO = TimesheetDTO.builder().employeeId(timeSheetModel.getEmployeeId())
+					.date(timeSheetModel.getDate()).checkIn(timeSheetModel.getCheckIn())
+					.checkOut(timeSheetModel.getCheckOut()).workingHour(timeSheetModel.getWorkingHour())
+					.leaveInterval(timeSheetModel.getLeaveInterval()).status(timeSheetModel.getStatus()).build();
+			timesheetDTOList.add(timesheetDTO);
 		}
+		return timesheetDTOList;
+	}
 
 	@Override
 	public List<TimeSheetModel> allEmpAttendence(LocalDate fromDate, LocalDate toDate) {
@@ -442,11 +458,11 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 		}
 	}
 
-//	    public static EmployeeExpense saveEmployeeExpenseDetail(EmployeeExpense employeeExpense, List<MultipartFile> image) throws IOException, SQLException {
-//	        Blob blob = new SerialBlob(IOUtils.toByteArray(image.getInputStream()));
-//	        employeeExpense.setImage(blob);
-//	        return employeeExpense;
-//	    }
+	//	    public static EmployeeExpense saveEmployeeExpenseDetail(EmployeeExpense employeeExpense, List<MultipartFile> image) throws IOException, SQLException {
+	//	        Blob blob = new SerialBlob(IOUtils.toByteArray(image.getInputStream()));
+	//	        employeeExpense.setImage(blob);
+	//	        return employeeExpense;
+	//	    }
 
 	public static EmployeeExpenseDTO changeToDTO(EmployeeExpense employeeExpense, EmployeeExpenseDTO employeeExpenseDTO,
 			User employee) {
@@ -496,7 +512,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 	public EmployeeExpenseDTO acceptedEmployeeExpense(int expenseId, EmployeeExpenseDTO employeeExpenseDTO)
 			throws IOException {
 		Optional<EmployeeExpense> employeeExpenseOptional = employeeExpenseRepo.findById(expenseId);
-//	        EmployeeExpenseDTO employeeExpenseDTO = new EmployeeExpenseDTO();
+		//	        EmployeeExpenseDTO employeeExpenseDTO = new EmployeeExpenseDTO();
 		if (employeeExpenseOptional.isPresent()) {
 			EmployeeExpense employeeExpense = employeeExpenseOptional.get();
 			if (employeeExpenseDTO.getStatus() == null) {
@@ -515,43 +531,43 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 		}
 	}
 
-//	    @Override
-//	    public EmployeeExpenseDTO rejectedEmployeeExpense(int expenseId) {
-//	        Optional<EmployeeExpense> employeeExpenseOptional = employeeExpenseRepo.findById(expenseId);
-//	        EmployeeExpenseDTO employeeExpenseDTO = new EmployeeExpenseDTO();
-//	        if (employeeExpenseOptional.isPresent()) {
-//	            EmployeeExpense employeeExpense = employeeExpenseOptional.get();
-//	            employeeExpense.setStatus("Rejected");
-//	            EmployeeExpense employeeExpense1 = employeeExpenseRepo.save(employeeExpense);
-//	            String employeeId = employeeExpense1.getEmployeeId();
-//	            Optional<Employee> employeeOptional = employeeRepo.findByEmpId(Integer.parseInt(employeeId));
-//	            if (employeeOptional.isPresent()) {
-//	                Employee employee = employeeOptional.get();
-//	                employeeExpenseDTO.setStatus(employeeExpense1.getStatus());
-//	                changeToDTO(employeeExpense1, employeeExpenseDTO, employee);
-//	                if (employeeExpense1.getInvoices() != null) {
-//	                    String invoices = employeeExpense1.getInvoices();
-//	                    HashMap<String, File> map = new HashMap<>();
-//	                    if (invoices.contains(",")) {
-//	                        String[] filePaths = invoices.split(",");
-//	                        for (String filePath : filePaths) {
-//	                            File file = getFileFromPath(filePath);
-//	                            map.put(file.getName(), file);
-//	                        }
-//	                    } else {
-//	                        File file = getFileFromPath(invoices);
-//	                        map.put(file.getName(), file);
-//	                    }
-//	                    employeeExpenseDTO.setInvoices(map);
-//	                }
-//	            }
-//	            return employeeExpenseDTO;
-//	        } else {
-//	            String message = "Expense id: " + expenseId + " does not exists";
-//	            logger.error(message);
-//	            throw new RuntimeException(message);
-//	        }
-//	    }
+	//	    @Override
+	//	    public EmployeeExpenseDTO rejectedEmployeeExpense(int expenseId) {
+	//	        Optional<EmployeeExpense> employeeExpenseOptional = employeeExpenseRepo.findById(expenseId);
+	//	        EmployeeExpenseDTO employeeExpenseDTO = new EmployeeExpenseDTO();
+	//	        if (employeeExpenseOptional.isPresent()) {
+	//	            EmployeeExpense employeeExpense = employeeExpenseOptional.get();
+	//	            employeeExpense.setStatus("Rejected");
+	//	            EmployeeExpense employeeExpense1 = employeeExpenseRepo.save(employeeExpense);
+	//	            String employeeId = employeeExpense1.getEmployeeId();
+	//	            Optional<Employee> employeeOptional = employeeRepo.findByEmpId(Integer.parseInt(employeeId));
+	//	            if (employeeOptional.isPresent()) {
+	//	                Employee employee = employeeOptional.get();
+	//	                employeeExpenseDTO.setStatus(employeeExpense1.getStatus());
+	//	                changeToDTO(employeeExpense1, employeeExpenseDTO, employee);
+	//	                if (employeeExpense1.getInvoices() != null) {
+	//	                    String invoices = employeeExpense1.getInvoices();
+	//	                    HashMap<String, File> map = new HashMap<>();
+	//	                    if (invoices.contains(",")) {
+	//	                        String[] filePaths = invoices.split(",");
+	//	                        for (String filePath : filePaths) {
+	//	                            File file = getFileFromPath(filePath);
+	//	                            map.put(file.getName(), file);
+	//	                        }
+	//	                    } else {
+	//	                        File file = getFileFromPath(invoices);
+	//	                        map.put(file.getName(), file);
+	//	                    }
+	//	                    employeeExpenseDTO.setInvoices(map);
+	//	                }
+	//	            }
+	//	            return employeeExpenseDTO;
+	//	        } else {
+	//	            String message = "Expense id: " + expenseId + " does not exists";
+	//	            logger.error(message);
+	//	            throw new RuntimeException(message);
+	//	        }
+	//	    }
 
 	public File getFileFromPath(String filePath) {
 		File file = new File(filePath);
@@ -616,7 +632,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 		double dLat = Math.toRadians(lat2 - lat1);
 		double dLon = Math.toRadians(lon2 - lon1);
 		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(Math.toRadians(lat1))
-				* Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+		* Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
 		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		double distance = earthRadius * c;
 
