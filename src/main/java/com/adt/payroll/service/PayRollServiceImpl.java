@@ -40,9 +40,10 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.util.ByteArrayDataSource;
 import javax.persistence.EntityNotFoundException;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
+
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -85,7 +86,7 @@ public class PayRollServiceImpl implements PayRollService {
     private CommonEmailService mailService;
 
     public PaySlip createPaySlip(int empId, String month, String year)
-            throws ParseException, IOException, SQLException {
+            throws ParseException, IOException {
         log.info("inside method");
         String submitDate = "", status = "", employee_id = "";
         String monthYear = month + " " + year;
@@ -345,7 +346,7 @@ public class PayRollServiceImpl implements PayRollService {
 
     public ByteArrayOutputStream createPdf(String empId, String name, int totalWorkingDays, int present,
                                            int leave, int halfDay, String salary, String paidLeave, String date, String bankName,
-                                           String accountNumber, String designation, String joiningDate, int adhoc, int adhoc1, int adhoc2, int adhoc3, String payPeriod) throws SQLException, IOException {
+                                           String accountNumber, String designation, String joiningDate, int adhoc, int adhoc1, int adhoc2, int adhoc3, String payPeriod) throws  IOException {
 
         float grossSalary = Float.valueOf(salary);
 //        int totalWorkingDays = Integer.parseInt(totalworkingDays);
@@ -617,6 +618,81 @@ public class PayRollServiceImpl implements PayRollService {
         payRecordRepo.save(payRecord);
 
         return baos.toByteArray();
+    }
+    @Override
+    public String updateNetAmountInExcel(MultipartFile file) throws IOException {
+
+        String salary = "",paidLeave = "",sheetName = "";
+        int NetAmount=0, adhoc1 = 0, adhoc2 = 0, adhoc3 = 0, workingDays = 0, present = 0,  halfDay = 0;
+
+
+        Map<String, Integer> excelColumnName = new HashMap<>();
+        String projDir = System.getProperty("user.dir");
+        NumberFormat format = NumberFormat.getInstance();
+        XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
+        DataFormatter dataFormatter = new DataFormatter();
+
+        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            XSSFSheet sh = workbook.getSheetAt(i);
+            if (sh.getLastRowNum() > 0) {
+                sheetName = sh.getSheetName();
+            }
+        }
+
+        XSSFSheet sheet = workbook.getSheet(sheetName);
+
+        Row headerRow = sheet.getRow(0);
+
+        int columnCount = headerRow.getLastCellNum();
+        String columnHeader = "";
+        for (int i = 0; i < columnCount; i++) {
+            headerRow.getCell(i);
+            headerRow.getCell(i).getStringCellValue();
+            columnHeader = String.valueOf(headerRow.getCell(i)).trim();
+
+            excelColumnName.put(columnHeader, i);
+        }
+        for (int i = 2; i <= 50; i++) {
+            try {
+                XSSFRow row = sheet.getRow(i);
+                try {
+                    workingDays = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.TotalWorkingDays))));
+                    present = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.YourWorkingDays))));
+                    halfDay = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.HalfDay))));
+                    salary = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.salary)));
+                    paidLeave = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.PaidLeave)));
+
+                    adhoc1 = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc1))));
+                    adhoc2 = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc2))));
+                    adhoc3 = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc3))));
+                    double netAmount = calculateNetAmount(workingDays,present,salary,paidLeave,halfDay,adhoc1,adhoc2,adhoc3);
+                    row.createCell(excelColumnName.get(Util.NetAmount)).setCellValue(netAmount);
+
+                } catch (Exception e) {
+                    continue;
+                }
+            } catch (Exception e) {
+                break;
+            }
+        }
+        FileOutputStream fileOutputStream = new FileOutputStream("C:/Users/hp/Desktop/excel/"+file.getOriginalFilename());
+        workbook.write(fileOutputStream);
+        fileOutputStream.close();
+
+        return "done";
+    }
+    public float calculateNetAmount(int totalWorkingDays,int present,String salary,String paidLeave,int halfDay,int adhoc1,int adhoc2,int adhoc3){
+        float grossSalary = Float.valueOf(salary);
+        int yourWorkingDays = present + Integer.parseInt(paidLeave);
+
+        float amountPerDay = grossSalary / totalWorkingDays;
+
+        float HalfDays = halfDay * amountPerDay / 2;
+
+        float netAmount = (yourWorkingDays * amountPerDay) - HalfDays;
+
+        netAmount = netAmount  + adhoc1 + adhoc2 + adhoc3;
+        return netAmount;
     }
 
 }
