@@ -6,6 +6,8 @@ import java.io.UnsupportedEncodingException;
 
 import javax.mail.MessagingException;
 
+import com.adt.payroll.event.OnEmployeeExpenseAcceptOrRejectEvent;
+import com.adt.payroll.event.OnEmployeeExpenseDetailsSavedEvent;
 import com.adt.payroll.event.OnPriorTimeAcceptOrRejectEvent;
 import com.adt.payroll.event.OnPriorTimeDetailsSavedEvent;
 import com.adt.payroll.model.LeaveRequestModel;
@@ -38,6 +40,13 @@ public interface CommonEmailService {
 
 	public void sendEmail(OnLeaveRequestSaveEvent event);
 	//*** END:- Send Email for Leave Request
+	
+	public void sendEmployeeExpenseVerification(OnEmployeeExpenseDetailsSavedEvent event, String emailVerificationUrl1, String to) throws IOException, TemplateException, MessagingException;
+	 
+	public void sendEmployeeExpenseApprovalEmail(OnEmployeeExpenseAcceptOrRejectEvent event, String action, String actionStatus, String to) throws IOException, TemplateException, MessagingException;
+	
+	public void sendAccountChangeEmailApproved(OnEmployeeExpenseAcceptOrRejectEvent event) throws IOException, TemplateException, MessagingException;
+
 
 
 }

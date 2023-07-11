@@ -16,25 +16,37 @@ package com.adt.payroll.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.io.File;
+
 public class Mail {
     private String from;
     private String to;
     private String subject;
     private String content;
     private Map<String, String> model;
+    private HashMap<String,File> attachments;
     private int empId;
     
     public Mail() {
         model = new HashMap<>();
     }
 
-    public Mail(String from, String to, String subject, String content, Map<String, String> model, int empId) {
+    public Mail(String from, String to, String subject, String content, HashMap<String, File> attachments, Map<String, String> model, int empId) {
         this.from = from;
         this.to = to;
         this.subject = subject;
         this.content = content;
+        this.attachments = attachments;
         this.model = model;
-        this.empId=empId;
+        this.empId = empId;
+    }
+
+    public void setAttachments(HashMap<String, File> attachments) {
+        this.attachments = attachments;
+    }
+
+    public HashMap<String, File> getAttachments() {
+        return attachments;
     }
 
     public String getFrom() {

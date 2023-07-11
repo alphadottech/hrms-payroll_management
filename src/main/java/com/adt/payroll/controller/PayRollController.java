@@ -3,7 +3,7 @@ package com.adt.payroll.controller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
+
 import java.text.ParseException;
 import java.util.Base64;
 
@@ -36,9 +36,9 @@ public class PayRollController {
     @Autowired
     private TimeSheetRepo timeSheetRepo;
 
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+    @PreAuthorize("@auth.allow('ROLE_ADMIN') or @auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
     @GetMapping("/slip")
-    public ResponseEntity<PaySlip> payrollCreate(@RequestParam("empId") int empId, @RequestParam("month") String month, @RequestParam("year") String year, HttpServletRequest request) throws ParseException, IOException, InvalidFormatException, SQLException {
+    public ResponseEntity<PaySlip> payrollCreate(@RequestParam("empId") int empId, @RequestParam("month") String month, @RequestParam("year") String year, HttpServletRequest request) throws ParseException, IOException, InvalidFormatException {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
         return ResponseEntity.ok(payRollService.createPaySlip(empId, month, year));
     }
@@ -50,7 +50,7 @@ public class PayRollController {
 
         return payRollService.generatePaySlip(file);
     }
-
+    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
     @PostMapping("/viewPay")
     public String viewPay(HttpServletRequest request, HttpServletResponse response,@RequestBody SalaryModel salaryModel, @RequestParam("month") String month , @RequestParam("year") String year) throws ParseException, IOException {
         response.setContentType("application/pdf");
@@ -59,6 +59,12 @@ public class PayRollController {
         return base64String;
 
     }
+
+    @PostMapping("/calculateNetAmtPayable")
+    public String updateNetAmountInExcel(@RequestParam("file") MultipartFile file) throws IOException {
+        return payRollService.updateNetAmountInExcel(file);
+    }
+
 
 
 }
