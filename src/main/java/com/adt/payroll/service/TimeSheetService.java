@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.io.IOException;
-import java.sql.SQLException;
+
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,7 +45,7 @@ public interface TimeSheetService {
 
 	public String resumeWorkingTime(int empId) throws ParseException;
 	
-	public EmployeeExpenseDTO employeeExpense(int empId, List<MultipartFile> image, EmployeeExpense employeeExpense) throws IOException, SQLException;
+	public EmployeeExpenseDTO employeeExpense(int empId, List<MultipartFile> image, EmployeeExpense employeeExpense) throws IOException;
 
 	public EmployeeExpenseDTO acceptedEmployeeExpense(int expenseId, EmployeeExpenseDTO employeeExpenseDTO) throws IOException;
 

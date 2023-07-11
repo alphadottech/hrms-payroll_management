@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.sql.SQLException;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -418,7 +418,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
 	@Override
 	public EmployeeExpenseDTO employeeExpense(int empId, List<MultipartFile> image, EmployeeExpense employeeExpense)
-			throws IOException, SQLException {
+			throws IOException {
 		Optional<User> employeeOptional = userRepo.findById(empId);
 		if (employeeOptional.isPresent()) {
 			employeeExpense.setEmployeeId(empId + "");
