@@ -29,6 +29,7 @@ public class Util {
 
     public static final String PaidLeave = "Paid Leave";
     public static final String NetAmountPayable = "Net amount payable";
+    public static final String NetAmount = "Net Amount";
     public static final String YourWorkingDays = "Present";
     public static final String TotalWorkingDays = "Working day";
 
