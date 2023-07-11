@@ -6,14 +6,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
+
 import java.text.ParseException;
 
 public interface PayRollService {
-    public PaySlip createPaySlip(int empId, String month, String year) throws ParseException, IOException, SQLException;
+    public PaySlip createPaySlip(int empId, String month, String year) throws ParseException, IOException;
 
 //    public PaySlip createPaySlip(String empId) throws ParseException, IOException, SQLException;
     public String generatePaySlip(MultipartFile file) throws IOException, ParseException;
 
     public byte[] viewPay(SalaryModel salaryModel, String month, String year) throws ParseException, UnsupportedEncodingException;
+
+    String updateNetAmountInExcel(MultipartFile file) throws IOException;
 }
