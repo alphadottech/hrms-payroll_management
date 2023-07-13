@@ -32,7 +32,7 @@ public interface TimeSheetService {
 	ResponseModel checkPriorStatus(int empId);
 
 //-------------------------------------------------------------------------------------------------------------
-	List<TimesheetDTO> empAttendence(int empId, String fromDate, String toDate);
+	List<TimesheetDTO> empAttendence(int empId, LocalDate fromDate, LocalDate toDate);
 
 	List<TimeSheetModel> allEmpAttendence(LocalDate fromDate, LocalDate toDate);
 
