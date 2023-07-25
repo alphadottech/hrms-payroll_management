@@ -46,7 +46,8 @@ public interface CommonEmailService {
 	public void sendEmployeeExpenseApprovalEmail(OnEmployeeExpenseAcceptOrRejectEvent event, String action, String actionStatus, String to) throws IOException, TemplateException, MessagingException;
 	
 	public void sendAccountChangeEmailApproved(OnEmployeeExpenseAcceptOrRejectEvent event) throws IOException, TemplateException, MessagingException;
-
+	
+	public void sendEmail( String name);
 
 
 }
