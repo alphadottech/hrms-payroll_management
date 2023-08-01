@@ -307,7 +307,30 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 	}
 	
 	
-	
+	@Override
+	public void sendEmail( String name) {
+		String massage= Util.MESSAGE.replace("[Name]", name);
+
+		MimeMessage mimeMessage = mailSender.createMimeMessage();
+		MimeMessageHelper mimeMessageHelper;
+
+		try {
+
+			//DataSource source = new ByteArrayDataSource(baos.toByteArray(), "application/octet-stream");
+			mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+			mimeMessageHelper.setFrom(sender);
+			mimeMessageHelper.setTo("teamhr.adt@gmail.com");
+			mimeMessageHelper.setText(massage);
+			mimeMessageHelper.setSubject("Salary Slip");
+			//mimeMessageHelper.addAttachment(name + ".pdf", source);
+			mailSender.send(mimeMessage);
+
+			log.info("Mail send Successfully");
+		} catch (MessagingException e) {
+			log.info("Error");
+
+		}
+	}
 	
 
 }
