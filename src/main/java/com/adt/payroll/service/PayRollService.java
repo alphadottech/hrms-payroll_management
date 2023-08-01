@@ -11,11 +11,7 @@ import java.text.ParseException;
 
 public interface PayRollService {
     public PaySlip createPaySlip(int empId, String month, String year) throws ParseException, IOException;
-
-//    public PaySlip createPaySlip(String empId) throws ParseException, IOException, SQLException;
     public String generatePaySlip(MultipartFile file) throws IOException, ParseException;
-
     public byte[] viewPay(SalaryModel salaryModel, String month, String year) throws ParseException, UnsupportedEncodingException;
-
     String updateNetAmountInExcel(MultipartFile file) throws IOException;
 }
