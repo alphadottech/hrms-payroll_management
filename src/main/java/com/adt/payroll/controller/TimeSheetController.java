@@ -100,8 +100,8 @@ public class TimeSheetController {
 	@PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
 	@GetMapping("/empAttendence")
 	public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") int empId,
-			@RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String fromDate,
-			@RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String toDate,
+			@RequestParam("fromDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
+			@RequestParam("toDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate,
 			HttpServletRequest request) {
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 
@@ -147,15 +147,20 @@ public class TimeSheetController {
 			HttpServletRequest request) throws ParseException {
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		Optional<Priortime> priortime = priorTimeRepository.findById(priortimeId);
-		timeSheetService.saveConfirmedDetails(priortime);
-		priortime.get().setStatus("Accepted");
-		priorTimeRepository.save(priortime.get());
-		String email = priortime.get().getEmail();
-		OnPriorTimeAcceptOrRejectEvent onPriortimeApprovalEvent = new OnPriorTimeAcceptOrRejectEvent(priortime,
-				"PriorTimesheet Entry", "Approved");
+		
+		if(priortime.isPresent()) {
+			timeSheetService.saveConfirmedDetails(priortime);
+			priortime.get().setStatus("Accepted");
+			//*** Save in Prior-Time table ***
+			priorTimeRepository.save(priortime.get());
+			String email = priortime.get().getEmail();
+			OnPriorTimeAcceptOrRejectEvent onPriortimeApprovalEvent = new OnPriorTimeAcceptOrRejectEvent(priortime,
+					"PriorTimesheet Entry", "Approved");
 
-		applicationEventPublisher.publishEvent(onPriortimeApprovalEvent);
-		return ResponseEntity.ok(new ApiResponse(true, "Details for PriorTime Timesheet entry updated successfully"));
+			applicationEventPublisher.publishEvent(onPriortimeApprovalEvent);
+			return ResponseEntity.ok(new ApiResponse(true, "Details for PriorTime Timesheet entry updated successfully"));
+		}
+		return new ResponseEntity<ApiResponse>(new ApiResponse(false, "Priortime Details not found"), HttpStatus.NOT_FOUND);
 
 	}
 
@@ -165,13 +170,17 @@ public class TimeSheetController {
 			HttpServletRequest request) {
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		Optional<Priortime> priortime = priorTimeRepository.findById(priortimeId);
-		priortime.get().setStatus("Rejected");
-		priorTimeRepository.save(priortime.get());
-		OnPriorTimeAcceptOrRejectEvent onPriortimeApprovalEvent = new OnPriorTimeAcceptOrRejectEvent(priortime,
-				"PriorTimesheet Entry", "Rejected");
+		
+		if(priortime.isPresent()) {
+			priortime.get().setStatus("Rejected");
+			priorTimeRepository.save(priortime.get());
+			OnPriorTimeAcceptOrRejectEvent onPriortimeApprovalEvent = new OnPriorTimeAcceptOrRejectEvent(priortime,
+					"PriorTimesheet Entry", "Rejected");
 
-		applicationEventPublisher.publishEvent(onPriortimeApprovalEvent);
-		return ResponseEntity.ok(new ApiResponse(true, "Details for PriorTime Timesheet entry updated as Rejected"));
+			applicationEventPublisher.publishEvent(onPriortimeApprovalEvent);
+			return ResponseEntity.ok(new ApiResponse(true, "Details for PriorTime Timesheet entry updated as Rejected"));
+		}
+		return new ResponseEntity<ApiResponse>(new ApiResponse(false, "Priortime Details not found"), HttpStatus.NOT_FOUND);
 
 	}
 

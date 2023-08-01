@@ -26,9 +26,12 @@ public interface TimeSheetRepo extends JpaRepository<TimeSheetModel, Integer> {
 
 	//	@Query(value="select * from payroll_schema.time_sheet c where c.date BETWEEN ?1 AND ?2",nativeQuery = true )
 	//	List<TimeSheetModel> findAllByEmployeeId(String startDate, String endDate);
+	
+	@Query(value="select * from payroll_schema.time_sheet c where c.employee_id =?1 and to_date(c.date, 'dd-mm-yyyy') BETWEEN to_date(?2, 'DD-MM-YYYY') and to_date(?3, 'DD-MM-YYYY');",nativeQuery = true )
+	List<TimeSheetModel> findAllByEmployeeIdWithinSpecifiedDateRange(int empId, String startDate, String endDate);
 
 	// JIRA no. - HRMS-88
-	List<TimeSheetModel> findAllByEmployeeId(int empId);
+	//List<TimeSheetModel> findAllByEmployeeId(int empId);
 
 	//------------------------------------------------------------------------------------------------------------------------------------
 	@Query(value="select * from payroll_schema.time_sheet c where c.date BETWEEN ?1 AND ?2",nativeQuery = true )
