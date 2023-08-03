@@ -52,9 +52,7 @@
                                                         <tr>
                                                             <td class="tw-card-body"
                                                                 style="padding: 20px 35px; text-align: left; color: #6f6f6f; font-family: sans-serif; border-top: 0;">
-                                                                <h1 class="tw-h1"
-                                                                    style="font-size: 24px; font-weight: bold; mso-line-height-rule: exactly; line-height: 32px; margin: 0 0 20px; color: #474747;">
-                                                                    Hello Payroll,</h1>
+
                                                                 <p class=""
                                                                     style="margin: 20px 0; font-size: 16px; mso-line-height-rule: exactly; line-height: 24px;">
                                                                     <span style="font-weight: 400;">
@@ -62,7 +60,7 @@
                                                                      <label for="Email">Email</label>:-<a  id = "Email">${Email}</a><br>
                                                                      <label for="EmployeeName">Employee Name</label>:-<a  id = "EmployeeName">${EmployeeName}</a><br>
                                                                      <label for="ExpenseAmount">Expense Amount</label>:-<a  id = "ExpenseAmount">${expenseAmount}</a><br>
-                                                                    <label for="Comments">Comment</label>:-<a  id = "Comments">${comments}</a><br>
+                                                                     <label for="Comments">Comment</label>:-<a  id = "Comments">${comments}</a><br>
                                                                     <label for="ExpenseDescription">Expense Description</label>:-<a id = "ExpenseDescription">${expenseDescription}</a><br>
                                                                     <label for="ExpenseCategory">Expense Category</label>:-<a id = "ExpenseCategory" >${expenseCategory}</a><br>
                                                                     <label for="PaymentDate">Payment Date</label>:-<a id = "PaymentDate" >${paymentDate}</a><br>
@@ -88,8 +86,16 @@
                                                                                                                                                                            style="border-radius: 4px;background-color:green; color: #ffffff; display: block; font-family: sans-serif; font-size: 18px; font-weight: bold; mso-height-rule: exactly; line-height: 1.1; padding: 14px 18px; text-decoration: none; text-transform: none; border: 0;"
                                                                                                                                                                            href="${approveEmployeeExpenseLink1}"
                                                                                                                                                                            target="_blank"
-                                                                                                                                                                           rel="noopener">Visit For Approve & Reject</a>
+                                                                                                                                                                           rel="noopener">Approve</a>
                                                                                                                                                                        </td>
+                                                                                                                                                                        <td class="button__td "
+                                                                                                                                                                                   style="border-radius: 7px; text-align: center; width: 523px;"> <a
+                                                                                                                                                                                      class="button__a"
+                                                                                                                                                                                 style="border-radius: 4px;background-color:red; color: #ffffff; display: block; font-family: sans-serif; font-size: 18px; font-weight: bold; mso-height-rule: exactly; line-height: 1.1; padding: 14px 18px; text-decoration: none; text-transform: none; border: 0;"
+                                                                                                                                                                               href="${rejectEmployeeExpenseLink1}"
+                                                                                                                                                                               target="_blank"
+                                                                                                                                                                                     rel="noopener">Reject</a>
+                                                                                                                                                                                     </td>
                                                                                                                                                            </tr>
                                                                        																					</tbody>
                                                                                                                                                        </table>

@@ -41,7 +41,7 @@ public interface CommonEmailService {
 	public void sendEmail(OnLeaveRequestSaveEvent event);
 	//*** END:- Send Email for Leave Request
 	
-	public void sendEmployeeExpenseVerification(OnEmployeeExpenseDetailsSavedEvent event, String emailVerificationUrl1, String to) throws IOException, TemplateException, MessagingException;
+	public void sendEmployeeExpenseVerification(OnEmployeeExpenseDetailsSavedEvent event, String emailVerificationUrl1,String emailVerificationUrl2, String to) throws IOException, TemplateException, MessagingException;
 	 
 	public void sendEmployeeExpenseApprovalEmail(OnEmployeeExpenseAcceptOrRejectEvent event, String action, String actionStatus, String to) throws IOException, TemplateException, MessagingException;
 	
