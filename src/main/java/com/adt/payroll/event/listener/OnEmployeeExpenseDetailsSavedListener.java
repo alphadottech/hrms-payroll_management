@@ -43,10 +43,11 @@ public class OnEmployeeExpenseDetailsSavedListener implements ApplicationListene
         EmployeeExpenseDTO employeeExpense = event.getEmployeeExpenseDTO();
         String recipientAddress = employeeExpense.getEmpEmail();
         String emailConfirmationUrl1 = event.getRedirectUrl1().toUriString();
+        String emailConfirmationUrl2 = event.getRedirectUrl2().toUriString();
 //        String emailConfirmationUrl2 = event.getRedirectUrl2().toUriString();
 
         try {
-            mailService.sendEmployeeExpenseVerification(event,emailConfirmationUrl1, recipientAddress);
+            mailService.sendEmployeeExpenseVerification(event,emailConfirmationUrl1,emailConfirmationUrl2, recipientAddress);
         } catch (IOException | TemplateException | MessagingException e) {
             throw new MailSendException(recipientAddress);
         }
