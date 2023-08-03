@@ -244,7 +244,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		}
 	}
 	
-	public void sendEmployeeExpenseVerification(OnEmployeeExpenseDetailsSavedEvent event, String emailVerificationUrl1, String to) throws IOException, TemplateException, MessagingException {
+	public void sendEmployeeExpenseVerification(OnEmployeeExpenseDetailsSavedEvent event, String emailVerificationUrl1,String emailVerificationUrl2, String to) throws IOException, TemplateException, MessagingException {
 		EmployeeExpenseDTO employeeExpenseDTO =event.getEmployeeExpenseDTO();
 		Mail mail = new Mail();
 		mail.setSubject("Employee Expense Request...");
@@ -253,6 +253,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		mail.getModel().put("expenseId",employeeExpenseDTO.getExpenseId()+"");
 		mail.getModel().put("EmployeeName",employeeExpenseDTO.getEmpName());
 		mail.getModel().put("approveEmployeeExpenseLink1", emailVerificationUrl1);
+		mail.getModel().put("rejectEmployeeExpenseLink1", emailVerificationUrl2);
 		mail.getModel().put("Email",to);
 		mail.getModel().put("expenseAmount", employeeExpenseDTO.getExpenseAmount());
 		mail.getModel().put("comments", employeeExpenseDTO.getEmployeeComments());

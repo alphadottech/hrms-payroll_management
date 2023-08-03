@@ -28,7 +28,7 @@ public class Util {
     private String[] holiday;
 
 
-    public static final String ADDRESS = "Alpha Dot\nMPSEDC STP Building\n19A Electronic Complex,\nPardeshipura,Indore (M.P) 452003";
+    public static final String ADDRESS = "AlphaDot Technologies Pvt Ltd\nMPSEDC STP Building\n19A Electronic Complex,\nPardeshipura,Indore (M.P) 452003";
     public static final String Name = "Name";
 
     public static final String DESIGNATION = "Designation";
