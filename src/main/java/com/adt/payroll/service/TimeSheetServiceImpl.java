@@ -374,23 +374,24 @@ public class TimeSheetServiceImpl implements TimeSheetService {
         return timesheetDTOList;
     }
     @Override
-    public List<TimeSheetModel> allEmpAttendence(LocalDate fromDate, LocalDate toDate) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        String startDate = String.valueOf(dateTimeFormatter.format(fromDate));
-        String endDate = String.valueOf(dateTimeFormatter.format(toDate));
-        List<TimeSheetModel> list = timeSheetRepo.findAllByEmployeeId(startDate, endDate).stream()
-                .filter(e -> !e.equals(null)).map(e -> {
-                    Optional<User> t = userRepo.findById(e.getEmployeeId());
-                    if (t.isPresent()) {
-                        e.setEmployeeName(t.get().getFirstName() + " " + t.get().getLastName());
-                    } else {
-                        e.setEmployeeName("NOT AVAILABLE");
-                    }
-                    return e;
-                }).collect(Collectors.toList());
-        return list;
-    }
-
+	public List<TimeSheetModel> allEmpAttendence(LocalDate fromDate, LocalDate toDate) {
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		String startDate = String.valueOf(dateTimeFormatter.format(fromDate));
+		String endDate = String.valueOf(dateTimeFormatter.format(toDate));
+		List<TimeSheetModel> list = timeSheetRepo.findAllWithinSpecifiedDateRange(startDate, endDate).stream()
+				.filter(e -> !e.equals(null)).map(e -> {
+					Optional<User> t = userRepo.findById(e.getEmployeeId());
+					if (t.isPresent()) {
+						e.setEmployeeName(t.get().getFirstName() + " " + t.get().getLastName());
+					} else {
+						e.setEmployeeName("NOT AVAILABLE");
+					}
+					return e;
+				}).collect(Collectors.toList());                         
+		return list;
+	}
+    
+    
     @Override
     public String pauseWorkingTime(int empId) {
         CurrentDateTime currentDateTime = util.getDateTime();
