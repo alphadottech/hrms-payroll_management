@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.adt.payroll.model.EmployeeExpense;
 
 public interface EmployeeExpenseRepo extends JpaRepository<EmployeeExpense, Integer> {
+    EmployeeExpense findByExpenseId(int expenseId);
 }

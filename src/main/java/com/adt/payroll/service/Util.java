@@ -4,16 +4,31 @@ import com.adt.payroll.dto.CurrentDateTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 @Component
 public class Util {
     @Value("${time.zone}")
     private String timezone;
+    
+    @Value("${holiday}")
+    private String[] holiday;
 
-    public static final String ADDRESS = "Alpha Dot\nMPSEDC STP Building\n19A Electronic Complex,\nPardeshipura,Indore (M.P) 452003";
+
+    public static final String ADDRESS = "AlphaDot Technologies Pvt Ltd\nMPSEDC STP Building\n19A Electronic Complex,\nPardeshipura,Indore (M.P) 452003";
     public static final String Name = "Name";
 
     public static final String DESIGNATION = "Designation";
@@ -70,6 +85,12 @@ public class Util {
             + "Best regards,\r\n"
 
             + "[Your Name]";
+    
+    public static final String MESSAGE="The salary slip details for [Name] has been entered incorrectly. \r\n Kindy fill correct information !! \r\n"
+    		+ "\r\n"
+            + "Regards,"
+            + "\r\n"
+            +"AlphaDot Technologies";
 
     public CurrentDateTime getDateTime() {
         TimeZone timeZone = TimeZone.getTimeZone(timezone);
@@ -100,5 +121,54 @@ public class Util {
         currentDateTime.setCurrentTime(formattedTime);
         return currentDateTime;
     }
+
+	public int getWorkingDays() throws ParseException, IOException {
+		int monthd;
+		Date date = new Date();
+		int years = date.getYear();
+		int currentYear = years + 1900;
+		monthd = date.getMonth();
+		if (monthd == 1) {
+			monthd = monthd = 12;
+			currentYear = currentYear - 1;
+		}
+		String year = "" + currentYear;
+		String month = Month.of(monthd).name();
+		List<String> holidays = Arrays.asList(holiday);
+		List<String> lists = new ArrayList<>();
+		SimpleDateFormat inputFormat = new SimpleDateFormat("MMMM");
+		SimpleDateFormat outputFormat = new SimpleDateFormat("MM");
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(inputFormat.parse(month));
+		int workDays;
+		String monthDate = String.valueOf(outputFormat.format(cal.getTime()));
+
+		String firstDayMonth = "01/" + monthDate + "/" + year;
+		String lastDayOfMonth = (LocalDate.parse(firstDayMonth, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+				.with(TemporalAdjusters.lastDayOfMonth())).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+
+		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+		Date startDate = formatter.parse(firstDayMonth);
+		Date endDate = formatter.parse(lastDayOfMonth);
+
+		Calendar start = Calendar.getInstance();
+		start.setTime(startDate);
+		Calendar end = Calendar.getInstance();
+		end.setTime(endDate);
+
+		LocalDate localDate = null;
+		while (!start.after(end)) {
+			localDate = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+			if (start.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY)
+				lists.add(localDate.toString());
+
+			start.add(Calendar.DATE, 1);
+		}
+
+		lists.removeAll(holidays);
+		workDays = lists.size();
+		workDays = workDays - Util.SaturdyaValue;
+		return workDays;
+	}
 
 }
