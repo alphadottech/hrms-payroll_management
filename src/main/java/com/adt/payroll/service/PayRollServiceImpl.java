@@ -83,6 +83,9 @@ public class PayRollServiceImpl implements PayRollService {
     private String[] holiday;
     
     @Autowired
+    Util util;
+    
+    @Autowired
     private CommonEmailService mailService;
 
     public PaySlip createPaySlip(int empId, String month, String year)
@@ -288,9 +291,9 @@ public class PayRollServiceImpl implements PayRollService {
         String date = dtf.format(currentdate);
         String sql = "select * from employee_schema.employee_expenses";
         List<Map<String, Object>> tableData = dataExtractor.extractDataFromTable(sql);
-
-
-        for (int i = 2; i <= 50; i++) {
+        List<User> employee=   userRepo.findAll();
+        int workingDay=util.getWorkingDays(); 
+        for (int i = 2; i <= sheet.getLastRowNum(); i++) {
             try {
                 XSSFRow row = sheet.getRow(i);
                 try {
@@ -311,7 +314,9 @@ public class PayRollServiceImpl implements PayRollService {
                     adhoc1 = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc1))));
                     adhoc2 = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc2))));
                     adhoc3 = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc3))));
-
+                    String[] fullName=  name.split(" ");
+                    String fName=  fullName[0].toString();
+                    String lName=fullName[1].toString();
                     if (halfDay > limit || leave > limit || workingDays > limit || present > limit) {
                         continue;
                     }
@@ -323,17 +328,27 @@ public class PayRollServiceImpl implements PayRollService {
                             adhoc += Integer.parseInt(String.valueOf(expense.get("expense_amount")));
                         }
                     }
+                    if(checkEmpDetails(gmail,accountNumber,employee,fName,lName)) {
+                  	  mailService.sendEmail(name);
+                  	   continue;
+                  	   
+                     }
 
-
-                    baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary,
-                            paidLeave, date, bankName, accountNumber, designation, joiningDate, adhoc, adhoc1, adhoc2, adhoc3, payPeriod);
-
+                    if (isNotNull(empId, name, workingDays, present,  date, bankName, accountNumber, designation, joiningDate,leave,halfDay,adhoc1,adhoc2,adhoc3,salary,workingDay,paidLeave )) {   
+                        baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary,
+                                paidLeave, date, bankName, accountNumber, designation, joiningDate, adhoc, adhoc1, adhoc2, adhoc3, payPeriod);
+                       }else {
+                    	   
+                    	   mailService.sendEmail(name);
+                    	   continue;
+                       }
 
 //                    sendEmail(baos, name, gmail, monthYear);
                     
                     mailService.sendEmail(baos, name, gmail, monthYear);
                     
                 } catch (Exception e) {
+                	mailService.sendEmail(name);
                     continue;
                 }
             } catch (Exception e) {
@@ -694,5 +709,45 @@ public class PayRollServiceImpl implements PayRollService {
         netAmount = netAmount  + adhoc1 + adhoc2 + adhoc3;
         return netAmount;
     }
+    
+    public boolean checkEmpDetails(String gmail, String accountNumber, List<User> employees, String fname,
+			String lName) {
+		boolean flag = true;
+		for (User employee : employees) {
+
+			String[] fullName = employee.getLastName().split(" ");
+			String lname = fullName[0].toString();
+
+			if (employee.getEmail().trim().equalsIgnoreCase(gmail)
+					&& employee.getFirstName().trim().equalsIgnoreCase(fname)
+					&& lname.trim().trim().equalsIgnoreCase(lName)
+					&& employee.getAccountNumber().trim().equalsIgnoreCase(accountNumber)) {
+				flag = false;
+				return flag;
+			}
+
+		}
+		return flag;
+	}
+    
+    public boolean isNotNull(String empId, String name, Integer workingDays, Integer present, String date,
+			String bankName, String accountNumber, String designation, String joiningDate, Integer leave,
+			Integer halfDay, Integer adhoc1, Integer adhoc2, Integer adhoc3, String salary, int workingDay,
+			String paidLeave) {
+		int intSalary = Integer.parseInt(salary);
+		int intpaidLeave = Integer.parseInt(paidLeave);
+		if (empId.isEmpty() || empId == null || name.isEmpty() || name == null || workingDays <= 0
+				|| present > workingDays || leave < 0 || halfDay < 0 || workingDays != workingDay || bankName.isEmpty()
+				|| accountNumber.isEmpty() || designation.isEmpty() || designation == null || joiningDate.isEmpty()
+				|| joiningDate == null || (present > 0 && (salary == null || intSalary == 0))
+				|| (present == 0 && (intSalary != 0 || intSalary < 0))
+				|| (present == 0 && leave <= workingDays && (leave != 0 || halfDay != 0)) || (intpaidLeave < 0)||(workingDays==present&&(leave>0))
+				
+				) {
+			return false;
+
+		}
+		return true;
+	}
 
 }
