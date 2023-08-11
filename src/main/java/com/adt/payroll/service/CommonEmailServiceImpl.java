@@ -244,7 +244,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		}
 	}
 	
-	public void sendEmployeeExpenseVerification(OnEmployeeExpenseDetailsSavedEvent event, String emailVerificationUrl1, String to) throws IOException, TemplateException, MessagingException {
+	public void sendEmployeeExpenseVerification(OnEmployeeExpenseDetailsSavedEvent event, String emailVerificationUrl1,String emailVerificationUrl2, String to) throws IOException, TemplateException, MessagingException {
 		EmployeeExpenseDTO employeeExpenseDTO =event.getEmployeeExpenseDTO();
 		Mail mail = new Mail();
 		mail.setSubject("Employee Expense Request...");
@@ -253,6 +253,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		mail.getModel().put("expenseId",employeeExpenseDTO.getExpenseId()+"");
 		mail.getModel().put("EmployeeName",employeeExpenseDTO.getEmpName());
 		mail.getModel().put("approveEmployeeExpenseLink1", emailVerificationUrl1);
+		mail.getModel().put("rejectEmployeeExpenseLink1", emailVerificationUrl2);
 		mail.getModel().put("Email",to);
 		mail.getModel().put("expenseAmount", employeeExpenseDTO.getExpenseAmount());
 		mail.getModel().put("comments", employeeExpenseDTO.getEmployeeComments());
@@ -307,7 +308,30 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 	}
 	
 	
-	
+	@Override
+	public void sendEmail( String name) {
+		String massage= Util.MESSAGE.replace("[Name]", name);
+
+		MimeMessage mimeMessage = mailSender.createMimeMessage();
+		MimeMessageHelper mimeMessageHelper;
+
+		try {
+
+			//DataSource source = new ByteArrayDataSource(baos.toByteArray(), "application/octet-stream");
+			mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+			mimeMessageHelper.setFrom(sender);
+			mimeMessageHelper.setTo("teamhr.adt@gmail.com");
+			mimeMessageHelper.setText(massage);
+			mimeMessageHelper.setSubject("Salary Slip");
+			//mimeMessageHelper.addAttachment(name + ".pdf", source);
+			mailSender.send(mimeMessage);
+
+			log.info("Mail send Successfully");
+		} catch (MessagingException e) {
+			log.info("Error");
+
+		}
+	}
 	
 
 }

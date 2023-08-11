@@ -32,8 +32,8 @@ public interface TimeSheetService {
 	ResponseModel checkPriorStatus(int empId);
 
 //-------------------------------------------------------------------------------------------------------------
-	List<TimesheetDTO> empAttendence(int empId, LocalDate fromDate, LocalDate toDate);
 
+List<TimesheetDTO> empAttendence(int empId, LocalDate fromDate, LocalDate toDate);
 	List<TimeSheetModel> allEmpAttendence(LocalDate fromDate, LocalDate toDate);
 
 	Optional<Priortime> savePriorTime(PriorTimeManagementRequest priorTimeManagementRequest) throws ParseException;
@@ -51,5 +51,12 @@ public interface TimeSheetService {
 
 //	public EmployeeExpenseDTO rejectedEmployeeExpense(int expenseId);
 
-	public EmployeeExpenseDTO getEmployeeExpenseById(int expenseId);
+	//public EmployeeExpenseDTO getEmployeeExpenseById(int expenseId);
+	//public String getEmployeeExpenseById(int expenseId);
+
+	public String approveEmployeeExpenseById(int expenseId);
+
+	public String rejectEmployeeExpenseById(int expenseId);
+
+	List<EmployeeExpense> getAllExpenseDetail();
 }

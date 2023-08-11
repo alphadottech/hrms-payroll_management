@@ -43,7 +43,11 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 	@Value("${spring.mail.username}")
 	private String sender;
 
-	private final ApplicationEventPublisher applicationEventPublisher;
+	private ApplicationEventPublisher applicationEventPublisher;
+	
+	public LeaveRequestServiceImpl(LeaveRequestRepo leaveReqRepo) {
+		this.leaveRequestRepo = leaveReqRepo;
+	}
 
 	public LeaveRequestServiceImpl(ApplicationEventPublisher applicationEventPublisher) {
 		this.applicationEventPublisher = applicationEventPublisher;
