@@ -17,6 +17,10 @@ public class LeaveServiceImpl implements LeaveService {
 
 	@Autowired
 	private LeaveRepository leaveRepository;
+	
+	public LeaveServiceImpl(LeaveRepository leaveRepository) {
+		this.leaveRepository = leaveRepository;
+	}
 
 	@Override
 	public List<LeaveModel> getAllEmpLeave() {
