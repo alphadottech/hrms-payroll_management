@@ -306,7 +306,8 @@ public class PayRollServiceImpl implements PayRollService {
                     salary = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.salary)));
                     paidLeave = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.PaidLeave)));
                     bankName = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.BankName)));
-                    accountNumber = format.format(row.getCell(excelColumnName.get(Util.AccountNumber)).getNumericCellValue()).replace(",", "");
+                    accountNumber = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.AccountNumber)));
+                   // accountNumber = format.format(row.getCell(excelColumnName.get(Util.AccountNumber)).getNumericCellValue()).replace(",", "");
                     designation = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.DESIGNATION)));
                     gmail = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Gmail)));
 //                    adhoc= Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc))));
