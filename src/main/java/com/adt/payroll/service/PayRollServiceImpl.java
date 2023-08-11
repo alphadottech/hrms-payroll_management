@@ -296,7 +296,9 @@ public class PayRollServiceImpl implements PayRollService {
         for (int i = 2; i <= sheet.getLastRowNum(); i++) {
             try {
                 XSSFRow row = sheet.getRow(i);
+               
                 try {
+                	if((row.getCell(excelColumnName.get(Util.EmployeeNumber)))!=null)
                     empId = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.EmployeeNumber)));
                     name = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Name)));
                     workingDays = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.TotalWorkingDays))));
@@ -312,9 +314,25 @@ public class PayRollServiceImpl implements PayRollService {
                     gmail = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Gmail)));
 //                    adhoc= Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc))));
                     joiningDate = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.JoiningDate)));
-                    adhoc1 = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc1))));
-                    adhoc2 = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc2))));
-                    adhoc3 = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc3))));
+					if ((row.getCell(excelColumnName.get(Util.Adhoc1))) != null) {
+						adhoc1 = Integer
+								.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc1))));
+					} else {
+						adhoc1 = 0;
+					}
+					if ((row.getCell(excelColumnName.get(Util.Adhoc2))) != null) {
+						adhoc2 = Integer
+								.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc2))));
+					} else {
+						adhoc2 = 0;
+					}
+
+					if ((row.getCell(excelColumnName.get(Util.Adhoc3))) != null) {
+						adhoc3 = Integer
+								.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc3))));
+					} else {
+						adhoc3 = 0;
+					}
                     String[] fullName=  name.split(" ");
                     String fName=  fullName[0].toString();
                     String lName=fullName[1].toString();
