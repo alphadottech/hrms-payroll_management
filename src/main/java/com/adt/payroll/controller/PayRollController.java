@@ -36,13 +36,13 @@ public class PayRollController {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
         return ResponseEntity.ok(payRollService.createPaySlip(empId, month, year));
     }
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+//    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
     @PostMapping("/genPayAll")
     public ResponseEntity<Object> generatePaySlip(@RequestParam("file") MultipartFile file,HttpServletRequest request) throws IOException, ParseException {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
         return  new ResponseEntity<>(payRollService.generatePaySlip(file), HttpStatus.OK);
     }
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+//    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
     @PostMapping("/viewPay")
     public ResponseEntity<Object> viewPay(HttpServletRequest request, HttpServletResponse response,@RequestBody SalaryModel salaryModel, @RequestParam("month") String month , @RequestParam("year") String year) throws ParseException, IOException {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());

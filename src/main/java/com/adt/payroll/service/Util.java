@@ -1,6 +1,7 @@
 package com.adt.payroll.service;
 
 import com.adt.payroll.dto.CurrentDateTime;
+import com.itextpdf.layout.element.Image;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import java.util.TimeZone;
 
 @Component
 public class Util {
+
     @Value("${time.zone}")
     private String timezone;
     
@@ -31,15 +33,19 @@ public class Util {
     public static final String ADDRESS = "AlphaDot Technologies Pvt Ltd\nMPSEDC STP Building\n19A Electronic Complex,\nPardeshipura,Indore (M.P) 452003";
     public static final String Name = "Name";
 
-    public static final String DESIGNATION = "Designation";
-    public static final String AccountNumber = "Account Number";
-    public static final String BankName = "Bank Name";
+    public static final String DESIGNATION = "DESIGNATION";
+    public static final String AccountNumber = "ACCOUNT NUMBER";
+    public static final String BankName = "BANK NAME";
 
     public static final String Gmail = "Gmail";
+
+    public static final String Basic = "Basic";
+
+    public static final String Hra = "Hra";
     public static final String NumberOfLeavesTaken = "Number of Leaves Taken";
     public static final String GrossSalary = "Gross Salary";
-
-    public static final String salary = "salary";
+    public static final String PF = "PF";
+    public static final String salary = "Salary";
     public static final String PayPeriods = "Pay Periods";
 
     public static final String PaidLeave = "Paid Leave";
@@ -47,8 +53,8 @@ public class Util {
     public static final String NetAmount = "Net Amount";
     public static final String YourWorkingDays = "Present";
     public static final String TotalWorkingDays = "Working day";
-
-    public static final String Leave = "Leave";
+    public static final String Esic = "Esic";
+    public static final String Leave = "Unpaid Leave";
     public static final String AmountDeductedForLeaves = "Amount deducted for leaves";
     public static final String AmountPayablePerDay = "Amount Payable per day";
     public static final String PaySlip = "Pay Slip";
