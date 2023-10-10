@@ -240,7 +240,7 @@ public class PayRollServiceImpl implements PayRollService {
     // Excel Pay Slip
 
     public String generatePaySlip(MultipartFile file) throws IOException, ParseException {
-        String empId = "", name = "", salary = "",
+        String empId = "", name = "", salary = "",esic="",
                 paidLeave = "", bankName = "", accountNumber = "", gmail = "", designation = "", submitDate = "", status = "", employee_id = "", joiningDate = "";
         String sheetName = "";
         int adhoc = 0, adhoc1 = 0, adhoc2 = 0, adhoc3 = 0, workingDays = 0, present = 0, leave = 0, halfDay = 0, limit = 30;
@@ -313,7 +313,9 @@ public class PayRollServiceImpl implements PayRollService {
                     joiningDate = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.JoiningDate)));
                     adhoc1 = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc1))));
                     adhoc2 = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc2))));
-                    adhoc3 = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc3))));
+//                    adhoc3 = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc3))));
+
+                    esic = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Esic)));
                     String[] fullName=  name.split(" ");
                     String fName=  fullName[0].toString();
                     String lName=fullName[1].toString();
@@ -328,15 +330,15 @@ public class PayRollServiceImpl implements PayRollService {
                             adhoc += Integer.parseInt(String.valueOf(expense.get("expense_amount")));
                         }
                     }
-                    if(checkEmpDetails(gmail,accountNumber,employee,fName,lName)) {
-                  	  mailService.sendEmail(name);
-                  	   continue;
-                  	   
-                     }
+//                    if(checkEmpDetails(gmail,accountNumber,employee,fName,lName)) {
+//                  	  mailService.sendEmail(name);
+//                  	   continue;
+//
+//                     }
 
                     if (isNotNull(empId, name, workingDays, present,  date, bankName, accountNumber, designation, joiningDate,leave,halfDay,adhoc1,adhoc2,adhoc3,salary,workingDay,paidLeave )) {   
                         baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary,
-                                paidLeave, date, bankName, accountNumber, designation, joiningDate, adhoc, adhoc1, adhoc2, adhoc3, payPeriod);
+                                paidLeave, date, bankName, accountNumber, designation, joiningDate, adhoc, adhoc1, adhoc2, adhoc3, payPeriod,esic);
                        }else {
                     	   
                     	   mailService.sendEmail(name);
@@ -361,9 +363,13 @@ public class PayRollServiceImpl implements PayRollService {
 
     public ByteArrayOutputStream createPdf(String empId, String name, int totalWorkingDays, int present,
                                            int leave, int halfDay, String salary, String paidLeave, String date, String bankName,
-                                           String accountNumber, String designation, String joiningDate, int adhoc, int adhoc1, int adhoc2, int adhoc3, String payPeriod) throws  IOException {
-
+                                           String accountNumber, String designation, String joiningDate, int adhoc, int adhoc1, int adhoc2, int adhoc3, String payPeriod,String esic) throws  IOException {
+        float pf =0;
         float grossSalary = Float.valueOf(salary);
+        float esicAmount =0;
+        float basic = grossSalary / 2;
+        pf = (float) (basic * 0.125);
+        float hra = grossSalary /2 ;
 //        int totalWorkingDays = Integer.parseInt(totalworkingDays);
 //        int leaves = Integer.parseInt(leave) - Integer.parseInt(paidLeave);
         int yourWorkingDays = present + Integer.parseInt(paidLeave);
@@ -379,6 +385,12 @@ public class PayRollServiceImpl implements PayRollService {
             netAmount = 0;
             adhoc = 0;
         }
+
+        if(esic.equalsIgnoreCase("yes")){
+            esicAmount = (float) (grossSalary*(0.04));
+        }
+        netAmount -= esicAmount;
+        netAmount -=pf;
         String a = String.valueOf(adhoc), b = String.valueOf(adhoc1), c = String.valueOf(adhoc2), d = String.valueOf(adhoc3);
         String adHoc = a.contains("-") ? a.replace("-", "") : a;
         String adHoc1 = b.contains("-") ? b.replace("-", "") : b;
@@ -431,12 +443,20 @@ public class PayRollServiceImpl implements PayRollService {
         itemInfo.addCell(new Cell().add(paidLeave));
         itemInfo.addCell(new Cell().add(Util.Adhoc));
         itemInfo.addCell(new Cell().add(adHoc));
-        itemInfo.addCell(new Cell().add(Util.Adhoc1));
-        itemInfo.addCell(new Cell().add(adHoc1));
-        itemInfo.addCell(new Cell().add(Util.Adhoc2));
-        itemInfo.addCell(new Cell().add(adHoc2));
-        itemInfo.addCell(new Cell().add(Util.Adhoc3));
-        itemInfo.addCell(new Cell().add(adHoc3));
+//        itemInfo.addCell(new Cell().add(Util.Adhoc1));
+//        itemInfo.addCell(new Cell().add(adHoc1));
+//        itemInfo.addCell(new Cell().add(Util.Adhoc2));
+//        itemInfo.addCell(new Cell().add(adHoc2));
+//        itemInfo.addCell(new Cell().add(Util.Adhoc3));
+//        itemInfo.addCell(new Cell().add(adHoc3));
+        itemInfo.addCell(new Cell().add(Util.PF));
+        itemInfo.addCell(new Cell().add(String.valueOf(pf)));
+        itemInfo.addCell(new Cell().add(Util.Basic));
+        itemInfo.addCell(new Cell().add(String.valueOf(basic)));
+        itemInfo.addCell(new Cell().add(Util.Hra));
+        itemInfo.addCell(new Cell().add(String.valueOf(hra)));
+        itemInfo.addCell(new Cell().add(Util.Esic));
+        itemInfo.addCell(new Cell().add(esic));
         itemInfo.addCell(new Cell().add(Util.GrossSalary));
         itemInfo.addCell(new Cell().add(String.valueOf(salary)));
         itemInfo.addCell(new Cell().add(Util.NetAmountPayable));
