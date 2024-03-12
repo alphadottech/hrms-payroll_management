@@ -16,17 +16,18 @@ import javax.persistence.Table;
 public class LeaveModel {
 
 	@Id
-	@Column(name="empid")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "serial_id")
+	private int serialNo;
+
+	@Column(name = "employee_id")
 	private int empId;
-	
-	@Column(name="name")
+
+	@Column(name = "name")
 	private String name;
 
-
-	@Column(name="leave_balance")
+	@Column(name = "leave_balance")
 	private int leaveBalance;
-
-
 
 
 
