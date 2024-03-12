@@ -15,22 +15,19 @@ import javax.persistence.Table;
 @Table(catalog = "EmployeeDB", schema = "payroll_schema", name = "leave_balance")
 public class LeaveModel {
 
-	    @Id
-	    @GeneratedValue(strategy = GenerationType.IDENTITY)
-	    @Column(name = "serial_id")
-	    private int serialNo;
-		
-		@Column(name="employee_id")
-		private int empId;
-		
-		@Column(name="name")
-		private String name;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "serial_id")
+	private int serialNo;
 
+	@Column(name = "employee_id")
+	private int empId;
 
-		@Column(name="leave_balance")
-		private int leaveBalance;
+	@Column(name = "name")
+	private String name;
 
-
+	@Column(name = "leave_balance")
+	private int leaveBalance;
 
 
 
