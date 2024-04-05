@@ -42,6 +42,7 @@ import javax.persistence.EntityNotFoundException;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 import java.text.NumberFormat;
@@ -53,6 +54,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import java.io.ByteArrayOutputStream;
 
 @Service
 public class PayRollServiceImpl implements PayRollService {
@@ -159,7 +163,10 @@ public class PayRollServiceImpl implements PayRollService {
 			}
 		}
 
-		float grossSalary = (int) user.get().getSalary();
+		float grossSalary = 0.0f;
+		if (user.get().getSalary() != null) {
+			grossSalary = user.get().getSalary().floatValue();
+		}
 		int totalWorkingDays = workDays - saturday;
 		float amountPerDay = grossSalary / totalWorkingDays;
 		float leavePerDay = leaves * amountPerDay;
@@ -169,8 +176,13 @@ public class PayRollServiceImpl implements PayRollService {
 				user.get().getBankName(), user.get().getAccountNumber(), firstDayMonth + " - " + lastDayOfMonth,
 				yourWorkingDays, totalWorkingDays, leaves, leavePerDay, grossSalary, netAmount, adhoc);
 		ImageModel img = new ImageModel();
+		ImageData datas = null;
+		if (imgRepo.search() != null) {
+			datas = ImageDataFactory.create(imgRepo.search());
+		} else {
+			datas = getImage();
+		}
 
-		ImageData datas = ImageDataFactory.create(imgRepo.search());
 		log.info("image path set");
 		Image alpha = new Image(datas);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -790,6 +802,21 @@ public class PayRollServiceImpl implements PayRollService {
 
 		}
 		return true;
+	}
+
+	public ImageData getImage() throws IOException {
+		ImageData datas = null;
+		Resource resource = new ClassPathResource("image/alphadot_tech_logo.jpg");
+		try (InputStream inputStream = resource.getInputStream();
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+			byte[] buffer = new byte[1024];
+			int bytesRead;
+			while ((bytesRead = inputStream.read(buffer)) != -1) {
+				outputStream.write(buffer, 0, bytesRead);
+			}
+			return datas = ImageDataFactory.create(outputStream.toByteArray());
+		}
+
 	}
 
 }
