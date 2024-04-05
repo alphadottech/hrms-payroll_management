@@ -62,7 +62,7 @@ public class User{
 	private String joinDate;
 	
 	@Column(name = "salary")
-	private double salary;
+	private Double salary;
 
 	@Column(name = "Gender")
 	private String gender;
