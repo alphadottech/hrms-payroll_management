@@ -17,10 +17,7 @@ public class LeaveModel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "serial_id")
-	private int serialNo;
-
-	@Column(name = "employee_id")
+	@Column(name = "emp_id")
 	private int empId;
 
 	@Column(name = "name")

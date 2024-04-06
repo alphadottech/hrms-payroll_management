@@ -49,7 +49,8 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
 	@Value("${spring.mail.username}")
 	private String sender;
-
+       
+	@Autowired
 	private ApplicationEventPublisher applicationEventPublisher;
 
 	public LeaveRequestServiceImpl() {
