@@ -1,10 +1,8 @@
 package com.adt.payroll.service;
 
-import com.adt.payroll.dto.CurrentDateTime;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -19,6 +17,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import com.itextpdf.io.image.ImageData;
+import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.layout.element.Image;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
+
+import com.adt.payroll.dto.CurrentDateTime;
+
 @Component
 public class Util {
     @Value("${time.zone}")
@@ -27,19 +36,22 @@ public class Util {
     @Value("${holiday}")
     private String[] holiday;
 
-
+    public static final String ADJUSTMENT = "ADJUSTMENT";
+    public static final String TDS = "TDS";
+    public static final String MEDICAL_INSURANCE = "MEDICAL INSURANCE";
     public static final String ADDRESS = "AlphaDot Technologies Pvt Ltd\nMPSEDC STP Building\n19A Electronic Complex,\nPardeshipura,Indore (M.P) 452003";
     public static final String Name = "Name";
 
-    public static final String DESIGNATION = "Designation";
-    public static final String AccountNumber = "Account Number";
-    public static final String BankName = "Bank Name";
-
+    public static final String DESIGNATION = "DESIGNATION";
+    public static final String AccountNumber = "ACCOUNT NUMBER";
+    public static final String BankName = "BANK NAME";
     public static final String Gmail = "Gmail";
+    public static final String Basic = "Basic";
+    public static final String Hra = "Hra";
     public static final String NumberOfLeavesTaken = "Number of Leaves Taken";
     public static final String GrossSalary = "Gross Salary";
-
-    public static final String salary = "salary";
+    public static final String PF = "PF";
+    public static final String salary = "Salary";
     public static final String PayPeriods = "Pay Periods";
 
     public static final String PaidLeave = "Paid Leave";
@@ -48,13 +60,17 @@ public class Util {
     public static final String YourWorkingDays = "Present";
     public static final String TotalWorkingDays = "Working day";
 
-    public static final String Leave = "Leave";
+    public static final String Esic = "Esic";
+    public static final String Leave = "Unpaid Leave";
     public static final String AmountDeductedForLeaves = "Amount deducted for leaves";
     public static final String AmountPayablePerDay = "Amount Payable per day";
     public static final String PaySlip = "Pay Slip";
     public static final String EmployeeInformation = "Employee Information";
     public static final String Gender = "Gender";
     public static final String EmployeeNumber = "Employee Id";
+    
+    public static final String ADDRESS2 = "MPSEDC STP Building ,19A Electronic Complex,\n" +
+            "Pardeshipura,Indore (M.P) 452003";
 
     public static final String HalfDay = "Half Day";
     public static final String JobTitle = "Job Title";
@@ -169,6 +185,22 @@ public class Util {
 		workDays = lists.size();
 		workDays = workDays - Util.SaturdyaValue;
 		return workDays;
+	}
+	
+	
+	public static ImageData getImage() throws IOException {
+		ImageData datas = null;
+		Resource resource = new ClassPathResource("image/alphadot_tech_logo.jpg");
+		try (InputStream inputStream = resource.getInputStream();
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+			byte[] buffer = new byte[1024];
+			int bytesRead;
+			while ((bytesRead = inputStream.read(buffer)) != -1) {
+				outputStream.write(buffer, 0, bytesRead);
+			}
+			return datas = ImageDataFactory.create(outputStream.toByteArray());
+		}
+
 	}
 
 }

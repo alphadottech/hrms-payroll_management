@@ -1,6 +1,50 @@
 package com.adt.payroll.service;
 
-import com.adt.payroll.model.*;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.adt.payroll.model.EmpPayrollDetails;
+import com.adt.payroll.model.ImageModel;
+import com.adt.payroll.model.PayRecord;
+import com.adt.payroll.model.PaySlip;
+import com.adt.payroll.model.SalaryModel;
+import com.adt.payroll.model.TimeSheetModel;
+import com.adt.payroll.model.User;
+import com.adt.payroll.repository.EmpPayrollDetailsRepo;
 import com.adt.payroll.repository.ImageRepo;
 import com.adt.payroll.repository.PayRecordRepo;
 import com.adt.payroll.repository.TimeSheetRepo;
@@ -20,43 +64,9 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.VerticalAlignment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import com.itextpdf.text.DocumentException;
 
-import javax.activation.DataSource;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import javax.mail.util.ByteArrayDataSource;
-import javax.persistence.EntityNotFoundException;
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
-import java.util.*;
-import java.util.stream.Collectors;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import java.io.ByteArrayOutputStream;
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class PayRollServiceImpl implements PayRollService {
@@ -79,6 +89,9 @@ public class PayRollServiceImpl implements PayRollService {
 
 	@Autowired
 	private UserRepo userRepo;
+	
+	@Autowired 
+	EmpPayrollDetailsRepo 	empPayrollDetailsRepo;
 
 	@Autowired
 	private ImageRepo imgRepo;
@@ -110,7 +123,10 @@ public class PayRollServiceImpl implements PayRollService {
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(inputFormat.parse(month));
-
+		
+		Optional<EmpPayrollDetails> empDetails = Optional.ofNullable(empPayrollDetailsRepo.findById(empId)
+				.orElseThrow(() -> new EntityNotFoundException("employee not found :" + empId)));
+		
 		Optional<User> user = Optional.ofNullable(userRepo.findById(empId)
 				.orElseThrow(() -> new EntityNotFoundException("employee not found :" + empId)));
 		String name = user.get().getFirstName() + " " + user.get().getLastName();
@@ -164,23 +180,23 @@ public class PayRollServiceImpl implements PayRollService {
 		}
 
 		float grossSalary = 0.0f;
-		if (user.get().getSalary() != null) {
-			grossSalary = user.get().getSalary().floatValue();
+		if (empDetails.get().getSalary() != null) {
+			grossSalary = empDetails.get().getSalary().floatValue();
 		}
 		int totalWorkingDays = workDays - saturday;
 		float amountPerDay = grossSalary / totalWorkingDays;
 		float leavePerDay = leaves * amountPerDay;
 		float netAmount = (yourWorkingDays * amountPerDay);
 		netAmount += adhoc;
-		paySlip = new PaySlip(empId, name, user.get().getDesignation(), dtf.format(currentdate),
-				user.get().getBankName(), user.get().getAccountNumber(), firstDayMonth + " - " + lastDayOfMonth,
+		paySlip = new PaySlip(empId, name, empDetails.get().getDesignation(), dtf.format(currentdate),
+				empDetails.get().getBankName(), empDetails.get().getAccountNumber(), firstDayMonth + " - " + lastDayOfMonth,
 				yourWorkingDays, totalWorkingDays, leaves, leavePerDay, grossSalary, netAmount, adhoc);
 		ImageModel img = new ImageModel();
 		ImageData datas = null;
 		if (imgRepo.search() != null) {
 			datas = ImageDataFactory.create(imgRepo.search());
 		} else {
-			datas = getImage();
+			datas = Util.getImage();
 		}
 
 		log.info("image path set");
@@ -211,11 +227,11 @@ public class PayRollServiceImpl implements PayRollService {
 		employeeTable.addCell(
 				new Cell().add(user.get().getFirstName() + " " + user.get().getLastName()).setBorder(Border.NO_BORDER));
 		employeeTable.addCell(new Cell().add(Util.BankName).setBorder(Border.NO_BORDER));
-		employeeTable.addCell(new Cell().add(user.get().getBankName()).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell().add(empDetails.get().getBankName()).setBorder(Border.NO_BORDER));
 		employeeTable.addCell(new Cell().add(Util.JobTitle).setBorder(Border.NO_BORDER));
-		employeeTable.addCell(new Cell().add(user.get().getDesignation()).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell().add(empDetails.get().getDesignation()).setBorder(Border.NO_BORDER));
 		employeeTable.addCell(new Cell().add(Util.AccountNumber).setBorder(Border.NO_BORDER));
-		employeeTable.addCell(new Cell().add(user.get().getAccountNumber()).setBorder(Border.NO_BORDER));
+		employeeTable.addCell(new Cell().add(empDetails.get().getAccountNumber()).setBorder(Border.NO_BORDER));
 
 		Table itemInfo = new Table(columnWidth);
 		itemInfo.addCell(new Cell().add(Util.PayPeriods));
@@ -254,11 +270,10 @@ public class PayRollServiceImpl implements PayRollService {
 	// Excel Pay Slip
 
 	public String generatePaySlip(MultipartFile file) throws IOException, ParseException {
-		String empId = "", name = "", salary = "", paidLeave = "", bankName = "", accountNumber = "", gmail = "",
-				designation = "", submitDate = "", status = "", employee_id = "", joiningDate = "";
-		String sheetName = "";
-		int adhoc = 0, adhoc1 = 0, adhoc2 = 0, adhoc3 = 0, workingDays = 0, present = 0, leave = 0, halfDay = 0,
-				limit = 30;
+		 String empId = "", name = "", salary = "", esic = "", pf="",
+	                paidLeave = "", bankName = "", accountNumber = "", gmail = "", designation = "", submitDate = "", status = "", employee_id = "", joiningDate = "";
+	        String sheetName = "";
+	    int adjustment = 0,tds=0, adhoc1 = 0, medicalInsurance = 0, adhoc3 = 0, workingDays = 0, present = 0, leave = 0, halfDay = 0, limit = 30;
 		Map<String, Integer> excelColumnName = new HashMap<>();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		SimpleDateFormat inputFormat = new SimpleDateFormat("MMMM");
@@ -309,35 +324,45 @@ public class PayRollServiceImpl implements PayRollService {
 		List<User> employee = userRepo.findAll();
 		int workingDay = util.getWorkingDays();
 		for (int i = 2; i <= sheet.getLastRowNum(); i++) {
+			System.out.println(sheet.getLastRowNum());
 			try {
 				XSSFRow row = sheet.getRow(i);
 				try {
-					empId = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.EmployeeNumber)));
-					name = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Name)));
-					workingDays = Integer.parseInt(
-							dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.TotalWorkingDays))));
-					present = Integer.parseInt(
-							dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.YourWorkingDays))));
-					leave = Integer
-							.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Leave))));
-					halfDay = Integer
-							.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.HalfDay))));
-					salary = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.salary)));
-					paidLeave = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.PaidLeave)));
-					bankName = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.BankName)));
-					accountNumber = format
-							.format(row.getCell(excelColumnName.get(Util.AccountNumber)).getNumericCellValue())
-							.replace(",", "");
-					designation = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.DESIGNATION)));
-					gmail = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Gmail)));
-//                    adhoc= Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc))));
-					joiningDate = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.JoiningDate)));
-					adhoc1 = Integer
-							.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc1))));
-					adhoc2 = Integer
-							.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc2))));
-					adhoc3 = Integer
-							.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc3))));
+					 empId = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.EmployeeNumber)));
+	                    name = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Name)));
+	                    workingDays = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.TotalWorkingDays))));
+	                    present = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.YourWorkingDays))));
+	                    leave = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Leave))));
+	                    halfDay = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.HalfDay))));
+	                    salary = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.salary)));
+	                    paidLeave = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.PaidLeave)));
+	                    bankName = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.BankName)));
+	                    accountNumber = format.format(row.getCell(excelColumnName.get(Util.AccountNumber)).getNumericCellValue()).replace(",", "");
+	                    designation = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.DESIGNATION)));
+	                    gmail = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Gmail)));
+	                    joiningDate = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.JoiningDate)));
+	        			bankName = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.BankName)));
+					 try {
+	                        adjustment= Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.ADJUSTMENT))));
+	                    } catch (NumberFormatException e) {
+	                        adjustment = 0;
+	                    }
+	                    try {
+	                        tds= Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.TDS))));
+	                    } catch (NumberFormatException e) {
+	                        tds = 0;
+	                    }
+	                    try {
+	                        medicalInsurance= Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.MEDICAL_INSURANCE))));
+	                    } catch (NumberFormatException e) {
+	                        medicalInsurance = 0;
+	                    }
+
+	                    try {
+	                        adhoc1 = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc1))));
+	                    } catch (NumberFormatException e) {
+	                        adhoc1 = 0;
+	                    }
 					String[] fullName = name.split(" ");
 					String fName = fullName[0].toString();
 					String lName = fullName[1].toString();
@@ -350,25 +375,27 @@ public class PayRollServiceImpl implements PayRollService {
 						employee_id = String.valueOf(expense.get("employee_id"));
 						if (submitDate.equals(monthDate) && status.equals("Accepted")
 								&& employee_id.equalsIgnoreCase(String.valueOf(empId))) {
-							adhoc += Integer.parseInt(String.valueOf(expense.get("expense_amount")));
+							adhoc1 += Integer.parseInt(String.valueOf(expense.get("expense_amount")));
 						}
 					}
-					if (checkEmpDetails(gmail, accountNumber, employee, fName, lName)) {
-						mailService.sendEmail(name);
-						continue;
-
-					}
-
+					
+					  if (checkEmpDetails(empId,gmail, accountNumber,employee, fName, lName)) {
+					  mailService.sendEmail(name);
+					  continue;
+					  
+					  }
+					 
 					if (isNotNull(empId, name, workingDays, present, date, bankName, accountNumber, designation,
-							joiningDate, leave, halfDay, adhoc1, adhoc2, adhoc3, salary, workingDay, paidLeave)) {
-						baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary, paidLeave, date,
-								bankName, accountNumber, designation, joiningDate, adhoc, adhoc1, adhoc2, adhoc3,
-								payPeriod);
-					} else {
-
-						mailService.sendEmail(name);
-						continue;
-					}
+							joiningDate, leave, halfDay, adhoc1,  salary, workingDay, paidLeave)) {
+						baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary,
+	                            paidLeave, date, bankName, accountNumber, designation, joiningDate, adhoc1, payPeriod, esic, pf,adjustment,medicalInsurance,tds);
+						
+						  } else {
+						  
+						  mailService.sendEmail(name);
+						  continue;
+						  }
+						 
 
 //                    sendEmail(baos, name, gmail, monthYear);
 
@@ -385,104 +412,59 @@ public class PayRollServiceImpl implements PayRollService {
 		return "Mail Send Successfully";
 	}
 
-	public ByteArrayOutputStream createPdf(String empId, String name, int totalWorkingDays, int present, int leave,
-			int halfDay, String salary, String paidLeave, String date, String bankName, String accountNumber,
-			String designation, String joiningDate, int adhoc, int adhoc1, int adhoc2, int adhoc3, String payPeriod)
-			throws IOException {
+	 public ByteArrayOutputStream createPdf(String empId, String name, int totalWorkingDays, int present,
+             int leave, int halfDay, String salary, String paidLeave, String date, String bankName,
+             String accountNumber, String designation, String joiningDate, int adhoc1, String payPeriod, String esic, String pf,int adjustment,int medicalInsurance,int tds) throws IOException, DocumentException {
 
-		float grossSalary = Float.valueOf(salary);
-//        int totalWorkingDays = Integer.parseInt(totalworkingDays);
-//        int leaves = Integer.parseInt(leave) - Integer.parseInt(paidLeave);
-		int yourWorkingDays = present + Integer.parseInt(paidLeave);
+		float pfAmount = 0;
+        double grossSalary = Double.parseDouble(salary);
 
-		float amountPerDay = grossSalary / totalWorkingDays;
+        if (esic.equals("Yes") && pf.equalsIgnoreCase("Yes")) {
+            grossSalary = Math.round(grossSalary - ((grossSalary / 2) * 0.13) - grossSalary * 0.04 + (grossSalary * 0.01617));
+        } else if (esic.equals("No") && pf.equalsIgnoreCase("Yes")) {
+           
+            grossSalary = Math.round(grossSalary - ((grossSalary / 2) * 0.13) + (grossSalary * 0.01617));
+        }
+        float esicAmount = 0;
+        double basic = Math.round(grossSalary / 2);
 
-		float HalfDays = halfDay * amountPerDay / 2;
+        double hra = Math.round(grossSalary / 2);
+        int yourWorkingDays = present + Integer.parseInt(paidLeave);
 
-		float netAmount = (yourWorkingDays * amountPerDay) - HalfDays;
+        double amountPerDay = grossSalary / totalWorkingDays;
+        double unpaidLeave = totalWorkingDays - present;
+         unpaidLeave -=Integer.parseInt(paidLeave);
+         unpaidLeave *=amountPerDay;
 
-		netAmount = netAmount + adhoc + adhoc1 + adhoc2 + adhoc3;
-		if (netAmount < 0) {
-			netAmount = 0;
-			adhoc = 0;
-		}
-		String a = String.valueOf(adhoc), b = String.valueOf(adhoc1), c = String.valueOf(adhoc2),
-				d = String.valueOf(adhoc3);
-		String adHoc = a.contains("-") ? a.replace("-", "") : a;
-		String adHoc1 = b.contains("-") ? b.replace("-", "") : b;
-		String adHoc2 = c.contains("-") ? c.replace("-", "") : c;
-		String adHoc3 = d.contains("-") ? d.replace("-", "") : d;
+        double HalfDays = halfDay * amountPerDay / 2;
 
-		ImageData datas = ImageDataFactory.create(imgRepo.search());
-		log.info("image path set");
-		Image alpha = new Image(datas);
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PdfWriter pdfWriter = new PdfWriter(baos);
-		PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-		Document document = new Document(pdfDocument);
-		pdfDocument.setDefaultPageSize(PageSize.A4);
+        double netAmount = Math.round((yourWorkingDays * amountPerDay) - HalfDays);
 
-		float col = 250f;
-		float columnWidth[] = { col, col };
-		Table table = new Table(columnWidth);
-		table.setBackgroundColor(new DeviceRgb(63, 169, 219)).setFontColor(Color.WHITE);
-		table.addCell(new Cell().add("Pay Slip").setTextAlignment(TextAlignment.CENTER)
-				.setVerticalAlignment(VerticalAlignment.MIDDLE).setMarginTop(30f).setMarginBottom(30f).setFontSize(30f)
-				.setBorder(Border.NO_BORDER));
-		table.addCell(new Cell().add(Util.ADDRESS).setTextAlignment(TextAlignment.RIGHT).setMarginTop(30f)
-				.setMarginBottom(30f).setBorder(Border.NO_BORDER).setMarginRight(10f));
-		float colWidth[] = { 125, 150, 125, 100 };
-		Table employeeTable = new Table(colWidth);
-		employeeTable.addCell(new Cell(0, 4).add(Util.EmployeeInformation
-				+ "                                                                          " + "Date : " + date)
-				.setBorder(Border.NO_BORDER));
-		employeeTable.addCell(new Cell().add(Util.EmployeeNumber).setBorder(Border.NO_BORDER));
-		employeeTable.addCell(new Cell().add(empId).setBorder(Border.NO_BORDER));
-		employeeTable.addCell(new Cell().add(Util.JoiningDate).setBorder(Border.NO_BORDER));
-		employeeTable.addCell(new Cell().add(joiningDate).setBorder(Border.NO_BORDER));
-		employeeTable.addCell(new Cell().add(Util.Name).setBorder(Border.NO_BORDER));
-		employeeTable.addCell(new Cell().add(name).setBorder(Border.NO_BORDER));
-		employeeTable.addCell(new Cell().add(Util.BankName).setBorder(Border.NO_BORDER));
-		employeeTable.addCell(new Cell().add(bankName).setBorder(Border.NO_BORDER));
-		employeeTable.addCell(new Cell().add(Util.JobTitle).setBorder(Border.NO_BORDER));
-		employeeTable.addCell(new Cell().add(designation).setBorder(Border.NO_BORDER));
-		employeeTable.addCell(new Cell().add(Util.AccountNumber).setBorder(Border.NO_BORDER));
-		employeeTable.addCell(new Cell().add(accountNumber).setBorder(Border.NO_BORDER));
-		Table itemInfo = new Table(columnWidth);
-		itemInfo.addCell(new Cell().add(Util.PayPeriods));
-		itemInfo.addCell(new Cell().add(payPeriod));
-		itemInfo.addCell(new Cell().add(Util.YourWorkingDays));
-		itemInfo.addCell(new Cell().add(String.valueOf(present)));
-		itemInfo.addCell(new Cell().add(Util.TotalWorkingDays));
-		itemInfo.addCell(new Cell().add(String.valueOf(totalWorkingDays)));
-		itemInfo.addCell(new Cell().add(Util.NumberOfLeavesTaken));
-		itemInfo.addCell(new Cell().add(String.valueOf(leave)));
-		itemInfo.addCell(new Cell().add("Paid Leave"));
-		itemInfo.addCell(new Cell().add(paidLeave));
-		itemInfo.addCell(new Cell().add(Util.Adhoc));
-		itemInfo.addCell(new Cell().add(adHoc));
-		itemInfo.addCell(new Cell().add(Util.Adhoc1));
-		itemInfo.addCell(new Cell().add(adHoc1));
-		itemInfo.addCell(new Cell().add(Util.Adhoc2));
-		itemInfo.addCell(new Cell().add(adHoc2));
-		itemInfo.addCell(new Cell().add(Util.Adhoc3));
-		itemInfo.addCell(new Cell().add(adHoc3));
-		itemInfo.addCell(new Cell().add(Util.GrossSalary));
-		itemInfo.addCell(new Cell().add(String.valueOf(salary)));
-		itemInfo.addCell(new Cell().add(Util.NetAmountPayable));
-		itemInfo.addCell(new Cell().add(String.format("%.2f", netAmount)));
-		document.add(alpha);
-		document.add(table);
-		document.add(new Paragraph("\n"));
-		document.add(employeeTable);
-		document.add(itemInfo);
-		document.add(
-				new Paragraph("\n(Note - This is a computer generated statement and does not require a signature.)")
-						.setTextAlignment(TextAlignment.CENTER));
-		document.close();
+        netAmount = Math.round(netAmount + adhoc1);
+        if (netAmount < 0) {
+            netAmount = 0;
+            adhoc1 = 0;
+        }
 
-		log.info("Successfully");
-		return baos;
+        if (esic.equalsIgnoreCase("yes") && netAmount != 0) {
+            esicAmount = (float) (Math.round(grossSalary * (0.0075)));
+
+        }
+
+        if (pf.equalsIgnoreCase("yes") && netAmount != 0) {
+            pfAmount = (float) (Math.round(basic * 0.120));
+
+        }
+        netAmount -= esicAmount;
+        netAmount -= pfAmount;
+        netAmount = Math.round(netAmount);
+        netAmount -= medicalInsurance;
+        netAmount -= adjustment;
+
+        ByteArrayOutputStream byteArrayOutputStream =  DetailedSalarySlip.builder().build().generateDetailedSalarySlipPDF( empId,  name,  totalWorkingDays,  present,
+                leave,  halfDay,  salary,  paidLeave,  date,  bankName,
+                accountNumber,  designation,  joiningDate,  adhoc1,  payPeriod,  esicAmount,  pfAmount,netAmount,grossSalary,basic,hra,amountPerDay,unpaidLeave,adjustment,medicalInsurance,tds);
+        return byteArrayOutputStream;
 	}
 
 //    public void sendEmail(ByteArrayOutputStream baos, String name, String gmail, String monthYear) {
@@ -752,40 +734,36 @@ public class PayRollServiceImpl implements PayRollService {
 			int adhoc1, int adhoc2, int adhoc3) {
 		float grossSalary = Float.valueOf(salary);
 		int yourWorkingDays = present + Integer.parseInt(paidLeave);
-
 		float amountPerDay = grossSalary / totalWorkingDays;
-
 		float HalfDays = halfDay * amountPerDay / 2;
-
 		float netAmount = (yourWorkingDays * amountPerDay) - HalfDays;
-
 		netAmount = netAmount + adhoc1 + adhoc2 + adhoc3;
 		return netAmount;
 	}
 
-	public boolean checkEmpDetails(String gmail, String accountNumber, List<User> employees, String fname,
-			String lName) {
+	public boolean checkEmpDetails(String empId,String gmail,String accountNumber, List<User> employees, String fname,
+			String lName ){
+		int i = Integer.parseInt(empId);
 		boolean flag = true;
-		for (User employee : employees) {
-
-			String[] fullName = employee.getLastName().split(" ");
-			String lname = fullName[0].toString();
-
-			if (employee.getEmail().trim().equalsIgnoreCase(gmail)
-					&& employee.getFirstName().trim().equalsIgnoreCase(fname)
-					&& lname.trim().trim().equalsIgnoreCase(lName)
-					&& employee.getAccountNumber().trim().equalsIgnoreCase(accountNumber)) {
+		Optional<User> employee = employees.stream().filter(user -> user.getId() == i).findFirst();
+		String[] fullName = employee.get().getLastName().split(" ");
+		String lname = fullName[0].toString();
+		if (employee.get().getEmail().trim().equalsIgnoreCase(gmail)
+				&& employee.get().getFirstName().trim().equalsIgnoreCase(fname)
+				&& lname.trim().trim().equalsIgnoreCase(lName)) {
+			EmpPayrollDetails empDetails = empPayrollDetailsRepo.getByEmpId(employee.get().getId());
+			if (empDetails.getAccountNumber().equalsIgnoreCase(accountNumber)) {
 				flag = false;
-				return flag;
 			}
-
+			return flag;
 		}
+
 		return flag;
 	}
 
 	public boolean isNotNull(String empId, String name, Integer workingDays, Integer present, String date,
 			String bankName, String accountNumber, String designation, String joiningDate, Integer leave,
-			Integer halfDay, Integer adhoc1, Integer adhoc2, Integer adhoc3, String salary, int workingDay,
+			Integer halfDay, Integer adhoc1,  String salary, int workingDay,
 			String paidLeave) {
 		int intSalary = Integer.parseInt(salary);
 		int intpaidLeave = Integer.parseInt(paidLeave);
@@ -794,7 +772,7 @@ public class PayRollServiceImpl implements PayRollService {
 				|| accountNumber.isEmpty() || designation.isEmpty() || designation == null || joiningDate.isEmpty()
 				|| joiningDate == null || (present > 0 && (salary == null || intSalary == 0))
 				|| (present == 0 && (intSalary != 0 || intSalary < 0))
-				|| (present == 0 && leave <= workingDays && (leave != 0 || halfDay != 0)) || (intpaidLeave < 0)
+				||(workingDays!=present+leave+intpaidLeave) || (intpaidLeave < 0)
 				|| (workingDays == present && (leave > 0))
 
 		) {
@@ -802,21 +780,6 @@ public class PayRollServiceImpl implements PayRollService {
 
 		}
 		return true;
-	}
-
-	public ImageData getImage() throws IOException {
-		ImageData datas = null;
-		Resource resource = new ClassPathResource("image/alphadot_tech_logo.jpg");
-		try (InputStream inputStream = resource.getInputStream();
-				ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-			byte[] buffer = new byte[1024];
-			int bytesRead;
-			while ((bytesRead = inputStream.read(buffer)) != -1) {
-				outputStream.write(buffer, 0, bytesRead);
-			}
-			return datas = ImageDataFactory.create(outputStream.toByteArray());
-		}
-
 	}
 
 }
