@@ -37,6 +37,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.adt.payroll.exception.NoDataFoundException;
 import com.adt.payroll.model.EmpPayrollDetails;
 import com.adt.payroll.model.ImageModel;
 import com.adt.payroll.model.PayRecord;
@@ -125,10 +126,10 @@ public class PayRollServiceImpl implements PayRollService {
 		cal.setTime(inputFormat.parse(month));
 		
 		Optional<EmpPayrollDetails> empDetails = Optional.ofNullable(empPayrollDetailsRepo.findById(empId)
-				.orElseThrow(() -> new EntityNotFoundException("employee not found :" + empId)));
+				.orElseThrow(() -> new NoDataFoundException("employee not found :" + empId)));
 		
 		Optional<User> user = Optional.ofNullable(userRepo.findById(empId)
-				.orElseThrow(() -> new EntityNotFoundException("employee not found :" + empId)));
+				.orElseThrow(() -> new NoDataFoundException("employee not found :" + empId)));
 		String name = user.get().getFirstName() + " " + user.get().getLastName();
 		List<TimeSheetModel> timeSheetModel = timeSheetRepo.search(empId, month.toUpperCase(), year);
 
