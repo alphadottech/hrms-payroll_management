@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 
 import com.adt.payroll.event.OnEmployeeExpenseAcceptOrRejectEvent;
 import com.adt.payroll.event.OnEmployeeExpenseDetailsSavedEvent;

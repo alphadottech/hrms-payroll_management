@@ -21,7 +21,7 @@ import com.adt.payroll.repository.LeaveRequestRepo;
 import com.adt.payroll.service.LeaveRequestService;
 import com.adt.payroll.service.LeaveService;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 
 @RestController
 @RequestMapping("/leave")

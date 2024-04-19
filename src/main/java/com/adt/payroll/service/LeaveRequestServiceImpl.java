@@ -5,9 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import javax.persistence.EntityNotFoundException;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +29,7 @@ import com.adt.payroll.repository.LeaveRequestRepo;
 import com.adt.payroll.repository.UserRepo;
 
 import freemarker.template.TemplateException;
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class LeaveRequestServiceImpl implements LeaveRequestService {

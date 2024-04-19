@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.persistence.EntityNotFoundException;
-
+import org.apache.commons.math3.exception.NoDataException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -29,6 +28,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.adt.payroll.errorResponse.ApiError;
 import com.adt.payroll.errorResponse.ErrorResponse;
 import com.adt.payroll.errorResponse.FieldErrors;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
@@ -128,6 +129,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleSqlException(SQLException ex) {
         String message = ex.getMessage();
         ApiError errors = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, message, ex);
+        ErrorResponse errorResponse = new ErrorResponse(errors.getStatus().value(), errors.getMessage(), errors.getTimestamp());
+        return new ResponseEntity<>(errorResponse, errors.getStatus());
+    }
+    
+    @ExceptionHandler(NoDataFoundException.class)
+    public ResponseEntity<Object> noDataFound(NoDataFoundException ex) {
+        String message = ex.getLocalizedMessage();
+        ApiError errors = new ApiError(HttpStatus.OK,message, ex);
         ErrorResponse errorResponse = new ErrorResponse(errors.getStatus().value(), errors.getMessage(), errors.getTimestamp());
         return new ResponseEntity<>(errorResponse, errors.getStatus());
     }

@@ -4,6 +4,7 @@ import com.adt.payroll.dto.CheckStatusDTO;
 import com.adt.payroll.dto.CurrentDateTime;
 import com.adt.payroll.dto.EmployeeExpenseDTO;
 import com.adt.payroll.dto.TimesheetDTO;
+import com.adt.payroll.exception.NoDataFoundException;
 import com.adt.payroll.model.EmployeeExpense;
 import com.adt.payroll.model.Priortime;
 import com.adt.payroll.model.TimeSheetModel;
@@ -14,6 +15,8 @@ import com.adt.payroll.repository.EmployeeExpenseRepo;
 import com.adt.payroll.repository.PriorTimeRepository;
 import com.adt.payroll.repository.TimeSheetRepo;
 import com.adt.payroll.repository.UserRepo;
+
+import org.apache.commons.math3.exception.NoDataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -361,7 +364,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
         String endDate = String.valueOf(dateTimeFormatter.format(toDate));
         List<TimeSheetModel> timeSheetModelList = timeSheetRepo.findAllByEmployeeIdWithinSpecifiedDateRange(empId, startDate, endDate);
         if (timeSheetModelList.isEmpty()) {
-            throw new NullPointerException("No attendence data available with given ID: " + empId);
+            throw new NoDataFoundException("No attendence data available with given ID: " + empId);
         }
         List<TimesheetDTO> timesheetDTOList = new ArrayList<TimesheetDTO>();
         for (TimeSheetModel timeSheetModel : timeSheetModelList) {

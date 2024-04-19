@@ -6,7 +6,7 @@ import java.util.List;
 import com.adt.payroll.model.LeaveRequestModel;
 import freemarker.template.TemplateException;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 
 
 public interface LeaveRequestService {

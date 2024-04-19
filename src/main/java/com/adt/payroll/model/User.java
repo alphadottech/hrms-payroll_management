@@ -1,16 +1,16 @@
 package com.adt.payroll.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Proxy;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
@@ -27,25 +27,20 @@ public class User{
 
 	@NaturalId
 	@Column(name = "EMAIL", unique = true)
-	
 	private String email;
 
 	@Column(name = "USERNAME", unique = true)
-
 	private String username;
 
 	@Column(name = "PASSWORD")
-
 	private String password;
 
 	@Column(name = "FIRST_NAME")
-
-	private String firstName;
+    private String firstName;
 
 	@Column(name = "LAST_NAME")
-	
 	private String lastName;
-	
+
 	@Column(name = "IS_ACTIVE", nullable = false)
 	private Boolean isActive;
 
@@ -55,33 +50,7 @@ public class User{
 	@Column(name = "MobileNo")
 	private Long mobileNo;
 
-	@Column(name = "designation")
-	private String designation;
-
-	@Column(name = "JoiningDate")
-	private String joinDate;
-	
-	@Column(name = "salary")
-	private Double salary;
-
 	@Column(name = "Gender")
 	private String gender;
 
-//	@Column(name = "DOB")
-//	private String dob;
-
-	@Column(name = "bank_name")
-	private String bankName;
-	
-	@Column(name = "account_number")
-	private String accountNumber;
-//	
-//	@Column(name = "ifsc_code")
-//	private String ifscCode;
-//	
-//	@Column(name = "created_at")
-//	private LocalTime createdAt;
-//	
-//	@Column(name = "updated_at")
-//	private LocalTime updatedAt;
 }
