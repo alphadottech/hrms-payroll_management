@@ -270,9 +270,10 @@ public class PayRollServiceImpl implements PayRollService {
 	// Excel Pay Slip
 
 	public String generatePaySlip(MultipartFile file) throws IOException, ParseException {
-		 String empId = "", name = "", salary = "", esic = "", pf="",
-	                paidLeave = "", bankName = "", accountNumber = "", gmail = "", designation = "", submitDate = "", status = "", employee_id = "", joiningDate = "";
-	        String sheetName = "";
+		String empId = "", name = "", salary = "", esic = "", pf = "", paidLeave = "", bankName = "",
+				accountNumber = "", gmail = "", designation = "", submitDate = "", status = "", employee_id = "",
+				joiningDate = "";
+		String sheetName = "";
 	    int adjustment = 0,tds=0, adhoc1 = 0, medicalInsurance = 0, adhoc3 = 0, workingDays = 0, present = 0, leave = 0, halfDay = 0, limit = 30;
 		Map<String, Integer> excelColumnName = new HashMap<>();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -743,19 +744,21 @@ public class PayRollServiceImpl implements PayRollService {
 
 	public boolean checkEmpDetails(String empId,String gmail,String accountNumber, List<User> employees, String fname,
 			String lName ){
-		int i = Integer.parseInt(empId);
+		int userId = Integer.parseInt(empId);
 		boolean flag = true;
-		Optional<User> employee = employees.stream().filter(user -> user.getId() == i).findFirst();
-		String[] fullName = employee.get().getLastName().split(" ");
-		String lname = fullName[0].toString();
-		if (employee.get().getEmail().trim().equalsIgnoreCase(gmail)
-				&& employee.get().getFirstName().trim().equalsIgnoreCase(fname)
-				&& lname.trim().trim().equalsIgnoreCase(lName)) {
-			EmpPayrollDetails empDetails = empPayrollDetailsRepo.getByEmpId(employee.get().getId());
-			if (empDetails.getAccountNumber().equalsIgnoreCase(accountNumber)) {
-				flag = false;
+		Optional<User> employee = employees.stream().filter(user -> user.getId() == userId).findFirst();
+		if (employee != null && !employee.isEmpty()) {
+			String[] fullName = employee.get().getLastName().split(" ");
+			String lname = fullName[0].toString();
+			if (employee.get().getEmail().trim().equalsIgnoreCase(gmail)
+					&& employee.get().getFirstName().trim().equalsIgnoreCase(fname)
+					&& lname.trim().trim().equalsIgnoreCase(lName)) {
+				EmpPayrollDetails empDetails = empPayrollDetailsRepo.getByEmpId(employee.get().getId());
+				if (empDetails.getAccountNumber().equalsIgnoreCase(accountNumber)) {
+					flag = false;
+				}
+				return flag;
 			}
-			return flag;
 		}
 
 		return flag;
