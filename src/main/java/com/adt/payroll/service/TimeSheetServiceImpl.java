@@ -74,6 +74,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
         double distance = calculateDistance(latitude, longitude, COMPANY_LATITUDE, COMPANY_LONGITUDE);
 
         CurrentDateTime currentDateTime = util.getDateTime();
+        LOGGER.info("currentDateTimeObj"+currentDateTime);
         Optional<TimeSheetModel> timeSheetModels = timeSheetRepo.findByEmployeeIdAndDate(empId,
                 currentDateTime.getCurrentDate());
         if (!timeSheetModels.isPresent()) {
@@ -95,6 +96,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
             timeSheetModel.setCheckInLatitude(String.valueOf(latitude));
             timeSheetModel.setCheckInLongitude(String.valueOf(longitude));
             timeSheetModel.setCheckInDistance(String.valueOf(distance));
+            LOGGER.info(currentDateTime.getCurrentTime());
             timeSheetRepo.save(timeSheetModel);
             return "you have check in with latitude: " + latitude + " and longitude: " + longitude;
         } else {

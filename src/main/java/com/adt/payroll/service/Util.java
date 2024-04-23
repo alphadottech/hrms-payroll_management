@@ -3,13 +3,12 @@ package com.adt.payroll.service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.Month;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -17,18 +16,20 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
-import com.itextpdf.io.image.ImageData;
-import com.itextpdf.io.image.ImageDataFactory;
-import com.itextpdf.layout.element.Image;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import com.adt.payroll.dto.CurrentDateTime;
+import com.itextpdf.io.image.ImageData;
+import com.itextpdf.io.image.ImageDataFactory;
 
 @Component
 public class Util {
@@ -37,7 +38,7 @@ public class Util {
     
     @Value("${holiday}")
     private String[] holiday;
-
+	private static final Logger log = LogManager.getLogger(Util.class);
     public static final String ADJUSTMENT = "ADJUSTMENT";
     public static final String TDS = "TDS";
     public static final String MEDICAL_INSURANCE = "MEDICAL INSURANCE";
@@ -112,17 +113,20 @@ public class Util {
 
     public CurrentDateTime getDateTime() {
 		CurrentDateTime currentDateTime = new CurrentDateTime();
-		SimpleDateFormat formatDate = null;
-		formatDate = new SimpleDateFormat("dd-MM-yyyy");	
-		Date date = new Date();
-		formatDate.setTimeZone(TimeZone.getTimeZone("IST"));
-		currentDateTime.setCurrentDate(formatDate.format(date));
-		System.out.println();
-		formatDate = new SimpleDateFormat("HH:mm:ss");
-		currentDateTime.setCurrentTime(formatDate.format(date));
-		System.out.println();
+		DateTimeZone istTimeZone = DateTimeZone.forID("Asia/Kolkata");
+        DateTime currentTimeIST = DateTime.now(istTimeZone);
+        org.joda.time.format.DateTimeFormatter formatter=null;
+        String formattedDateTime=null;
+        // Create a DateTimeFormatter object with the pattern
+        formatter  = DateTimeFormat.forPattern("dd-MM-yyyy");
+         formattedDateTime = formatter.print(currentTimeIST);
+         log.info("date="+formattedDateTime);
+         currentDateTime.setCurrentDate(formattedDateTime);
+        formatter  = DateTimeFormat.forPattern("HH:mm:ss");
+        formattedDateTime = formatter.print(currentTimeIST);
+        log.info("time="+formattedDateTime);
+        currentDateTime.setCurrentTime(formattedDateTime);   
 		Calendar calendar = Calendar.getInstance();
-		calendar = formatDate.getCalendar();
 		int year = calendar.get(Calendar.YEAR);
 		int month = calendar.get(Calendar.MONTH) + 1; // Note: Month is zero-based, so add 1 int
 		int day = calendar.get(Calendar.DAY_OF_MONTH);
