@@ -113,18 +113,18 @@ public class Util {
     public CurrentDateTime getDateTime() {
 		CurrentDateTime currentDateTime = new CurrentDateTime();
 		DateTimeZone istTimeZone = DateTimeZone.forID("Asia/Kolkata");
-        DateTime currentTimeIST = DateTime.now(istTimeZone);
-        org.joda.time.format.DateTimeFormatter formatter=null;
-        String formattedDateTime=null;
-        // Create a DateTimeFormatter object with the pattern
-        formatter  = DateTimeFormat.forPattern("dd-MM-yyyy");
-         formattedDateTime = formatter.print(currentTimeIST);
-         log.info("date="+formattedDateTime);
-         currentDateTime.setCurrentDate(formattedDateTime);
-        formatter  = DateTimeFormat.forPattern("HH:mm:ss");
-        formattedDateTime = formatter.print(currentTimeIST);
-        log.info("time="+formattedDateTime);
-        currentDateTime.setCurrentTime(formattedDateTime);   
+		DateTime currentTimeIST = DateTime.now(istTimeZone);
+		org.joda.time.format.DateTimeFormatter formatter = null;
+		String formattedDateTime = null;
+		// Create a DateTimeFormatter object with the pattern
+		formatter = DateTimeFormat.forPattern("dd-MM-yyyy");
+		formattedDateTime = formatter.print(currentTimeIST);
+		log.info("date=" + formattedDateTime);
+		currentDateTime.setCurrentDate(formattedDateTime);
+		formatter = DateTimeFormat.forPattern("HH:mm:ss");
+		formattedDateTime = formatter.print(currentTimeIST);
+		log.info("time=" + formattedDateTime);
+		currentDateTime.setCurrentTime(formattedDateTime);
 		Calendar calendar = Calendar.getInstance();
 		int year = calendar.get(Calendar.YEAR);
 		int month = calendar.get(Calendar.MONTH) + 1; // Note: Month is zero-based, so add 1 int
