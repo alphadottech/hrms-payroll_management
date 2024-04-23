@@ -6,8 +6,10 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.Month;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -109,33 +111,33 @@ public class Util {
             +"AlphaDot Technologies";
 
     public CurrentDateTime getDateTime() {
-        TimeZone timeZone = TimeZone.getTimeZone(timezone);
-// Create a calendar object with the current date and time in the Kolkata time zone
-        Calendar calendar = Calendar.getInstance(timeZone);
-// Get the year, month, day, hour, minute, and second from the calendar object
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH) + 1; // Note: Month is zero-based, so add 1
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
-        int second = calendar.get(Calendar.SECOND);
+		CurrentDateTime currentDateTime = new CurrentDateTime();
+		SimpleDateFormat formatDate = null;
+		formatDate = new SimpleDateFormat("dd-MM-yyyy");	
+		Date date = new Date();
+		formatDate.setTimeZone(TimeZone.getTimeZone("IST"));
+		currentDateTime.setCurrentDate(formatDate.format(date));
+		System.out.println();
+		formatDate = new SimpleDateFormat("HH:mm:ss");
+		currentDateTime.setCurrentTime(formatDate.format(date));
+		System.out.println();
+		Calendar calendar = Calendar.getInstance();
+		calendar = formatDate.getCalendar();
+		int year = calendar.get(Calendar.YEAR);
+		int month = calendar.get(Calendar.MONTH) + 1; // Note: Month is zero-based, so add 1 int
+		int day = calendar.get(Calendar.DAY_OF_MONTH);
+		int hour = calendar.get(Calendar.HOUR_OF_DAY);
+		int minute = calendar.get(Calendar.MINUTE);
+		int second = calendar.get(Calendar.SECOND);
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+		currentDateTime.setYear(year);
+		currentDateTime.setMonth(month);
+		currentDateTime.setDay(day);
+		currentDateTime.setHour(hour);
+		currentDateTime.setMinute(minute);
+		currentDateTime.setSecond(second);
 
-        String formattedDate = dateFormat.format(calendar.getTime());
-        String formattedTime = timeFormat.format(calendar.getTime());
-
-        CurrentDateTime currentDateTime = new CurrentDateTime();
-        currentDateTime.setYear(year);
-        currentDateTime.setMonth(month);
-        currentDateTime.setDay(day);
-        currentDateTime.setHour(hour);
-        currentDateTime.setMinute(minute);
-        currentDateTime.setSecond(second);
-        currentDateTime.setCurrentDate(formattedDate);
-        currentDateTime.setCurrentTime(formattedTime);
-        return currentDateTime;
+		return currentDateTime;
     }
 
 	public int getWorkingDays() throws ParseException, IOException {
