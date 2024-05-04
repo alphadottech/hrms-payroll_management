@@ -37,6 +37,8 @@ public class Util {
     
     @Value("${holiday}")
     private String[] holiday;
+    public static final String SATURDAY = "Saturday";
+    public static final String SUNDAY = "sunday";
 	private static final Logger log = LogManager.getLogger(Util.class);
     public static final String ADJUSTMENT = "ADJUSTMENT";
     public static final String TDS = "TDS";

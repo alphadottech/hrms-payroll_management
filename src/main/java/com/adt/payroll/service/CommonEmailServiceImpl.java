@@ -105,8 +105,8 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 
 		Mail mail = new Mail();
 		mail.setSubject("Email Verification [Team CEP]");
-		mail.setTo(to);
-		mail.setFrom(sender);
+		mail.setTo(mailFrom);
+		mail.setFrom(to);
 		mail.getModel().put("userName", to);
 		mail.getModel().put("approveLeaveRequestLink1", emailVerificationUrl1);
 		mail.getModel().put("RejectLeaveRequestLink2", emailVerificationUrl2);

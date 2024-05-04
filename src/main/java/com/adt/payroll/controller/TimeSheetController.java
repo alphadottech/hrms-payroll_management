@@ -89,9 +89,9 @@ public class TimeSheetController {
         return new ResponseEntity<>(timeSheetService.checkStatus(empId), HttpStatus.OK);
     }
 
-    @PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
+   // @PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
     @GetMapping("/priorTimeAdjustment/{empId}")
-    public ResponseEntity<ResponseModel> priorTimeAdjustment(@PathVariable int empId, HttpServletRequest request) {
+    public ResponseEntity<List<ResponseModel> > priorTimeAdjustment(@PathVariable int empId, HttpServletRequest request) {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
         return new ResponseEntity<>(timeSheetService.checkPriorStatus(empId), HttpStatus.OK);
     }
@@ -118,7 +118,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
         return new ResponseEntity<>(timeSheetService.allEmpAttendence(fromDate, toDate), HttpStatus.OK);
     }
 
-    @PreAuthorize("@auth.allow('ROLE_USER')")
+   // @PreAuthorize("@auth.allow('ROLE_USER')")
     @PostMapping("/updatePriorTime")
     public ResponseEntity<ApiResponse> updatePriorTimeByDate(@RequestBody PriorTimeManagementRequest priorTimeManagementRequest,
                                                              HttpServletRequest request) throws ParseException {
@@ -137,11 +137,11 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
             applicationEventPublisher.publishEvent(onPriorTimeDetailsSavedEvent);
 
             return ResponseEntity.ok(new ApiResponse(true, "Mail sent successfully."));
-        }).orElseThrow(() -> new PriorTimeAdjustmentException(priorTimeManagementRequest.getEmail(),
+        }).orElseThrow(() -> new PriorTimeAdjustmentException("teamhr.adt@gmail.com",
                 "Missing user details in database"));
     }
 
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+   // @PreAuthorize("@auth.allow('ROLE_ADMIN')")
     @GetMapping("/updatePriorTime/Accepted/{priortimeId}")
     public ResponseEntity<ApiResponse> updatePriorTimeAccepted(@PathVariable(name = "priortimeId") int priortimeId,
                                                                HttpServletRequest request) throws ParseException {
@@ -159,7 +159,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
 
     }
 
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+    //@PreAuthorize("@auth.allow('ROLE_ADMIN')")
     @GetMapping("/updatePriorTime/Rejected/{priortimeId}")
     public ResponseEntity<ApiResponse> updatePriorTimeRejected(@PathVariable(name = "priortimeId") int priortimeId,
                                                                HttpServletRequest request) {

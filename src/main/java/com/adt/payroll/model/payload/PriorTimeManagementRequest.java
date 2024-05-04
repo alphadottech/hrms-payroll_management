@@ -8,7 +8,7 @@ public class PriorTimeManagementRequest {
 	String checkOut;
 	String checkIn;
 	String date;
-	String email;
-	String month;
+	String workingHour;
+	String status;
 
 }

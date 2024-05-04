@@ -28,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -50,6 +51,10 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
     @Autowired
     private UserRepo userRepo;
+    
+    @Autowired
+	private TableDataExtractor dataExtractor;
+
 
     @Autowired
     private EmployeeExpenseRepo employeeExpenseRepo;
@@ -218,38 +223,71 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
     // priorTimeaAjustment
     @Override
-    public ResponseModel checkPriorStatus(int empId) {
-        ResponseModel responseModel = new ResponseModel();
-        List<String> list = new ArrayList<>();
+    public  List<ResponseModel>  checkPriorStatus(int empId) {
+        TimeSheetModel timeSheetModel =new TimeSheetModel();
+        List<ResponseModel> list = new ArrayList<>();
         SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat dateformater = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cal = Calendar.getInstance();
-        int temp = 15;
-        while (temp > 0) {
-            String date = f.format(cal.getTime());
-            cal.add(Calendar.DATE, -1);
-            Optional<TimeSheetModel> timeSheetModelData = timeSheetRepo.findByEmployeeIdAndDate(empId, date);
-            if (!timeSheetModelData.isPresent())
-                list.add(date);
-            else if (timeSheetModelData.get().getCheckOut() == null)
-                list.add(timeSheetModelData.get().toString());
+        String sql = "select * from employee_schema.holiday";
+		List<Map<String, Object>> tableData = dataExtractor.extractDataFromTable(sql);
+		List<String> listOfDate=new ArrayList<>();
+		for (Map<String, Object> holiday : tableData) {
+			listOfDate.add(String.valueOf(holiday.get("date")));
+		}
 
+		int temp = 15;
+		boolean checkDay;
+		while (temp > 0) {
+			checkDay = true;
+			 ResponseModel responseModel = new ResponseModel();
+			 responseModel.setEmployeeId(empId);
+			String Checkdate = dateformater.format(cal.getTime());
+			int dayNumber = cal.get(Calendar.DAY_OF_MONTH);
+			String dayNames[] = new DateFormatSymbols().getWeekdays();
+			String nameDay = dayNames[cal.get(Calendar.DAY_OF_WEEK)];
+			if ((nameDay.equalsIgnoreCase(Util.SATURDAY))
+					&& ((dayNumber >= 8 && dayNumber <= 14) || (dayNumber >= 22 && dayNumber <= 28))
+					|| (nameDay.equalsIgnoreCase(Util.SUNDAY)) || (listOfDate.contains(Checkdate))) {
+				checkDay = false;
+			}
+			String date = f.format(cal.getTime());
+			cal.add(Calendar.DATE, -1);
+			if (checkDay) {
+				responseModel.setStatus("Pending");
+				responseModel.setDate(date);
+            Optional<TimeSheetModel> timeSheetModelData = timeSheetRepo.findByEmployeeIdAndDate(empId, date);
+            if (!timeSheetModelData.isPresent()) {
+                list.add(responseModel);
+			} else if (timeSheetModelData.get().getCheckOut() == null && !timeSheetModelData.isEmpty()) {
+				responseModel.setCheckIn(timeSheetModelData.get().getCheckIn());
+				responseModel.setStatus("Pending");
+				responseModel.setWorkingHour(timeSheetModelData.get().getWorkingHour());
+				responseModel.setCheckOut(timeSheetModelData.get().getCheckOut());
+				responseModel.setDate(timeSheetModelData.get().getDate());
+				list.add(responseModel);
+
+			}
+            
+        	}
             temp--;
         }
-        responseModel.setPriorResult(list);
-        return responseModel;
+        
+        return list;
     }
 
     public Optional<Priortime> savePriorTime(PriorTimeManagementRequest priorTimeManagementRequest)
             throws ParseException {
         Priortime priortimeuser = new Priortime();
-        if (priorTimeManagementRequest.getCheckIn() != null && !priorTimeManagementRequest.getCheckIn().equals("")) {
+       User use= userRepo.getById(priorTimeManagementRequest.getEmployeeId());
+        if (priorTimeManagementRequest.getCheckIn() != null && !priorTimeManagementRequest.getCheckIn().isEmpty()) {
             priortimeuser.setCheckIn(priorTimeManagementRequest.getCheckIn());
         } else {
             Optional<TimeSheetModel> timeSheetModelData = timeSheetRepo.findByEmployeeIdAndDate(
                     priorTimeManagementRequest.getEmployeeId(), priorTimeManagementRequest.getDate());
             priortimeuser.setCheckIn(timeSheetModelData.get().getCheckIn());
         }
-        if (priorTimeManagementRequest.getCheckOut() != null && !priorTimeManagementRequest.getCheckOut().equals("")) {
+        if (priorTimeManagementRequest.getCheckOut() != null && !priorTimeManagementRequest.getCheckOut().isEmpty()) {
             priortimeuser.setCheckOut(priorTimeManagementRequest.getCheckOut());
         } else {
             String checkout = timeSheetRepo.findCheckOutByEmployeeIdAndDate(priorTimeManagementRequest.getEmployeeId(),
@@ -257,10 +295,10 @@ public class TimeSheetServiceImpl implements TimeSheetService {
             priortimeuser.setCheckOut(checkout);
         }
         priortimeuser.setDate(priorTimeManagementRequest.getDate());
-        priortimeuser.setEmail(priorTimeManagementRequest.getEmail());
+        priortimeuser.setEmail(use.getEmail());
         priortimeuser.setEmployeeId(priorTimeManagementRequest.getEmployeeId());
-
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        priortimeuser.setStatus(priorTimeManagementRequest.getStatus());
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
         SimpleDateFormat monthFormatter = new SimpleDateFormat("MMMM");
         Date d = dateFormatter.parse(String.valueOf(priorTimeManagementRequest.getDate()));
         String month = monthFormatter.format(d);
@@ -274,7 +312,6 @@ public class TimeSheetServiceImpl implements TimeSheetService {
         long differenceInHours = (differenceInMilliSeconds / (60 * 60 * 1000)) % 24;
         long differenceInMinutes = (differenceInMilliSeconds / (60 * 1000)) % 60;
         long differenceInSeconds = (differenceInMilliSeconds / 1000) % 60;
-
         priortimeuser.setWorkingHour(differenceInHours + ":" + differenceInMinutes + ":" + differenceInSeconds);
         priortimeuser.setMonth(month.toUpperCase());
         priortimeuser.setYear(year.toUpperCase());
@@ -286,7 +323,6 @@ public class TimeSheetServiceImpl implements TimeSheetService {
     public TimeSheetModel saveConfirmedDetails(Optional<Priortime> priortime) throws ParseException {
         Integer employeeId = priortime.get().getEmployeeId();
         String date = priortime.get().getDate();
-        if ((priortime.get().getCheckIn()) == null || (priortime.get().getCheckIn()) == null) {
             Optional<TimeSheetModel> timesheetData = timeSheetRepo.findByEmployeeIdAndDate(employeeId, date);
             if (timesheetData.isPresent()) {
                 TimeSheetModel timesheet = timesheetData.get();
@@ -296,7 +332,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
                 timesheet.setWorkingHour(priortime.get().getWorkingHour());
                 return timeSheetRepo.save(timesheet);
             }
-        } else {
+         else {
             TimeSheetModel timesheet = new TimeSheetModel();
             timesheet.setCheckIn(priortime.get().getCheckIn());
             timesheet.setCheckOut(priortime.get().getCheckOut());
@@ -308,7 +344,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
             timesheet.setStatus("PRESENT");
             return timeSheetRepo.save(timesheet);
         }
-        return null;
+       
     }
 
 //	@Override

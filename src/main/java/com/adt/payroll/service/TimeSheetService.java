@@ -29,7 +29,7 @@ public interface TimeSheetService {
 
 	CheckStatusDTO checkStatus(int empId);
 
-	ResponseModel checkPriorStatus(int empId);
+	 List<ResponseModel> checkPriorStatus(int empId);
 
 //-------------------------------------------------------------------------------------------------------------
 
