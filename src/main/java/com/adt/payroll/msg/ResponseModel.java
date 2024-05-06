@@ -6,6 +6,8 @@ import lombok.Data;
 public class ResponseModel {
 
 	private int employeeId;
+	 
+	private String email;
 
 	private String checkOut;
 

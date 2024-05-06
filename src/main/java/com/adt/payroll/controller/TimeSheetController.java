@@ -89,7 +89,7 @@ public class TimeSheetController {
         return new ResponseEntity<>(timeSheetService.checkStatus(empId), HttpStatus.OK);
     }
 
-   // @PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
+    //@PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
     @GetMapping("/priorTimeAdjustment/{empId}")
     public ResponseEntity<List<ResponseModel> > priorTimeAdjustment(@PathVariable int empId, HttpServletRequest request) {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
@@ -118,16 +118,15 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
         return new ResponseEntity<>(timeSheetService.allEmpAttendence(fromDate, toDate), HttpStatus.OK);
     }
 
-   // @PreAuthorize("@auth.allow('ROLE_USER')")
+    //@PreAuthorize("@auth.allow('ROLE_USER')")
     @PostMapping("/updatePriorTime")
     public ResponseEntity<ApiResponse> updatePriorTimeByDate(@RequestBody PriorTimeManagementRequest priorTimeManagementRequest,
                                                              HttpServletRequest request) throws ParseException {
 
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
-
+         
         return ((Optional<Priortime>) timeSheetService.savePriorTime(priorTimeManagementRequest)).map(priorTimeuser -> {
             int priortimeId = priorTimeuser.getPriortimeId();
-
             UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/timeSheet/updatePriorTime/Accepted/" + priortimeId);
             UriComponentsBuilder urlBuilder2 = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -137,7 +136,8 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
             applicationEventPublisher.publishEvent(onPriorTimeDetailsSavedEvent);
 
             return ResponseEntity.ok(new ApiResponse(true, "Mail sent successfully."));
-        }).orElseThrow(() -> new PriorTimeAdjustmentException("teamhr.adt@gmail.com",
+      
+        }).orElseThrow(() -> new PriorTimeAdjustmentException(priorTimeManagementRequest.getEmail(),
                 "Missing user details in database"));
     }
 
@@ -159,7 +159,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
 
     }
 
-    //@PreAuthorize("@auth.allow('ROLE_ADMIN')")
+   // @PreAuthorize("@auth.allow('ROLE_ADMIN')")
     @GetMapping("/updatePriorTime/Rejected/{priortimeId}")
     public ResponseEntity<ApiResponse> updatePriorTimeRejected(@PathVariable(name = "priortimeId") int priortimeId,
                                                                HttpServletRequest request) {

@@ -226,6 +226,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
     public  List<ResponseModel>  checkPriorStatus(int empId) {
         TimeSheetModel timeSheetModel =new TimeSheetModel();
         List<ResponseModel> list = new ArrayList<>();
+        User use= userRepo.getById(empId);
         SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
         SimpleDateFormat dateformater = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cal = Calendar.getInstance();
@@ -256,6 +257,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 			if (checkDay) {
 				responseModel.setStatus("Pending");
 				responseModel.setDate(date);
+				responseModel.setEmail(use.getEmail());
             Optional<TimeSheetModel> timeSheetModelData = timeSheetRepo.findByEmployeeIdAndDate(empId, date);
             if (!timeSheetModelData.isPresent()) {
                 list.add(responseModel);
@@ -265,6 +267,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 				responseModel.setWorkingHour(timeSheetModelData.get().getWorkingHour());
 				responseModel.setCheckOut(timeSheetModelData.get().getCheckOut());
 				responseModel.setDate(timeSheetModelData.get().getDate());
+				responseModel.setEmail(use.getEmail());
 				list.add(responseModel);
 
 			}
@@ -279,7 +282,6 @@ public class TimeSheetServiceImpl implements TimeSheetService {
     public Optional<Priortime> savePriorTime(PriorTimeManagementRequest priorTimeManagementRequest)
             throws ParseException {
         Priortime priortimeuser = new Priortime();
-       User use= userRepo.getById(priorTimeManagementRequest.getEmployeeId());
         if (priorTimeManagementRequest.getCheckIn() != null && !priorTimeManagementRequest.getCheckIn().isEmpty()) {
             priortimeuser.setCheckIn(priorTimeManagementRequest.getCheckIn());
         } else {
@@ -295,7 +297,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
             priortimeuser.setCheckOut(checkout);
         }
         priortimeuser.setDate(priorTimeManagementRequest.getDate());
-        priortimeuser.setEmail(use.getEmail());
+        priortimeuser.setEmail(priorTimeManagementRequest.getEmail());
         priortimeuser.setEmployeeId(priorTimeManagementRequest.getEmployeeId());
         priortimeuser.setStatus(priorTimeManagementRequest.getStatus());
         SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");

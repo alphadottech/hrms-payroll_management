@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class PriorTimeManagementRequest {
 	int employeeId;
+	String email;
 	String checkOut;
 	String checkIn;
 	String date;
