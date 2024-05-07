@@ -279,27 +279,33 @@ public class TimeSheetServiceImpl implements TimeSheetService {
         return list;
     }
 
-    public Optional<Priortime> savePriorTime(PriorTimeManagementRequest priorTimeManagementRequest)
+    public Optional<Priortime> savePriorTime(PriorTimeManagementRequest priorTimeManagementRequest,double latitude, double longitude)
             throws ParseException {
         Priortime priortimeuser = new Priortime();
-        if (priorTimeManagementRequest.getCheckIn() != null && !priorTimeManagementRequest.getCheckIn().isEmpty()) {
-            priortimeuser.setCheckIn(priorTimeManagementRequest.getCheckIn());
-        } else {
-            Optional<TimeSheetModel> timeSheetModelData = timeSheetRepo.findByEmployeeIdAndDate(
-                    priorTimeManagementRequest.getEmployeeId(), priorTimeManagementRequest.getDate());
-            priortimeuser.setCheckIn(timeSheetModelData.get().getCheckIn());
-        }
-        if (priorTimeManagementRequest.getCheckOut() != null && !priorTimeManagementRequest.getCheckOut().isEmpty()) {
-            priortimeuser.setCheckOut(priorTimeManagementRequest.getCheckOut());
-        } else {
-            String checkout = timeSheetRepo.findCheckOutByEmployeeIdAndDate(priorTimeManagementRequest.getEmployeeId(),
-                    priorTimeManagementRequest.getDate());
-            priortimeuser.setCheckOut(checkout);
+        double distance = calculateDistance(latitude, longitude, COMPANY_LATITUDE, COMPANY_LONGITUDE);        
+        Optional<TimeSheetModel> timeSheetModelData = timeSheetRepo.findByEmployeeIdAndDate(
+                priorTimeManagementRequest.getEmployeeId(), priorTimeManagementRequest.getDate());
+        if(!timeSheetModelData.isPresent()) {    	
+        	priortimeuser.setCheckInLatitude(String.valueOf(latitude));
+        	priortimeuser.setCheckInLongitude(String.valueOf(longitude));
+        	priortimeuser.setCheckOutLatitude(String.valueOf(latitude));
+        	priortimeuser.setCheckOutLongitude(String.valueOf(longitude));
+        	priortimeuser.setCheckInDistance(String.valueOf(distance));
+        	priortimeuser.setCheckOutDistance(String.valueOf(distance));     		
+        }else {     	
+        	priortimeuser.setCheckOutLatitude(String.valueOf(latitude));
+        	priortimeuser.setCheckOutLongitude(String.valueOf(longitude));
+        	priortimeuser.setCheckOutDistance(String.valueOf(distance));
+        	priortimeuser.setCheckInLatitude(timeSheetModelData.get().getCheckInLatitude());
+        	priortimeuser.setCheckInLongitude(timeSheetModelData.get().getCheckInLongitude());
+        	priortimeuser.setCheckInDistance(timeSheetModelData.get().getCheckInDistance());
         }
         priortimeuser.setDate(priorTimeManagementRequest.getDate());
         priortimeuser.setEmail(priorTimeManagementRequest.getEmail());
         priortimeuser.setEmployeeId(priorTimeManagementRequest.getEmployeeId());
         priortimeuser.setStatus(priorTimeManagementRequest.getStatus());
+        priortimeuser.setCheckIn(priorTimeManagementRequest.getCheckIn());
+        priortimeuser.setCheckOut(priorTimeManagementRequest.getCheckOut());
         SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
         SimpleDateFormat monthFormatter = new SimpleDateFormat("MMMM");
         Date d = dateFormatter.parse(String.valueOf(priorTimeManagementRequest.getDate()));
@@ -308,8 +314,8 @@ public class TimeSheetServiceImpl implements TimeSheetService {
         Date y = dateFormatter.parse(String.valueOf(priorTimeManagementRequest.getDate()));
         String year = yearFormatter.format(y);
         DateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
-        Date checkin = timeFormat.parse(priortimeuser.getCheckIn());
-        Date checkout = timeFormat.parse(priortimeuser.getCheckOut());
+        Date checkin = timeFormat.parse(priorTimeManagementRequest.getCheckIn());
+        Date checkout = timeFormat.parse(priorTimeManagementRequest.getCheckOut());
         long differenceInMilliSeconds = Math.abs(checkin.getTime() - checkout.getTime());
         long differenceInHours = (differenceInMilliSeconds / (60 * 60 * 1000)) % 24;
         long differenceInMinutes = (differenceInMilliSeconds / (60 * 1000)) % 60;
@@ -332,6 +338,9 @@ public class TimeSheetServiceImpl implements TimeSheetService {
                 timesheet.setCheckOut(priortime.get().getCheckOut());
                 timesheet.setStatus("PRESENT");
                 timesheet.setWorkingHour(priortime.get().getWorkingHour());
+                timesheet.setCheckOutLatitude(priortime.get().getCheckOutLatitude());
+                timesheet.setCheckOutLongitude(priortime.get().getCheckOutLongitude());
+                timesheet.setCheckOutDistance(priortime.get().getCheckOutDistance()); 
                 return timeSheetRepo.save(timesheet);
             }
          else {
@@ -344,8 +353,15 @@ public class TimeSheetServiceImpl implements TimeSheetService {
             timesheet.setYear(priortime.get().getYear());
             timesheet.setWorkingHour(priortime.get().getWorkingHour());
             timesheet.setStatus("PRESENT");
+            timesheet.setCheckOutLatitude(priortime.get().getCheckOutLatitude());
+            timesheet.setCheckOutLongitude(priortime.get().getCheckOutLongitude());
+            timesheet.setCheckOutDistance(priortime.get().getCheckOutDistance());
+            timesheet.setCheckInLatitude(priortime.get().getCheckInLatitude());
+            timesheet.setCheckInLongitude(priortime.get().getCheckInLongitude());
+            timesheet.setCheckInDistance(priortime.get().getCheckInDistance());
             return timeSheetRepo.save(timesheet);
         }
+            
        
     }
 

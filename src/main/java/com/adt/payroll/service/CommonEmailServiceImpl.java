@@ -6,11 +6,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-import jakarta.activation.DataSource;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.util.ByteArrayDataSource;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +31,10 @@ import com.adt.payroll.repository.UserRepo;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import jakarta.activation.DataSource;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.util.ByteArrayDataSource;
 
 @Service
 public class CommonEmailServiceImpl implements CommonEmailService {
@@ -107,7 +106,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		mail.setSubject("Email Verification [Team CEP]");
 		mail.setTo(mailFrom);
 		mail.setFrom(to);
-		mail.getModel().put("userName", to);
+		mail.getModel().put("userName", mailFrom);
 		mail.getModel().put("approveLeaveRequestLink1", emailVerificationUrl1);
 		mail.getModel().put("RejectLeaveRequestLink2", emailVerificationUrl2);
 		mail.getModel().put("Email", event.getPriorTime().getEmail());

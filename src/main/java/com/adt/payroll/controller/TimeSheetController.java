@@ -120,12 +120,12 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
 
     @PreAuthorize("@auth.allow('ROLE_USER')")
     @PostMapping("/updatePriorTime")
-    public ResponseEntity<ApiResponse> updatePriorTimeByDate(@RequestBody PriorTimeManagementRequest priorTimeManagementRequest,
+    public ResponseEntity<ApiResponse> updatePriorTimeByDate(@RequestParam("Latitude") double latitude, @RequestParam("Longitude") double longitude,@RequestBody PriorTimeManagementRequest priorTimeManagementRequest,
                                                              HttpServletRequest request) throws ParseException {
 
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
          
-        return ((Optional<Priortime>) timeSheetService.savePriorTime(priorTimeManagementRequest)).map(priorTimeuser -> {
+        return ((Optional<Priortime>) timeSheetService.savePriorTime(priorTimeManagementRequest,latitude,longitude)).map(priorTimeuser -> {
             int priortimeId = priorTimeuser.getPriortimeId();
             UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/timeSheet/updatePriorTime/Accepted/" + priortimeId);
