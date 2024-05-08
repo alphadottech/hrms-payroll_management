@@ -21,4 +21,7 @@ public interface LeaveRequestService {
 	
 	public String RejectLeaveRequest(Integer empid, Integer leaveId) throws TemplateException, MessagingException, IOException;
 
+	public List<LeaveRequestModel> getAllEmployeeLeaveDetails();
+     
+
 }

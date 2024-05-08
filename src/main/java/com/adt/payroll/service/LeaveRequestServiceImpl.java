@@ -212,5 +212,10 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 		LOGGER.info("Mail send Successfully");
 
 	}
+	
+	@Override
+	public List<LeaveRequestModel> getAllEmployeeLeaveDetails() {
+		return leaveRequestRepo.findAll();
+	}
 
 }

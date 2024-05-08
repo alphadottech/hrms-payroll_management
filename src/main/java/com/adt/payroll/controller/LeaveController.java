@@ -91,5 +91,12 @@ public class LeaveController {
 		LOGGER.info("Payroll service: leave:  RejectLeaveRequest Info level log msg");
 		return new ResponseEntity<>(leaveRequestService.RejectLeaveRequest(empid, leaveId), HttpStatus.OK);
 	}
+	
+	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
+	@GetMapping("/getAllEmployeeLeaves")
+	public ResponseEntity<List<LeaveRequestModel>> getAllEmployeeLeaveDetails() {
+		LOGGER.info("Payroll service: leave:  RejectLeaveRequest Info level log msg");
+		return new ResponseEntity<>(leaveRequestService.getAllEmployeeLeaveDetails(), HttpStatus.OK);
+	}
 
 }
