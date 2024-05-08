@@ -15,8 +15,6 @@ public class PriorTimeManagementRequest {
 	
 	private String date;
 	
-	private String workingHour;
-	
 	private String status;
 	
 
