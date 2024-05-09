@@ -28,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -50,6 +51,10 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
     @Autowired
     private UserRepo userRepo;
+    
+    @Autowired
+	private TableDataExtractor dataExtractor;
+
 
     @Autowired
     private EmployeeExpenseRepo employeeExpenseRepo;
@@ -218,49 +223,90 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
     // priorTimeaAjustment
     @Override
-    public ResponseModel checkPriorStatus(int empId) {
-        ResponseModel responseModel = new ResponseModel();
-        List<String> list = new ArrayList<>();
+    public  List<ResponseModel>  checkPriorStatus(int empId) {
+        TimeSheetModel timeSheetModel =new TimeSheetModel();
+        List<ResponseModel> list = new ArrayList<>();
+        User use= userRepo.getById(empId);
         SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat dateformater = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cal = Calendar.getInstance();
-        int temp = 15;
-        while (temp > 0) {
-            String date = f.format(cal.getTime());
-            cal.add(Calendar.DATE, -1);
-            Optional<TimeSheetModel> timeSheetModelData = timeSheetRepo.findByEmployeeIdAndDate(empId, date);
-            if (!timeSheetModelData.isPresent())
-                list.add(date);
-            else if (timeSheetModelData.get().getCheckOut() == null)
-                list.add(timeSheetModelData.get().toString());
+        String sql = "select * from employee_schema.holiday";
+		List<Map<String, Object>> tableData = dataExtractor.extractDataFromTable(sql);
+		List<String> listOfDate=new ArrayList<>();
+		for (Map<String, Object> holiday : tableData) {
+			listOfDate.add(String.valueOf(holiday.get("date")));
+		}
 
+		int temp = 15;
+		boolean checkDay;
+		while (temp > 0) {
+			checkDay = true;
+			 ResponseModel responseModel = new ResponseModel();
+			 responseModel.setEmployeeId(empId);
+			String Checkdate = dateformater.format(cal.getTime());
+			int dayNumber = cal.get(Calendar.DAY_OF_MONTH);
+			String dayNames[] = new DateFormatSymbols().getWeekdays();
+			String nameDay = dayNames[cal.get(Calendar.DAY_OF_WEEK)];
+			if ((nameDay.equalsIgnoreCase(Util.SATURDAY))
+					&& ((dayNumber >= 8 && dayNumber <= 14) || (dayNumber >= 22 && dayNumber <= 28))
+					|| (nameDay.equalsIgnoreCase(Util.SUNDAY)) || (listOfDate.contains(Checkdate))) {
+				checkDay = false;
+			}
+			String date = f.format(cal.getTime());
+			cal.add(Calendar.DATE, -1);
+			if (checkDay) {
+				responseModel.setStatus("Pending");
+				responseModel.setDate(date);
+				responseModel.setEmail(use.getEmail());
+            Optional<TimeSheetModel> timeSheetModelData = timeSheetRepo.findByEmployeeIdAndDate(empId, date);
+            if (!timeSheetModelData.isPresent()) {
+                list.add(responseModel);
+			} else if (timeSheetModelData.get().getCheckOut() == null && !timeSheetModelData.isEmpty()) {
+				responseModel.setCheckIn(timeSheetModelData.get().getCheckIn());
+				responseModel.setStatus("Pending");
+				responseModel.setWorkingHour(timeSheetModelData.get().getWorkingHour());
+				responseModel.setCheckOut(timeSheetModelData.get().getCheckOut());
+				responseModel.setDate(timeSheetModelData.get().getDate());
+				responseModel.setEmail(use.getEmail());
+				list.add(responseModel);
+
+			}
+            
+        	}
             temp--;
         }
-        responseModel.setPriorResult(list);
-        return responseModel;
+        
+        return list;
     }
 
-    public Optional<Priortime> savePriorTime(PriorTimeManagementRequest priorTimeManagementRequest)
+    public Optional<Priortime> savePriorTime(PriorTimeManagementRequest priorTimeManagementRequest,double latitude, double longitude)
             throws ParseException {
         Priortime priortimeuser = new Priortime();
-        if (priorTimeManagementRequest.getCheckIn() != null && !priorTimeManagementRequest.getCheckIn().equals("")) {
-            priortimeuser.setCheckIn(priorTimeManagementRequest.getCheckIn());
-        } else {
-            Optional<TimeSheetModel> timeSheetModelData = timeSheetRepo.findByEmployeeIdAndDate(
-                    priorTimeManagementRequest.getEmployeeId(), priorTimeManagementRequest.getDate());
-            priortimeuser.setCheckIn(timeSheetModelData.get().getCheckIn());
-        }
-        if (priorTimeManagementRequest.getCheckOut() != null && !priorTimeManagementRequest.getCheckOut().equals("")) {
-            priortimeuser.setCheckOut(priorTimeManagementRequest.getCheckOut());
-        } else {
-            String checkout = timeSheetRepo.findCheckOutByEmployeeIdAndDate(priorTimeManagementRequest.getEmployeeId(),
-                    priorTimeManagementRequest.getDate());
-            priortimeuser.setCheckOut(checkout);
+        double distance = calculateDistance(latitude, longitude, COMPANY_LATITUDE, COMPANY_LONGITUDE);        
+        Optional<TimeSheetModel> timeSheetModelData = timeSheetRepo.findByEmployeeIdAndDate(
+                priorTimeManagementRequest.getEmployeeId(), priorTimeManagementRequest.getDate());
+        if(!timeSheetModelData.isPresent()) {    	
+        	priortimeuser.setCheckInLatitude(String.valueOf(latitude));
+        	priortimeuser.setCheckInLongitude(String.valueOf(longitude));
+        	priortimeuser.setCheckOutLatitude(String.valueOf(latitude));
+        	priortimeuser.setCheckOutLongitude(String.valueOf(longitude));
+        	priortimeuser.setCheckInDistance(String.valueOf(distance));
+        	priortimeuser.setCheckOutDistance(String.valueOf(distance));     		
+        }else {     	
+        	priortimeuser.setCheckOutLatitude(String.valueOf(latitude));
+        	priortimeuser.setCheckOutLongitude(String.valueOf(longitude));
+        	priortimeuser.setCheckOutDistance(String.valueOf(distance));
+        	priortimeuser.setCheckInLatitude(timeSheetModelData.get().getCheckInLatitude());
+        	priortimeuser.setCheckInLongitude(timeSheetModelData.get().getCheckInLongitude());
+        	priortimeuser.setCheckInDistance(timeSheetModelData.get().getCheckInDistance());
         }
         priortimeuser.setDate(priorTimeManagementRequest.getDate());
         priortimeuser.setEmail(priorTimeManagementRequest.getEmail());
         priortimeuser.setEmployeeId(priorTimeManagementRequest.getEmployeeId());
-
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        priortimeuser.setStatus(priorTimeManagementRequest.getStatus());
+        priortimeuser.setCheckIn(priorTimeManagementRequest.getCheckIn());
+        priortimeuser.setCheckOut(priorTimeManagementRequest.getCheckOut());
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
         SimpleDateFormat monthFormatter = new SimpleDateFormat("MMMM");
         Date d = dateFormatter.parse(String.valueOf(priorTimeManagementRequest.getDate()));
         String month = monthFormatter.format(d);
@@ -268,13 +314,12 @@ public class TimeSheetServiceImpl implements TimeSheetService {
         Date y = dateFormatter.parse(String.valueOf(priorTimeManagementRequest.getDate()));
         String year = yearFormatter.format(y);
         DateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
-        Date checkin = timeFormat.parse(priortimeuser.getCheckIn());
-        Date checkout = timeFormat.parse(priortimeuser.getCheckOut());
+        Date checkin = timeFormat.parse(priorTimeManagementRequest.getCheckIn());
+        Date checkout = timeFormat.parse(priorTimeManagementRequest.getCheckOut());
         long differenceInMilliSeconds = Math.abs(checkin.getTime() - checkout.getTime());
         long differenceInHours = (differenceInMilliSeconds / (60 * 60 * 1000)) % 24;
         long differenceInMinutes = (differenceInMilliSeconds / (60 * 1000)) % 60;
         long differenceInSeconds = (differenceInMilliSeconds / 1000) % 60;
-
         priortimeuser.setWorkingHour(differenceInHours + ":" + differenceInMinutes + ":" + differenceInSeconds);
         priortimeuser.setMonth(month.toUpperCase());
         priortimeuser.setYear(year.toUpperCase());
@@ -286,7 +331,6 @@ public class TimeSheetServiceImpl implements TimeSheetService {
     public TimeSheetModel saveConfirmedDetails(Optional<Priortime> priortime) throws ParseException {
         Integer employeeId = priortime.get().getEmployeeId();
         String date = priortime.get().getDate();
-        if ((priortime.get().getCheckIn()) == null || (priortime.get().getCheckIn()) == null) {
             Optional<TimeSheetModel> timesheetData = timeSheetRepo.findByEmployeeIdAndDate(employeeId, date);
             if (timesheetData.isPresent()) {
                 TimeSheetModel timesheet = timesheetData.get();
@@ -294,9 +338,12 @@ public class TimeSheetServiceImpl implements TimeSheetService {
                 timesheet.setCheckOut(priortime.get().getCheckOut());
                 timesheet.setStatus("PRESENT");
                 timesheet.setWorkingHour(priortime.get().getWorkingHour());
+                timesheet.setCheckOutLatitude(priortime.get().getCheckOutLatitude());
+                timesheet.setCheckOutLongitude(priortime.get().getCheckOutLongitude());
+                timesheet.setCheckOutDistance(priortime.get().getCheckOutDistance()); 
                 return timeSheetRepo.save(timesheet);
             }
-        } else {
+         else {
             TimeSheetModel timesheet = new TimeSheetModel();
             timesheet.setCheckIn(priortime.get().getCheckIn());
             timesheet.setCheckOut(priortime.get().getCheckOut());
@@ -306,9 +353,16 @@ public class TimeSheetServiceImpl implements TimeSheetService {
             timesheet.setYear(priortime.get().getYear());
             timesheet.setWorkingHour(priortime.get().getWorkingHour());
             timesheet.setStatus("PRESENT");
+            timesheet.setCheckOutLatitude(priortime.get().getCheckOutLatitude());
+            timesheet.setCheckOutLongitude(priortime.get().getCheckOutLongitude());
+            timesheet.setCheckOutDistance(priortime.get().getCheckOutDistance());
+            timesheet.setCheckInLatitude(priortime.get().getCheckInLatitude());
+            timesheet.setCheckInLongitude(priortime.get().getCheckInLongitude());
+            timesheet.setCheckInDistance(priortime.get().getCheckInDistance());
             return timeSheetRepo.save(timesheet);
         }
-        return null;
+            
+       
     }
 
 //	@Override

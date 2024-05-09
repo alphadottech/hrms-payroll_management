@@ -91,7 +91,7 @@ public class TimeSheetController {
 
     @PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
     @GetMapping("/priorTimeAdjustment/{empId}")
-    public ResponseEntity<ResponseModel> priorTimeAdjustment(@PathVariable int empId, HttpServletRequest request) {
+    public ResponseEntity<List<ResponseModel> > priorTimeAdjustment(@PathVariable int empId, HttpServletRequest request) {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
         return new ResponseEntity<>(timeSheetService.checkPriorStatus(empId), HttpStatus.OK);
     }
@@ -120,14 +120,13 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
 
     @PreAuthorize("@auth.allow('ROLE_USER')")
     @PostMapping("/updatePriorTime")
-    public ResponseEntity<ApiResponse> updatePriorTimeByDate(@RequestBody PriorTimeManagementRequest priorTimeManagementRequest,
+    public ResponseEntity<ApiResponse> updatePriorTimeByDate(@RequestParam("Latitude") double latitude, @RequestParam("Longitude") double longitude,@RequestBody PriorTimeManagementRequest priorTimeManagementRequest,
                                                              HttpServletRequest request) throws ParseException {
 
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
-
-        return ((Optional<Priortime>) timeSheetService.savePriorTime(priorTimeManagementRequest)).map(priorTimeuser -> {
+         
+        return ((Optional<Priortime>) timeSheetService.savePriorTime(priorTimeManagementRequest,latitude,longitude)).map(priorTimeuser -> {
             int priortimeId = priorTimeuser.getPriortimeId();
-
             UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/timeSheet/updatePriorTime/Accepted/" + priortimeId);
             UriComponentsBuilder urlBuilder2 = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -137,6 +136,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
             applicationEventPublisher.publishEvent(onPriorTimeDetailsSavedEvent);
 
             return ResponseEntity.ok(new ApiResponse(true, "Mail sent successfully."));
+      
         }).orElseThrow(() -> new PriorTimeAdjustmentException(priorTimeManagementRequest.getEmail(),
                 "Missing user details in database"));
     }

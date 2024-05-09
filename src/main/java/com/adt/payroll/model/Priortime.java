@@ -44,5 +44,24 @@ public class Priortime {
 
 	@Column(name = "email")
 	private String email;
+	
+	@Column(name = "checkInLatitude")
+    private String checkInLatitude;
+
+    @Column(name = "checkInLongitude")
+    private String checkInLongitude;
+
+    @Column(name = "checkInDistance")
+    private String checkInDistance;
+
+    @Column(name = "checkOutLatitude")
+    private String checkOutLatitude;
+
+    @Column(name = "checkOutLongitude")
+    private String checkOutLongitude;
+
+    @Column(name = "checkOutDistance")
+    private String checkOutDistance;
+	
 
 }

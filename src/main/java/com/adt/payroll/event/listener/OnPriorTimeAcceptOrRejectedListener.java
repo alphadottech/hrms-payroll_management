@@ -11,7 +11,7 @@ import com.adt.payroll.event.OnPriorTimeAcceptOrRejectEvent;
 import com.adt.payroll.service.CommonEmailService;
 
 @Component
-public class OnPriorTimeRejectedListener implements ApplicationListener<OnPriorTimeAcceptOrRejectEvent> {
+public class OnPriorTimeAcceptOrRejectedListener implements ApplicationListener<OnPriorTimeAcceptOrRejectEvent> {
 
 	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
@@ -20,7 +20,7 @@ public class OnPriorTimeRejectedListener implements ApplicationListener<OnPriorT
 	private CommonEmailService emailService;
 
 	@Autowired
-	public OnPriorTimeRejectedListener(CommonEmailService emailService) {
+	public OnPriorTimeAcceptOrRejectedListener(CommonEmailService emailService) {
 		this.emailService = emailService;
 	}
 

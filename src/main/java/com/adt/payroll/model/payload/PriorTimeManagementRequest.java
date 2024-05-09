@@ -1,14 +1,21 @@
 package com.adt.payroll.model.payload;
 
+
 import lombok.Data;
 
 @Data
 public class PriorTimeManagementRequest {
-	int employeeId;
-	String checkOut;
-	String checkIn;
-	String date;
-	String email;
-	String month;
+	private int employeeId;
+	
+	private String email;
+	
+	private String checkOut;
+	
+	private String checkIn;
+	
+	private String date;
+	
+	private String status;
+	
 
 }

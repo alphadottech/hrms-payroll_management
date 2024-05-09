@@ -29,14 +29,14 @@ public interface TimeSheetService {
 
 	CheckStatusDTO checkStatus(int empId);
 
-	ResponseModel checkPriorStatus(int empId);
+	 List<ResponseModel> checkPriorStatus(int empId);
 
 //-------------------------------------------------------------------------------------------------------------
 
 List<TimesheetDTO> empAttendence(int empId, LocalDate fromDate, LocalDate toDate);
 	List<TimeSheetModel> allEmpAttendence(LocalDate fromDate, LocalDate toDate);
 
-	Optional<Priortime> savePriorTime(PriorTimeManagementRequest priorTimeManagementRequest) throws ParseException;
+	Optional<Priortime> savePriorTime(PriorTimeManagementRequest priorTimeManagementRequest,double latitude,double longitude) throws ParseException;
 
 
 	TimeSheetModel saveConfirmedDetails(Optional<Priortime> priortime) throws ParseException;
