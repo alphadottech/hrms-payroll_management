@@ -4,6 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
@@ -57,6 +60,10 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 
 	@Autowired
 	private UserRepo userRepo;
+	
+	@Autowired
+	private TableDataExtractor dataExtractor;
+
 
 	public CommonEmailServiceImpl(JavaMailSender mailSender, Configuration templateConfiguration) {
 		this.mailSender = mailSender;
@@ -100,12 +107,19 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 
 	@Override
 	public void sendEmailVerification(OnPriorTimeDetailsSavedEvent event, String emailVerificationUrl1,
-			String emailVerificationUrl2, String to) throws IOException, TemplateException, MessagingException {
-
+			String emailVerificationUrl2, String from) throws IOException, TemplateException, MessagingException {
+		String sql = "select * from av_schema.priortime_email";
+		List<String> emailArray = new ArrayList<>();
+		List<Map<String, Object>> priortimeData = dataExtractor.extractDataFromTable(sql);
+		for (Map<String, Object> priortime : priortimeData) {
+			String email = String.valueOf(priortime.get("email_id"));
+			emailArray.add(email);
+		}
+		
 		Mail mail = new Mail();
 		mail.setSubject("Email Verification [Team CEP]");
-		mail.setTo(mailFrom);
-		mail.setFrom(to);
+		mail.setToArray(emailArray);
+		mail.setFrom(from);
 		mail.getModel().put("userName", mailFrom);
 		mail.getModel().put("approveLeaveRequestLink1", emailVerificationUrl1);
 		mail.getModel().put("RejectLeaveRequestLink2", emailVerificationUrl2);
@@ -158,7 +172,12 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
 				StandardCharsets.UTF_8.name());
 
-		helper.setTo(mail.getTo());
+		String[] emailArray = mail.getToArray().toArray(new String[0]);
+		if (mail.getToArray() != null && !mail.getToArray().isEmpty()) {
+			helper.setTo(emailArray);
+		} else {
+			helper.setTo(mail.getTo());
+		}
 		helper.setText(mail.getContent(), true);
 		helper.setSubject(mail.getSubject());
 		helper.setFrom(mail.getFrom());
