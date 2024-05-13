@@ -14,6 +14,7 @@
 package com.adt.payroll.model;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import java.io.File;
@@ -26,6 +27,7 @@ public class Mail {
     private Map<String, String> model;
     private HashMap<String,File> attachments;
     private int empId;
+    private List<String> toArray;
     
     public Mail() {
         model = new HashMap<>();
@@ -95,6 +97,14 @@ public class Mail {
 
 	public void setEmpId(int empId) {
 		this.empId = empId;
+	}
+	
+	public List<String> getToArray() {
+		return toArray;
+	}
+
+	public void setToArray(List<String> toArray) {
+		this.toArray = toArray;
 	}
 
    }
