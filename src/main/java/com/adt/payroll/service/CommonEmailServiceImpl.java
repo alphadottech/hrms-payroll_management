@@ -171,9 +171,8 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
 				StandardCharsets.UTF_8.name());
-
-		String[] emailArray = mail.getToArray().toArray(new String[0]);
 		if (mail.getToArray() != null && !mail.getToArray().isEmpty()) {
+			String[] emailArray = mail.getToArray().toArray(new String[0]);
 			helper.setTo(emailArray);
 		} else {
 			helper.setTo(mail.getTo());
