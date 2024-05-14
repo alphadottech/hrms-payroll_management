@@ -120,7 +120,6 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		mail.setSubject("Email Verification [Team CEP]");
 		mail.setToArray(emailArray);
 		mail.setFrom(from);
-		mail.getModel().put("userName", mailFrom);
 		mail.getModel().put("approveLeaveRequestLink1", emailVerificationUrl1);
 		mail.getModel().put("RejectLeaveRequestLink2", emailVerificationUrl2);
 		mail.getModel().put("Email", event.getPriorTime().getEmail());
@@ -132,7 +131,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		mail.getModel().put("EmployeeId", String.valueOf(event.getPriorTime().getEmployeeId()));
 
 		templateConfiguration.setClassForTemplateLoading(getClass(), basePackagePath);
-		Template template = templateConfiguration.getTemplate("email-verification.ftl");
+		Template template = templateConfiguration.getTemplate("priortime_email_verification.ftl");
 		String mailContent = FreeMarkerTemplateUtils.processTemplateIntoString(template, mail.getModel());
 
 		mail.setContent(mailContent);

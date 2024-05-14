@@ -141,7 +141,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
                 "Missing user details in database"));
     }
 
-   // @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+ 
     @GetMapping("/updatePriorTime/Accepted/{priortimeId}")
     public ResponseEntity<ApiResponse> updatePriorTimeAccepted(@PathVariable(name = "priortimeId") int priortimeId,
                                                                HttpServletRequest request) throws ParseException {
@@ -159,7 +159,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
 
     }
 
-   // @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+  
     @GetMapping("/updatePriorTime/Rejected/{priortimeId}")
     public ResponseEntity<ApiResponse> updatePriorTimeRejected(@PathVariable(name = "priortimeId") int priortimeId,
                                                                HttpServletRequest request) {
