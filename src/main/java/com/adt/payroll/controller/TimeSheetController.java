@@ -72,6 +72,12 @@ public class TimeSheetController {
 
 	@Value("${-Dmy.property}")
 	private String ipaddress;
+	
+	@Value("${-UI.scheme}")
+	private String scheme;
+
+	@Value("${-UI.context}")
+	private String context;
 
     @PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
     @PostMapping("/checkIn/{empId}")
@@ -135,15 +141,15 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
         return ((Optional<Priortime>) timeSheetService.savePriorTime(priorTimeManagementRequest,latitude,longitude)).map(priorTimeuser -> {
             int priortimeId = priorTimeuser.getPriortimeId();
             UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.newInstance()
-					.scheme("https")
+					.scheme(scheme)
 					.host(ipaddress)
 					.port(serverPort)
-					.path("/payroll/timeSheet/updatePriorTime/Accepted/" + priortimeId);
+					.path(context+"/payroll/timeSheet/updatePriorTime/Accepted/" + priortimeId);
             UriComponentsBuilder urlBuilder2 = ServletUriComponentsBuilder.newInstance()
-					.scheme("https")
+					.scheme(scheme)
 					.host(ipaddress)
 					.port(serverPort)
-					.path("/payroll/timeSheet/updatePriorTime/Rejected/" + priortimeId);
+					.path(context+"/payroll/timeSheet/updatePriorTime/Rejected/" + priortimeId);
             OnPriorTimeDetailsSavedEvent onPriorTimeDetailsSavedEvent = new OnPriorTimeDetailsSavedEvent(priorTimeuser,
                     urlBuilder1, urlBuilder2);
             applicationEventPublisher.publishEvent(onPriorTimeDetailsSavedEvent);
