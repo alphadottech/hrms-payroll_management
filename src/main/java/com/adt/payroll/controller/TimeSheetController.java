@@ -138,12 +138,12 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
 					.scheme("https")
 					.host(ipaddress)
 					.port(serverPort)
-					.path("/timeSheet/updatePriorTime/Accepted/" + priortimeId);
+					.path("/payroll/timeSheet/updatePriorTime/Accepted/" + priortimeId);
             UriComponentsBuilder urlBuilder2 = ServletUriComponentsBuilder.newInstance()
 					.scheme("https")
 					.host(ipaddress)
 					.port(serverPort)
-					.path("/timeSheet/updatePriorTime/Rejected/" + priortimeId);
+					.path("/payroll/timeSheet/updatePriorTime/Rejected/" + priortimeId);
             OnPriorTimeDetailsSavedEvent onPriorTimeDetailsSavedEvent = new OnPriorTimeDetailsSavedEvent(priorTimeuser,
                     urlBuilder1, urlBuilder2);
             applicationEventPublisher.publishEvent(onPriorTimeDetailsSavedEvent);
