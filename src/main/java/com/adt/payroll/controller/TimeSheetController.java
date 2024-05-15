@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -65,6 +66,12 @@ public class TimeSheetController {
 
     @Autowired
     PriorTimeRepository priorTimeRepository;
+    
+    @Value("${-Dmy.port}")
+	private String serverPort;
+
+	@Value("${-Dmy.property}")
+	private String ipaddress;
 
     @PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
     @PostMapping("/checkIn/{empId}")
@@ -127,10 +134,16 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
          
         return ((Optional<Priortime>) timeSheetService.savePriorTime(priorTimeManagementRequest,latitude,longitude)).map(priorTimeuser -> {
             int priortimeId = priorTimeuser.getPriortimeId();
-            UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/timeSheet/updatePriorTime/Accepted/" + priortimeId);
-            UriComponentsBuilder urlBuilder2 = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/timeSheet/updatePriorTime/Rejected/" + priortimeId);
+            UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.newInstance()
+					.scheme("https")
+					.host(ipaddress)
+					.port(serverPort)
+					.path("/timeSheet/updatePriorTime/Accepted/" + priortimeId);
+            UriComponentsBuilder urlBuilder2 = ServletUriComponentsBuilder.newInstance()
+					.scheme("https")
+					.host(ipaddress)
+					.port(serverPort)
+					.path("/timeSheet/updatePriorTime/Rejected/" + priortimeId);
             OnPriorTimeDetailsSavedEvent onPriorTimeDetailsSavedEvent = new OnPriorTimeDetailsSavedEvent(priorTimeuser,
                     urlBuilder1, urlBuilder2);
             applicationEventPublisher.publishEvent(onPriorTimeDetailsSavedEvent);
