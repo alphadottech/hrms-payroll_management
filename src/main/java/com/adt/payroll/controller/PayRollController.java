@@ -65,6 +65,12 @@ public class PayRollController {
         return ResponseEntity.ok(payRollService.updateNetAmountInExcel(file));
     }
 
-
+  //  @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+	@PostMapping("/generatePaySlipAndSalaryValidationForAll")
+	public ResponseEntity<Object> generatePaySlipAndSalaryValidationForAll(HttpServletRequest request)
+			throws IOException, ParseException {
+		LOGGER.info("API Call From IP: " + request.getRemoteHost());
+		return new ResponseEntity<>(payRollService.generatePaySlipForAllEmployees(), HttpStatus.OK);
+	}
 
 }

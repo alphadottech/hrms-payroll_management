@@ -14,10 +14,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.jcajce.provider.asymmetric.dsa.DSASigner.stdDSA;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -94,6 +97,11 @@ public class Util {
 
     public static final String Adhoc3 = "ADHOC3";
     public static final int SaturdyaValue = 2;
+    public static final String WORKING_DAY ="workingDays";
+    public static final String PAY_PERIOD ="payDuration";
+    public static final String MONTH ="month";
+    public static final String YEAR ="year";
+    
     public static final String msg = "Dear [Name],\r\n"
             + "\r\n"
             + "I hope this email finds you well. I am writing to share your payslip for the month of [Month, Year].\r\n"
@@ -107,6 +115,12 @@ public class Util {
             + "[Your Name]";
     
     public static final String MESSAGE="The salary slip details for [Name] has been entered incorrectly. \r\n Kindy fill correct information !! \r\n"
+    		+ "\r\n"
+            + "Regards,"
+            + "\r\n"
+            +"AlphaDot Technologies";
+    
+    public static final String ERR_MESSAGE="The salary slip details for [Name] has been entered incorrectly. [errorMsg] \r\n Kindy fill correct information !! \r\n"
     		+ "\r\n"
             + "Regards,"
             + "\r\n"
@@ -209,5 +223,62 @@ public class Util {
 		}
 
 	}
+	
+	public Map<String, String>  getWorkingDaysAndMonth() throws ParseException, IOException {
+		Map<String, String> paySlipDetails = new HashMap<>();
+		int monthd;
+		Date date = new Date();
+		int years = date.getYear();
+		int currentYear = years + 1900;
+		monthd = date.getMonth();
+		if (monthd == 1) {
+			monthd = monthd = 12;
+			currentYear = currentYear - 1;
+		}
+		String year = "" + currentYear;
+		String month = Month.of(monthd).name();
+		List<String> holidays = Arrays.asList(holiday);
+		List<String> lists = new ArrayList<>();
+		SimpleDateFormat inputFormat = new SimpleDateFormat("MMMM");
+		SimpleDateFormat outputFormat = new SimpleDateFormat("MM");
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(inputFormat.parse(month));
+		int workDays;
+		String monthDate = String.valueOf(outputFormat.format(cal.getTime()));
+
+		String firstDayMonth = "01/" + monthDate + "/" + year;
+		String lastDayOfMonth = (LocalDate.parse(firstDayMonth, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+				.with(TemporalAdjusters.lastDayOfMonth())).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+
+		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+		Date startDate = formatter.parse(firstDayMonth);
+		Date endDate = formatter.parse(lastDayOfMonth);
+
+		Calendar start = Calendar.getInstance();
+		start.setTime(startDate);
+		Calendar end = Calendar.getInstance();
+		end.setTime(endDate);
+
+		LocalDate localDate = null;
+		while (!start.after(end)) {
+			localDate = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+			if (start.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY)
+				lists.add(localDate.toString());
+
+			start.add(Calendar.DATE, 1);
+		}
+
+		lists.removeAll(holidays);
+		workDays = lists.size();
+		workDays = workDays - Util.SaturdyaValue;
+		paySlipDetails.put(WORKING_DAY, String.valueOf(workDays));
+		paySlipDetails.put(MONTH, month);
+		paySlipDetails.put(YEAR, year);
+		String payPeriod = firstDayMonth + " - " + lastDayOfMonth;
+		paySlipDetails.put(PAY_PERIOD, payPeriod);
+
+		return paySlipDetails;
+	}
+	
 
 }

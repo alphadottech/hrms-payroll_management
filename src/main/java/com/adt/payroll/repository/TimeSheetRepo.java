@@ -30,7 +30,7 @@ public interface TimeSheetRepo extends JpaRepository<TimeSheetModel, Integer> {
 	@Query(value="select * from payroll_schema.time_sheet c where c.employee_id =?1 and to_date(c.date, 'dd-mm-yyyy') BETWEEN to_date(?2, 'DD-MM-YYYY') and to_date(?3, 'DD-MM-YYYY');",nativeQuery = true )
 	List<TimeSheetModel> findAllByEmployeeIdWithinSpecifiedDateRange(int empId, String startDate, String endDate);
 	
-	@Query(value="select * from payroll_schema.time_sheet c where  to_date(c.date, 'DD MM YYYY') between to_date(?1,'DD MM YYYY') AND to_date(?2,'DD MM YYYY')",nativeQuery = true )
+	@Query(value = "SELECT * FROM payroll_schema.time_sheet WHERE date BETWEEN :startDate AND :endDate", nativeQuery = true)
 	List<TimeSheetModel> findAllWithinSpecifiedDateRange(String startDate, String endDate);
 
 	// JIRA no. - HRMS-88
@@ -55,6 +55,11 @@ public interface TimeSheetRepo extends JpaRepository<TimeSheetModel, Integer> {
 
 	@Query(value = "SELECT e.check_out FROM payroll_schema.priortime_table e where employee_id=?1 and date=?2", nativeQuery = true)
 	String findCheckOutByEmployeeIdAndDate(int empId, String date);
+	//--------------------------------------------------------------------------------------------
+	@Query(value = "SELECT count(*) as empTotalWorkingDay FROM payroll_schema.time_sheet where employee_id=?1 and month=?2 and year=?3 and status='Present' and working_hour>='6:00:00'", nativeQuery = true)
+	public int findEmpTotalWorkingDayCount(int empId, String month, String year);
 
+	@Query(value = "SELECT count(*) as empHalfDay FROM payroll_schema.time_sheet where employee_id=?1 and month=?2 and year=?3 and status='Present' and working_hour<'6:00:00'", nativeQuery = true)
+	public int findEmpTotalHalfDayCount(int empId, String month, String year);
 }
 
