@@ -2,6 +2,7 @@ package com.adt.payroll.service;
 
 
 
+import java.io.ByteArrayInputStream;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,7 +26,7 @@ import com.adt.payroll.msg.ResponseModel;
 public interface TimeSheetService {
 	public String updateCheckIn(int empId,double latitude,double longitude);
 
-	public String updateCheckOut(int empId,double latitude,double longitude) throws ParseException;
+	public String updateCheckOut(int empId, double latitude, double longitude) throws ParseException;
 
 	CheckStatusDTO checkStatus(int empId);
 
@@ -59,4 +60,6 @@ List<TimesheetDTO> empAttendence(int empId, LocalDate fromDate, LocalDate toDate
 	public String rejectEmployeeExpenseById(int expenseId);
 
 	List<EmployeeExpense> getAllExpenseDetail();
+
+	public ByteArrayInputStream getExcelData() throws IOException;
 }
