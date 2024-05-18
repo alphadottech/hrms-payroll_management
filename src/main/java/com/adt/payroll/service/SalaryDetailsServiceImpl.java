@@ -5,6 +5,8 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.adt.payroll.dto.SalaryDetailsDTO;
@@ -17,18 +19,16 @@ import com.adt.payroll.repository.UserRepo;
 public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 
 	private static final Logger log = LogManager.getLogger(SalaryDetailsServiceImpl.class);
-	
+
 	@Autowired
 	public SalaryDetailsRepository salaryDetailsRepo;
 
 	@Autowired
 	public UserRepo userRepo;
-	
-	@Override
-	public String saveSalaryDetails(SalaryDetailsDTO salaryDetailsDTO) {
-		log.info("PayrollService: SalaryDetailsController: Employee saveSalaryDetails: " + salaryDetailsDTO);
 
-		String response = null;
+	@Override
+	public ResponseEntity<String> saveSalaryDetails(SalaryDetailsDTO salaryDetailsDTO) {
+		log.info("PayrollService: SalaryDetailsController: Employee saveSalaryDetails: " + salaryDetailsDTO);
 
 		try {
 			Optional<User> existEmployee = userRepo.findById(salaryDetailsDTO.getEmpId());
@@ -48,6 +48,10 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 					salaryDetails.get().setNetSalary(salaryDetailsDTO.getNetSalary());
 					salaryDetailsRepo.save(salaryDetails.get());
 
+					return new ResponseEntity<>(
+							"EmployeeSalaryDetails of EmpId:" + salaryDetailsDTO.getEmpId() + " is Updated Succesfully",
+							HttpStatus.OK);
+
 				} else {
 					SalaryDetails salaryDetailsNew = new SalaryDetails();
 
@@ -62,20 +66,25 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 					salaryDetailsNew.setGrossSalary(salaryDetailsDTO.getGrossSalary());
 					salaryDetailsNew.setNetSalary(salaryDetailsDTO.getNetSalary());
 					salaryDetailsRepo.save(salaryDetailsNew);
-				}
-				response = "Success";
 
+					return new ResponseEntity<>(
+							"EmployeeSalaryDetails of EmpId:" + salaryDetailsDTO.getEmpId() + " is Saved Succesfully",
+							HttpStatus.OK);
+				}
 			} else {
-				response = "NotExist";
+				return new ResponseEntity<>(
+						"EmployeeSalaryDetails of EmpId:" + salaryDetailsDTO.getEmpId() + " is Not Exist",
+						HttpStatus.NOT_FOUND);
 			}
 		} catch (Exception e) {
 
 			e.printStackTrace();
 			log.info("e.printStackTrace()---" + e.getMessage());
-			response = "Failed";
+			return new ResponseEntity<>(
+					"EmployeeSalaryDetails of EmpId:" + salaryDetailsDTO.getEmpId() + " is Not Saved",
+					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		return response;
 	}
 
 }

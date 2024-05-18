@@ -25,7 +25,6 @@ public class LeaveBalance {
 	@Column(name = "leave_balance")
 	private int leaveBalance;
 	
-//ritika-----------
 	@Column(name = "half_day")
 	private int halfDay;
 
@@ -34,7 +33,6 @@ public class LeaveBalance {
 	
 	@Column(name = "unpaid_leave")
 	private int unpaidLeave;
-//ritika-----------
 
 	
 }
