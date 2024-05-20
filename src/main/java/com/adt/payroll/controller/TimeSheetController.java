@@ -1,5 +1,6 @@
 package com.adt.payroll.controller;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -11,8 +12,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -262,5 +267,18 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
         return ResponseEntity.ok(timeSheetService.getAllExpenseDetail());
 
     }
+
+    @GetMapping("/exporttoexcel")
+    public ResponseEntity<Resource> allEmpAttendenceExportExcel() throws IOException {
+        String filename="alphadot_exceldata.xlsx";
+
+        ByteArrayInputStream newdata = timeSheetService.getExcelData();
+
+        InputStreamResource file=new InputStreamResource(newdata);
+        ResponseEntity<Resource> body  =ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename="+filename).contentType(MediaType.parseMediaType("application/vnd.ms-excel")).body(file);
+        return body;
+    }
+
+
 
 }

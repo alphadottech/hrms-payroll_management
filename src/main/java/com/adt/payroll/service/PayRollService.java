@@ -14,4 +14,7 @@ public interface PayRollService {
     public String generatePaySlip(MultipartFile file) throws IOException, ParseException;
     public byte[] viewPay(SalaryModel salaryModel, String month, String year) throws ParseException, UnsupportedEncodingException;
     String updateNetAmountInExcel(MultipartFile file) throws IOException;
+    
+	public String generatePaySlipForAllEmployees() throws ParseException, IOException;
+
 }

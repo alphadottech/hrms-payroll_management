@@ -3,7 +3,6 @@ package com.adt.payroll.service;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -31,8 +30,6 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,14 +37,18 @@ import org.springframework.web.multipart.MultipartFile;
 import com.adt.payroll.exception.NoDataFoundException;
 import com.adt.payroll.model.EmpPayrollDetails;
 import com.adt.payroll.model.ImageModel;
+import com.adt.payroll.model.LeaveBalance;
 import com.adt.payroll.model.PayRecord;
 import com.adt.payroll.model.PaySlip;
+import com.adt.payroll.model.SalaryDetails;
 import com.adt.payroll.model.SalaryModel;
 import com.adt.payroll.model.TimeSheetModel;
 import com.adt.payroll.model.User;
 import com.adt.payroll.repository.EmpPayrollDetailsRepo;
 import com.adt.payroll.repository.ImageRepo;
+import com.adt.payroll.repository.LeaveBalanceRepository;
 import com.adt.payroll.repository.PayRecordRepo;
+import com.adt.payroll.repository.SalaryDetailsRepository;
 import com.adt.payroll.repository.TimeSheetRepo;
 import com.adt.payroll.repository.UserRepo;
 import com.itextpdf.io.image.ImageData;
@@ -90,12 +91,16 @@ public class PayRollServiceImpl implements PayRollService {
 
 	@Autowired
 	private UserRepo userRepo;
-	
-	@Autowired 
-	EmpPayrollDetailsRepo 	empPayrollDetailsRepo;
+	@Autowired
+	private SalaryDetailsRepository salaryDetailsRepo;
+
+	@Autowired
+	EmpPayrollDetailsRepo empPayrollDetailsRepo;
 
 	@Autowired
 	private ImageRepo imgRepo;
+	@Autowired
+	private LeaveBalanceRepository leaveBalanceRepo;
 
 	@Value("${holiday}")
 	private String[] holiday;
@@ -124,12 +129,12 @@ public class PayRollServiceImpl implements PayRollService {
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(inputFormat.parse(month));
-		
+
 		Optional<EmpPayrollDetails> empDetails = Optional.ofNullable(empPayrollDetailsRepo.findById(empId)
 				.orElseThrow(() -> new NoDataFoundException("employee not found :" + empId)));
-		
-		Optional<User> user = Optional.ofNullable(userRepo.findById(empId)
-				.orElseThrow(() -> new NoDataFoundException("employee not found :" + empId)));
+
+		Optional<User> user = Optional.ofNullable(
+				userRepo.findById(empId).orElseThrow(() -> new NoDataFoundException("employee not found :" + empId)));
 		String name = user.get().getFirstName() + " " + user.get().getLastName();
 		List<TimeSheetModel> timeSheetModel = timeSheetRepo.search(empId, month.toUpperCase(), year);
 
@@ -190,8 +195,9 @@ public class PayRollServiceImpl implements PayRollService {
 		float netAmount = (yourWorkingDays * amountPerDay);
 		netAmount += adhoc;
 		paySlip = new PaySlip(empId, name, empDetails.get().getDesignation(), dtf.format(currentdate),
-				empDetails.get().getBankName(), empDetails.get().getAccountNumber(), firstDayMonth + " - " + lastDayOfMonth,
-				yourWorkingDays, totalWorkingDays, leaves, leavePerDay, grossSalary, netAmount, adhoc);
+				empDetails.get().getBankName(), empDetails.get().getAccountNumber(),
+				firstDayMonth + " - " + lastDayOfMonth, yourWorkingDays, totalWorkingDays, leaves, leavePerDay,
+				grossSalary, netAmount, adhoc);
 		ImageModel img = new ImageModel();
 		ImageData datas = null;
 		if (imgRepo.search() != null) {
@@ -275,7 +281,8 @@ public class PayRollServiceImpl implements PayRollService {
 				accountNumber = "", gmail = "", designation = "", submitDate = "", status = "", employee_id = "",
 				joiningDate = "";
 		String sheetName = "";
-	    int adjustment = 0,tds=0, adhoc1 = 0, medicalInsurance = 0, adhoc3 = 0, workingDays = 0, present = 0, leave = 0, halfDay = 0, limit = 30;
+		int adjustment = 0, tds = 0, adhoc1 = 0, medicalInsurance = 0, adhoc3 = 0, workingDays = 0, present = 0,
+				leave = 0, halfDay = 0, limit = 30;
 		Map<String, Integer> excelColumnName = new HashMap<>();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		SimpleDateFormat inputFormat = new SimpleDateFormat("MMMM");
@@ -330,41 +337,51 @@ public class PayRollServiceImpl implements PayRollService {
 			try {
 				XSSFRow row = sheet.getRow(i);
 				try {
-					 empId = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.EmployeeNumber)));
-	                    name = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Name)));
-	                    workingDays = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.TotalWorkingDays))));
-	                    present = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.YourWorkingDays))));
-	                    leave = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Leave))));
-	                    halfDay = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.HalfDay))));
-	                    salary = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.salary)));
-	                    paidLeave = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.PaidLeave)));
-	                    bankName = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.BankName)));
-	                    accountNumber = format.format(row.getCell(excelColumnName.get(Util.AccountNumber)).getNumericCellValue()).replace(",", "");
-	                    designation = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.DESIGNATION)));
-	                    gmail = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Gmail)));
-	                    joiningDate = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.JoiningDate)));
-	        			bankName = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.BankName)));
-					 try {
-	                        adjustment= Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.ADJUSTMENT))));
-	                    } catch (NumberFormatException e) {
-	                        adjustment = 0;
-	                    }
-	                    try {
-	                        tds= Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.TDS))));
-	                    } catch (NumberFormatException e) {
-	                        tds = 0;
-	                    }
-	                    try {
-	                        medicalInsurance= Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.MEDICAL_INSURANCE))));
-	                    } catch (NumberFormatException e) {
-	                        medicalInsurance = 0;
-	                    }
+					empId = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.EmployeeNumber)));
+					name = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Name)));
+					workingDays = Integer.parseInt(
+							dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.TotalWorkingDays))));
+					present = Integer.parseInt(
+							dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.YourWorkingDays))));
+					leave = Integer
+							.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Leave))));
+					halfDay = Integer
+							.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.HalfDay))));
+					salary = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.salary)));
+					paidLeave = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.PaidLeave)));
+					bankName = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.BankName)));
+					accountNumber = format
+							.format(row.getCell(excelColumnName.get(Util.AccountNumber)).getNumericCellValue())
+							.replace(",", "");
+					designation = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.DESIGNATION)));
+					gmail = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Gmail)));
+					joiningDate = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.JoiningDate)));
+					bankName = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.BankName)));
+					try {
+						adjustment = Integer.parseInt(
+								dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.ADJUSTMENT))));
+					} catch (NumberFormatException e) {
+						adjustment = 0;
+					}
+					try {
+						tds = Integer
+								.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.TDS))));
+					} catch (NumberFormatException e) {
+						tds = 0;
+					}
+					try {
+						medicalInsurance = Integer.parseInt(dataFormatter
+								.formatCellValue(row.getCell(excelColumnName.get(Util.MEDICAL_INSURANCE))));
+					} catch (NumberFormatException e) {
+						medicalInsurance = 0;
+					}
 
-	                    try {
-	                        adhoc1 = Integer.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc1))));
-	                    } catch (NumberFormatException e) {
-	                        adhoc1 = 0;
-	                    }
+					try {
+						adhoc1 = Integer
+								.parseInt(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc1))));
+					} catch (NumberFormatException e) {
+						adhoc1 = 0;
+					}
 					String[] fullName = name.split(" ");
 					String fName = fullName[0].toString();
 					String lName = fullName[1].toString();
@@ -380,24 +397,24 @@ public class PayRollServiceImpl implements PayRollService {
 							adhoc1 += Integer.parseInt(String.valueOf(expense.get("expense_amount")));
 						}
 					}
-					
-					  if (checkEmpDetails(empId,gmail, accountNumber,employee, fName, lName)) {
-					  mailService.sendEmail(name);
-					  continue;
-					  
-					  }
-					 
+
+					if (checkEmpDetails(empId, gmail, accountNumber, employee, fName, lName)) {
+						mailService.sendEmail(name);
+						continue;
+
+					}
+
 					if (isNotNull(empId, name, workingDays, present, date, bankName, accountNumber, designation,
-							joiningDate, leave, halfDay, adhoc1,  salary, workingDay, paidLeave)) {
-						baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary,
-	                            paidLeave, date, bankName, accountNumber, designation, joiningDate, adhoc1, payPeriod, esic, pf,adjustment,medicalInsurance,tds);
-						
-						  } else {
-						  
-						  mailService.sendEmail(name);
-						  continue;
-						  }
-						 
+							joiningDate, leave, halfDay, adhoc1, salary, workingDay, paidLeave)) {
+						baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary, paidLeave, date,
+								bankName, accountNumber, designation, joiningDate, adhoc1, payPeriod, esic, pf,
+								adjustment, medicalInsurance, tds);
+
+					} else {
+
+						mailService.sendEmail(name);
+						continue;
+					}
 
 //                    sendEmail(baos, name, gmail, monthYear);
 
@@ -414,59 +431,63 @@ public class PayRollServiceImpl implements PayRollService {
 		return "Mail Send Successfully";
 	}
 
-	 public ByteArrayOutputStream createPdf(String empId, String name, int totalWorkingDays, int present,
-             int leave, int halfDay, String salary, String paidLeave, String date, String bankName,
-             String accountNumber, String designation, String joiningDate, int adhoc1, String payPeriod, String esic, String pf,int adjustment,int medicalInsurance,int tds) throws IOException, DocumentException {
+	public ByteArrayOutputStream createPdf(String empId, String name, int totalWorkingDays, int present, int leave,
+			int halfDay, String salary, String paidLeave, String date, String bankName, String accountNumber,
+			String designation, String joiningDate, int adhoc1, String payPeriod, String esic, String pf,
+			int adjustment, int medicalInsurance, int tds) throws IOException, DocumentException {
 
 		float pfAmount = 0;
-        double grossSalary = Double.parseDouble(salary);
+		double grossSalary = Double.parseDouble(salary);
 
-        if (esic.equals("Yes") && pf.equalsIgnoreCase("Yes")) {
-            grossSalary = Math.round(grossSalary - ((grossSalary / 2) * 0.13) - grossSalary * 0.04 + (grossSalary * 0.01617));
-        } else if (esic.equals("No") && pf.equalsIgnoreCase("Yes")) {
-           
-            grossSalary = Math.round(grossSalary - ((grossSalary / 2) * 0.13) + (grossSalary * 0.01617));
-        }
-        float esicAmount = 0;
-        double basic = Math.round(grossSalary / 2);
+		if (esic.equals("Yes") && pf.equalsIgnoreCase("Yes")) {
+			grossSalary = Math
+					.round(grossSalary - ((grossSalary / 2) * 0.13) - grossSalary * 0.04 + (grossSalary * 0.01617));
+		} else if (esic.equals("No") && pf.equalsIgnoreCase("Yes")) {
 
-        double hra = Math.round(grossSalary / 2);
-        int yourWorkingDays = present + Integer.parseInt(paidLeave);
+			grossSalary = Math.round(grossSalary - ((grossSalary / 2) * 0.13) + (grossSalary * 0.01617));
+		}
+		float esicAmount = 0;
+		double basic = Math.round(grossSalary / 2);
 
-        double amountPerDay = grossSalary / totalWorkingDays;
-        double unpaidLeave = totalWorkingDays - present;
-         unpaidLeave -=Integer.parseInt(paidLeave);
-         unpaidLeave *=amountPerDay;
+		double hra = Math.round(grossSalary / 2);
+		int yourWorkingDays = present + Integer.parseInt(paidLeave);
 
-        double HalfDays = halfDay * amountPerDay / 2;
+		double amountPerDay = grossSalary / totalWorkingDays;
+		double unpaidLeave = totalWorkingDays - present;
+		unpaidLeave -= Integer.parseInt(paidLeave);
+		unpaidLeave *= amountPerDay;
 
-        double netAmount = Math.round((yourWorkingDays * amountPerDay) - HalfDays);
+		double HalfDays = halfDay * amountPerDay / 2;
 
-        netAmount = Math.round(netAmount + adhoc1);
-        if (netAmount < 0) {
-            netAmount = 0;
-            adhoc1 = 0;
-        }
+		double netAmount = Math.round((yourWorkingDays * amountPerDay) - HalfDays);
 
-        if (esic.equalsIgnoreCase("yes") && netAmount != 0) {
-            esicAmount = (float) (Math.round(grossSalary * (0.0075)));
+		netAmount = Math.round(netAmount + adhoc1);
+		if (netAmount < 0) {
+			netAmount = 0;
+			adhoc1 = 0;
+		}
 
-        }
+		if (esic.equalsIgnoreCase("yes") && netAmount != 0) {
+			esicAmount = (float) (Math.round(grossSalary * (0.0075)));
 
-        if (pf.equalsIgnoreCase("yes") && netAmount != 0) {
-            pfAmount = (float) (Math.round(basic * 0.120));
+		}
 
-        }
-        netAmount -= esicAmount;
-        netAmount -= pfAmount;
-        netAmount = Math.round(netAmount);
-        netAmount -= medicalInsurance;
-        netAmount -= adjustment;
+		if (pf.equalsIgnoreCase("yes") && netAmount != 0) {
+			pfAmount = (float) (Math.round(basic * 0.120));
 
-        ByteArrayOutputStream byteArrayOutputStream =  DetailedSalarySlip.builder().build().generateDetailedSalarySlipPDF( empId,  name,  totalWorkingDays,  present,
-                leave,  halfDay,  salary,  paidLeave,  date,  bankName,
-                accountNumber,  designation,  joiningDate,  adhoc1,  payPeriod,  esicAmount,  pfAmount,netAmount,grossSalary,basic,hra,amountPerDay,unpaidLeave,adjustment,medicalInsurance,tds);
-        return byteArrayOutputStream;
+		}
+		netAmount -= esicAmount;
+		netAmount -= pfAmount;
+		netAmount = Math.round(netAmount);
+		netAmount -= medicalInsurance;
+		netAmount -= adjustment;
+
+		ByteArrayOutputStream byteArrayOutputStream = DetailedSalarySlip.builder().build()
+				.generateDetailedSalarySlipPDF(empId, name, totalWorkingDays, present, leave, halfDay, salary,
+						paidLeave, date, bankName, accountNumber, designation, joiningDate, adhoc1, payPeriod,
+						esicAmount, pfAmount, netAmount, grossSalary, basic, hra, amountPerDay, unpaidLeave, adjustment,
+						medicalInsurance, tds);
+		return byteArrayOutputStream;
 	}
 
 //    public void sendEmail(ByteArrayOutputStream baos, String name, String gmail, String monthYear) {
@@ -743,8 +764,8 @@ public class PayRollServiceImpl implements PayRollService {
 		return netAmount;
 	}
 
-	public boolean checkEmpDetails(String empId,String gmail,String accountNumber, List<User> employees, String fname,
-			String lName ){
+	public boolean checkEmpDetails(String empId, String gmail, String accountNumber, List<User> employees, String fname,
+			String lName) {
 		int userId = Integer.parseInt(empId);
 		boolean flag = true;
 		Optional<User> employee = employees.stream().filter(user -> user.getId() == userId).findFirst();
@@ -767,8 +788,7 @@ public class PayRollServiceImpl implements PayRollService {
 
 	public boolean isNotNull(String empId, String name, Integer workingDays, Integer present, String date,
 			String bankName, String accountNumber, String designation, String joiningDate, Integer leave,
-			Integer halfDay, Integer adhoc1,  String salary, int workingDay,
-			String paidLeave) {
+			Integer halfDay, Integer adhoc1, String salary, int workingDay, String paidLeave) {
 		int intSalary = Integer.parseInt(salary);
 		int intpaidLeave = Integer.parseInt(paidLeave);
 		if (empId.isEmpty() || empId == null || name.isEmpty() || name == null || workingDays <= 0
@@ -776,7 +796,7 @@ public class PayRollServiceImpl implements PayRollService {
 				|| accountNumber.isEmpty() || designation.isEmpty() || designation == null || joiningDate.isEmpty()
 				|| joiningDate == null || (present > 0 && (salary == null || intSalary == 0))
 				|| (present == 0 && (intSalary != 0 || intSalary < 0))
-				||(workingDays!=present+leave+intpaidLeave) || (intpaidLeave < 0)
+				|| (workingDays != present + leave + intpaidLeave) || (intpaidLeave < 0)
 				|| (workingDays == present && (leave > 0))
 
 		) {
@@ -784,6 +804,265 @@ public class PayRollServiceImpl implements PayRollService {
 
 		}
 		return true;
+	}
+
+//  generate salary code modification
+	@Override
+	public String generatePaySlipForAllEmployees() throws ParseException, IOException {
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	//	int officeTotalWorkingDay = util.getWorkingDays();
+		Map<String, String> paySlipDetails = util.getWorkingDaysAndMonth();
+		List<SalaryDetails> salaryDetailsList = salaryDetailsRepo.findAll();
+		String name = null;
+		PaySlip paySlip = null;
+
+		if ((!salaryDetailsList.isEmpty()) || (salaryDetailsList.size() > 0)) {
+
+			for (SalaryDetails salaryDetails : salaryDetailsList) {
+				try {
+					if (salaryDetails.getEmpId() != 0) {
+						try {
+							if (userRepo.existsById(salaryDetails.getEmpId())) {
+								paySlip = new PaySlip();
+								Optional<User> userOptional = userRepo.findByEmployeeId(salaryDetails.getEmpId());
+								Optional<EmpPayrollDetails> empPayrollDetailsOptional = empPayrollDetailsRepo
+										.findByEmployeeId(salaryDetails.getEmpId());
+								if (!empPayrollDetailsOptional.isPresent()) {
+									log.info("Employee payroll details are not present. Please enter the employee record "
+											+ salaryDetails.getEmpId());
+									continue;
+								}
+								String fName = userOptional.get().getFirstName();
+								String lName = userOptional.get().getLastName();
+								name = fName + " " + lName;
+								String gmail = userOptional.get().getEmail();
+
+								// null checks
+								if (isNotNull(salaryDetails.getEmpId(), name, userOptional.get().getEmail(),
+										salaryDetails.getBasic(), salaryDetails.getGrossSalary(),
+										salaryDetails.getHouseRentAllowance(), salaryDetails.getEmployerPFAmount(),
+										salaryDetails.getEmployeePFAmount(),
+										empPayrollDetailsOptional.get().getAccountNumber(),
+										empPayrollDetailsOptional.get().getBankName(),
+										empPayrollDetailsOptional.get().getDesignation(),
+										empPayrollDetailsOptional.get().getJoinDate(),Integer.parseInt(paySlipDetails.get("workingDays")))) {
+									
+									double salary = empPayrollDetailsOptional.get().getSalary();
+									boolean isESIC = false;
+									if (salary <= 21000) {
+										isESIC = true;
+									}
+
+									double calculatedGross = grossSalaryCalculation(empPayrollDetailsOptional.get(),
+											salaryDetails.getBasic(), salaryDetails, isESIC, name);
+									if(calculatedGross ==-1) {
+										continue;
+									}
+									double empGrossSalaryAmount = salaryDetails.getGrossSalary();
+									double grossSalaryDifference = Math.abs(calculatedGross - empGrossSalaryAmount) ;
+
+									if (grossSalaryDifference > 100) {
+										log.info("GrossSalaryAmount {} different btw calculatedGross {} &  empGrossSalaryAmount {} respectively"
+												 +"/-, Please check & correct Amount for the employee ",grossSalaryDifference, calculatedGross, empGrossSalaryAmount, salaryDetails.getEmpId() ); 
+										mailService.sendEmail(name, "GrossSalaryAmount different "+grossSalaryDifference+ " of calculatedGross and fetched empGrossSalaryAmount " +calculatedGross
+												+" , "+empGrossSalaryAmount+"Please check & correct Amount for the employee "+ salaryDetails.getEmpId());
+										continue;
+									}
+
+									double totalLeaveDeduction = calculateAndUpdateEmployeeTotalLeaves(
+											salaryDetails.getEmpId(), empGrossSalaryAmount, paySlipDetails.get(Util.MONTH),
+											paySlipDetails.get(Util.YEAR), Integer.parseInt(paySlipDetails.get(Util.WORKING_DAY)), paySlip);
+
+									if (totalLeaveDeduction == -1) {
+										log.info( "Employees leave balance record is not exist. please enter the data.", salaryDetails.getEmpId());
+										continue;
+									}
+
+									double empNetSalaryAmount = Math
+											.round(empGrossSalaryAmount - (salaryDetails.getEmployeeESICAmount()
+													+ salaryDetails.getEmployeePFAmount()
+													+ salaryDetails.getMedicalInsurance()));
+									// empNetSalaryAmount = Math.round(empNetSalaryAmount + adhoc);
+									empNetSalaryAmount = Math.round(empNetSalaryAmount - totalLeaveDeduction);
+
+									if (empNetSalaryAmount < 0) {
+										empNetSalaryAmount = 0;
+									}
+									paySlip.setAccountNumber(empPayrollDetailsOptional.get().getAccountNumber());
+									paySlip.setBankName(empPayrollDetailsOptional.get().getBankName());
+									paySlip.setJobTitle(empPayrollDetailsOptional.get().getDesignation());
+									paySlip.setName(name);
+									paySlip.setTotalWorkingDays(Integer.parseInt(paySlipDetails.get(Util.WORKING_DAY)));
+									paySlip.setPayPeriods(paySlipDetails.get(Util.PAY_PERIOD));
+									paySlip.setNetSalaryAmount(empNetSalaryAmount);
+									paySlip.setSalary(empPayrollDetailsOptional.get().getSalary());
+									baos = DetailedSalarySlip.builder().build().generateDetailedSalarySlipPDF(
+											salaryDetails, paySlip, empPayrollDetailsOptional.get().getJoinDate(),
+											paySlipDetails.get(Util.MONTH), 0);
+
+									log.info("baos:---createPDF");
+
+								} else {
+									mailService.sendEmail(name);
+									continue;
+								}
+								mailService.sendEmail(baos, name, gmail, paySlipDetails.get(Util.MONTH)+" "+paySlipDetails.get(Util.YEAR));
+							}
+
+						} catch (Exception e) {
+							e.printStackTrace();
+							mailService.sendEmail(name);
+							log.info("e.printStackTrace()---" + e.getMessage());
+							continue;
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					log.info("e.printStackTrace()----" + e.getMessage());
+					break;
+				}
+			}
+		}
+		return "Mail Send Successfully";
+	}
+
+	// null checks for values
+	private boolean isNotNull(int employee_id, String name, String gmail, double basic, double grossSalary, double hRA,
+			double employerPF, double employeePF, String accountNumber, String bankName, String designation,
+			String joiningDate, int officeTotalWorkingDay) {
+
+		if (employee_id == 0 || name.isEmpty() || name == null || officeTotalWorkingDay < 0 || bankName.isEmpty()
+				|| bankName == null || accountNumber == null || accountNumber.isEmpty() || designation.isEmpty()
+				|| designation == null || joiningDate.isEmpty() || joiningDate == null || basic <= 0
+				|| (gmail.isEmpty() || gmail == null) || grossSalary <= 0 || hRA <= 0 || employerPF <= 0
+				|| employeePF <= 0) {
+			log.info("Salary values are null.");
+			return false;
+		}
+		return true;
+	}
+
+	// Leave and leave deduction calculation
+	private double calculateAndUpdateEmployeeTotalLeaves(int empId, double empGrossSalary, String month, String year,
+			int officeTotalWorkingDay, PaySlip paySlip) throws ParseException, IOException {
+
+		double absentDeductionAmt = 0, halfDayAmount = 0, halfDayAmountDeduct = 0, totalLeaveDeduction = 0;
+		try {
+			double amountPerDay = empGrossSalary / officeTotalWorkingDay;
+			int empRemainingLeave = 0;
+			int empPaidLeave = 0;
+			int empUnpaidLeave = 0;
+			int empTotalWorkingDay = timeSheetRepo.findEmpTotalWorkingDayCount(empId, month, year);
+
+			int empHalfDay = timeSheetRepo.findEmpTotalHalfDayCount(empId, month, year);
+			if(empHalfDay>0) {
+				empTotalWorkingDay=empTotalWorkingDay+empHalfDay;
+			}
+			int empLeave = officeTotalWorkingDay - empTotalWorkingDay;
+
+			Optional<LeaveBalance> leaveBalanceOptional = leaveBalanceRepo.findByEmployeeId(empId);
+			if (!leaveBalanceOptional.isPresent()) {
+				return -1;
+			}
+
+			int leaveBal = leaveBalanceOptional.get().getLeaveBalance();
+
+			if (leaveBal >= empLeave) {
+				empRemainingLeave = leaveBal - empLeave;
+
+				leaveBal = empRemainingLeave;
+				empPaidLeave = empLeave;
+				empUnpaidLeave = 0;
+
+			} else if (empLeave > leaveBal) {
+				empRemainingLeave = empLeave - leaveBal;
+
+				empPaidLeave = leaveBal;
+				leaveBal = 0;
+				empUnpaidLeave = empRemainingLeave;
+
+				absentDeductionAmt = amountPerDay * empUnpaidLeave;
+			}
+
+			if (empHalfDay > 0) {
+				halfDayAmount = (amountPerDay / 2);
+				halfDayAmountDeduct = empHalfDay * halfDayAmount;
+			}
+			// update Allleaves in db-----------
+			leaveBalanceRepo.updateAllLeavesByEmpId(empId, leaveBal, empPaidLeave, empUnpaidLeave, empHalfDay);
+			totalLeaveDeduction = halfDayAmountDeduct + absentDeductionAmt;
+			paySlip.setNumberOfLeavesTaken(empLeave);
+			paySlip.setYouWorkingDays(empTotalWorkingDay);
+			paySlip.setPaidLeave(empPaidLeave);
+			paySlip.setUnpaidLeave(empUnpaidLeave);
+			paySlip.setHalfday(empHalfDay);
+			paySlip.setLeaveDeductionAmount(totalLeaveDeduction);
+			return totalLeaveDeduction;
+		} catch (Exception e) {
+			log.error("Error occured while calculating leave & leave deduction " + e.getMessage());
+			return -1;
+		}
+	}
+
+	// gross salary calculation for verification
+	private double grossSalaryCalculation(EmpPayrollDetails empPayrollDetails, double fixedBasic, SalaryDetails salaryDetails, boolean isESIC, String name) {
+		double salary = empPayrollDetails.getSalary();
+		double actualBasic = salary / 2;
+		double grossSalaryAmount = salary;
+		// employer pf and esic portion calculation 13% and 0.75% respectively
+		double employerPFAmount = actualBasic * 0.13;
+		double employerESICAmount = grossSalaryAmount * 0.0075;
+
+		// employer pf and esic portion calculation 12% and 3.25% respectively	
+		double employeeESICAmount = grossSalaryAmount * 0.0325;
+		String msg = "";
+		if (isESIC) {
+			if (Math.abs(employerESICAmount - salaryDetails.getEmployerESICAmount()) > 100) {
+				msg = "Employer Esic amount different exceeds the difference limit of eSICAmount & fetched employerESICAmount "
+						+ Math.abs(employerESICAmount - salaryDetails.getEmployerESICAmount());
+			}
+
+			if (Math.abs(employeeESICAmount-salaryDetails.getEmployeeESICAmount()) > 100) {
+				msg = "Employee Esic amount different exceeds the difference limit."
+						+ Math.abs(employeeESICAmount-salaryDetails.getEmployeeESICAmount());
+			}
+		}
+		if (Math.abs(employerPFAmount - salaryDetails.getEmployerPFAmount()) > 100) {
+			msg = "Employer pf amount different exceeds the difference limit." + Math.abs(employerPFAmount - salaryDetails.getEmployerPFAmount());
+		}
+
+		if (msg.isEmpty()) {
+			if (isESIC) {
+				grossSalaryAmount = Math.round(grossSalaryAmount - employerPFAmount
+						- (employeeESICAmount + employerESICAmount) + (grossSalaryAmount * 0.01617));
+
+			} else {
+				if (fixedBasic <= 15000) {
+					grossSalaryAmount = Math
+							.round(grossSalaryAmount - (fixedBasic * 0.13) + (grossSalaryAmount * 0.01617));
+				} else {
+					grossSalaryAmount = Math
+							.round(grossSalaryAmount - employerPFAmount + (grossSalaryAmount * 0.01617));
+				}
+			}
+			msg=validateEmployeePF(grossSalaryAmount, salaryDetails.getEmployeePFAmount());
+		}
+		if (!msg.isEmpty()) {
+			mailService.sendEmail(name, msg);
+			return -1;
+		}
+		return grossSalaryAmount;
+	}
+	
+	private String validateEmployeePF(double calculatedGross, double employeePFAmount) {
+		double basic = calculatedGross/2;
+		double empCalcutedPFAmount = basic * 0.12;
+		if (Math.abs(empCalcutedPFAmount - employeePFAmount) > 100) {
+			return "Employee pf amount different exceeds the difference limit."
+					+ Math.abs(empCalcutedPFAmount - employeePFAmount);
+		}
+		return "";
 	}
 
 }
