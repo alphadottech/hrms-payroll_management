@@ -41,42 +41,42 @@ public class LeaveController {
 	@Autowired
 	LeaveRequestRepo leaveRequestRepo;
 
-	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
+	@PreAuthorize("@auth.allow('GET_ALL_EMPLOYEE_LEAVE_BALANCE')")
 	@GetMapping("/getAllEmpLeaves")
 	public ResponseEntity<List<LeaveModel>> getAllLeaves() throws ParseException {
 		LOGGER.info("Payroll service: leave:  getAllLeaves Info level log msg");
 		return new ResponseEntity<>(leaveService.getAllEmpLeave(), HttpStatus.OK);
 	}
 
-	@PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
+	@PreAuthorize("@auth.allow('GET_ALL_EMPLOYEE_LEAVE_BALANCE',T(java.util.Map).of('currentUser', #empId))")
 	@GetMapping("/getById/{empId}")
 	public ResponseEntity<LeaveModel> getEmpLeaves(@PathVariable("empId") int empId) {
 		LOGGER.info("Payroll service: leave:  getEmpLeaves Info level log msg");
 		return new ResponseEntity<>(leaveService.getLeaveById(empId), HttpStatus.OK);
 	}
 
-	@PreAuthorize("@auth.allow('ROLE_USER')")
+	@PreAuthorize("@auth.allow('SAVE_LEAVE_REQUEST')")
 	@PostMapping("/leaveRequest")
 	public ResponseEntity<String> saveLeaveRequest(@RequestBody LeaveRequestModel lr) {
 		LOGGER.info("Payroll service: leave:  saveLeaveRequest Info level log msg");
 		return new ResponseEntity<>(leaveRequestService.saveLeaveRequest(lr), HttpStatus.OK);
 	}
 
-	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
+	@PreAuthorize("@auth.allow('GET_LEAVE_DETAILS')")
 	@GetMapping("/getLeaveDetails")
 	public ResponseEntity<List<LeaveRequestModel>> getLeaveDetails() {
 		LOGGER.info("Payroll service: leave:  getLeaveDetails Info level log msg");
 		return new ResponseEntity<>(leaveRequestService.getLeaveDetails(), HttpStatus.OK);
 	}
 
-	@PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
+	@PreAuthorize("@auth.allow('GET_LEAVE_REQUEST_DETAILS_BY_EMPLOYEE_ID',T(java.util.Map).of('currentUser', #empId))")
 	@GetMapping("getAllLeaveByEmpId/{empId}")
 	public ResponseEntity<List<LeaveRequestModel>> getLeaveRequestDetailsByEmpId(@PathVariable("empId") int empId) {
 		LOGGER.info("Payroll service: leave:  getLeaveRequestDetailsByEmpId Info level log msg");
 		return new ResponseEntity<>(leaveRequestService.getLeaveRequestDetailsByEmpId(empId), HttpStatus.OK);
 	}
 
-	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
+	@PreAuthorize("@auth.allow('ACCEPT_LEAVE_REQUEST')")
 	@GetMapping("/leave/Accepted/{empid}/{leaveId}/{leaveDates}")
 	public ResponseEntity<String> AcceptLeaveRequest(@PathVariable("empid") Integer empid,
 			@PathVariable("leaveId") Integer leaveId,@PathVariable("leaveDates") Integer leaveDate) throws TemplateException, MessagingException, IOException {
@@ -84,7 +84,7 @@ public class LeaveController {
 		return new ResponseEntity<>(leaveRequestService.AcceptLeaveRequest(empid, leaveId,leaveDate), HttpStatus.OK);
 	}
 
-	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
+	@PreAuthorize("@auth.allow('REJECT_LEAVE_REQUEST')")
 	@GetMapping("/leave/Rejected/{empid}/{leaveId}")
 	public ResponseEntity<String> RejectLeaveRequest(@PathVariable("empid") Integer empid,
 			@PathVariable("leaveId") Integer leaveId) throws TemplateException, MessagingException, IOException {
@@ -92,7 +92,7 @@ public class LeaveController {
 		return new ResponseEntity<>(leaveRequestService.RejectLeaveRequest(empid, leaveId), HttpStatus.OK);
 	}
 	
-	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
+	@PreAuthorize("@auth.allow('GET_ALL_EMPLOYEE_LEAVE_DETAILS')")
 	@GetMapping("/getAllEmployeeLeaves")
 	public ResponseEntity<List<LeaveRequestModel>> getAllEmployeeLeaveDetails() {
 		LOGGER.info("Payroll service: leave:  RejectLeaveRequest Info level log msg");

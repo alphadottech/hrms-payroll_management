@@ -84,7 +84,7 @@ public class TimeSheetController {
 	@Value("${-UI.context}")
 	private String context;
 
-    @PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
+    @PreAuthorize("@auth.allow('CHECK_IN',T(java.util.Map).of('currentUser', #empId))")
     @PostMapping("/checkIn/{empId}")
     public ResponseEntity<String> saveCheckIn(@RequestParam("Latitude") double latitude, @RequestParam("Longitude") double longitude, @PathVariable int empId, HttpServletRequest request)
             throws ParseException {
@@ -92,7 +92,7 @@ public class TimeSheetController {
         return ResponseEntity.ok(timeSheetService.updateCheckIn(empId, latitude, longitude));
     }
 
-    @PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
+    @PreAuthorize("@auth.allow('CHECK_OUT',T(java.util.Map).of('currentUser', #empId))")
     @PutMapping("/checkOut/{empId}")
     public ResponseEntity<String> saveCheckOut(@RequestParam("Latitude") double latitude, @RequestParam("Longitude") double longitude, @PathVariable int empId, HttpServletRequest request)
             throws ParseException {
@@ -100,21 +100,21 @@ public class TimeSheetController {
         return new ResponseEntity<>(timeSheetService.updateCheckOut(empId, latitude, longitude), HttpStatus.OK);
     }
 
-    @PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
+    @PreAuthorize("@auth.allow('CHECK_STATUS_FROM_TIMESHEET',T(java.util.Map).of('currentUser', #empId))")
     @PostMapping("/checkStatus/{empId}")
     public ResponseEntity<CheckStatusDTO> checkStatus(@PathVariable int empId, HttpServletRequest request) {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
         return new ResponseEntity<>(timeSheetService.checkStatus(empId), HttpStatus.OK);
     }
 
-    @PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
+    @PreAuthorize("@auth.allow('CHECK_PRIORTIME_STATUS',T(java.util.Map).of('currentUser', #empId))")
     @GetMapping("/priorTimeAdjustment/{empId}")
     public ResponseEntity<List<ResponseModel> > priorTimeAdjustment(@PathVariable int empId, HttpServletRequest request) {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
         return new ResponseEntity<>(timeSheetService.checkPriorStatus(empId), HttpStatus.OK);
     }
 
-@PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
+@PreAuthorize("@auth.allow('GET_ATTENDANCE_BY_EMPLOYEE_ID',T(java.util.Map).of('currentUser', #empId))")
 @GetMapping("/empAttendence")
 public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") int empId,
                                                         @RequestParam("fromDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
@@ -126,7 +126,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
 }
 
 
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+    @PreAuthorize("@auth.allow('GET_ALL_EMPLOYEE_ATTENDANCE')")
     @GetMapping("/allEmpAttendence")
     public ResponseEntity<List<TimeSheetModel>> allEmpAttendence(
             @RequestParam("fromDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
@@ -136,7 +136,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
         return new ResponseEntity<>(timeSheetService.allEmpAttendence(fromDate, toDate), HttpStatus.OK);
     }
 
-    @PreAuthorize("@auth.allow('ROLE_USER')")
+    @PreAuthorize("@auth.allow('PRIORTIME_ADJUSTMENT_REQUEST')")
     @PostMapping("/updatePriorTime")
     public ResponseEntity<ApiResponse> updatePriorTimeByDate(@RequestParam("Latitude") double latitude, @RequestParam("Longitude") double longitude,@RequestBody PriorTimeManagementRequest priorTimeManagementRequest,
                                                              HttpServletRequest request) throws ParseException {
@@ -199,14 +199,14 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
 
     }
 
-    @PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
+    @PreAuthorize("@auth.allow('PAUSE_TIME',T(java.util.Map).of('currentUser', #empId))")
     @PutMapping("/pause/{empId}")
     public ResponseEntity<String> pauseWorkingTime(@PathVariable int empId, HttpServletRequest request) {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
         return new ResponseEntity<>(timeSheetService.pauseWorkingTime(empId), HttpStatus.OK);
     }
 
-    @PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
+    @PreAuthorize("@auth.allow('RESUME_TIME',T(java.util.Map).of('currentUser', #empId))")
     @PatchMapping("/resume/{empId}")
     public ResponseEntity<String> resumeWorkingTime(@PathVariable int empId, HttpServletRequest request)
             throws ParseException {
@@ -214,7 +214,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
         return new ResponseEntity<>(timeSheetService.resumeWorkingTime(empId), HttpStatus.OK);
     }
 
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+    @PreAuthorize("@auth.allow('EMPLOYEE_EXPENSE_SAVE_REQUEST')")
     @PostMapping("/employeeExpense/{empId}")
     public ResponseEntity employeeExpense(@PathVariable int empId, @RequestParam("expense") String expense, @RequestParam List<MultipartFile> invoice, HttpServletRequest request)
             throws ParseException, IOException {
@@ -234,7 +234,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
         return ResponseEntity.ok(new ApiResponse(true, "Expense Submitted Successfully."));
     }
 
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+    @PreAuthorize("@auth.allow('APPROV_EEMPLOYEE_EXPENSE')")
     @PutMapping("/employeeExpenseApprove/{expenseId}")
     public ResponseEntity<String> ApproveEmployeeExpense(@PathVariable int expenseId, HttpServletRequest request) {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
@@ -249,7 +249,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
 
     }
 
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+    @PreAuthorize("@auth.allow('UPDATE_EMPLOYEE_EXPENSE')")
     @PutMapping("/employeeExpense")
     public ResponseEntity<ApiResponse> EmployeeExpense(@RequestBody EmployeeExpenseDTO employeeExpenseDTO, HttpServletRequest request)
             throws ParseException, IOException {

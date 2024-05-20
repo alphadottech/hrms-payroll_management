@@ -24,27 +24,27 @@ public class SalaryController {
     @Autowired
     private SalaryService salaryService;
 
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+    @PreAuthorize("@auth.allow('GET_ALL_EMPLOYEE_SALARY')")
     @GetMapping("/getAllEmpSalary")
     public ResponseEntity<List<SalaryModel>> getAllEmpSalary() throws ParseException {
         LOGGER.info("Payroll service: salary:  getAllEmpSalary() Info level log msg");
         return new ResponseEntity<>(salaryService.getAllEmpSalary(), HttpStatus.OK);
     }
 
-    @PreAuthorize("@auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
+    @PreAuthorize("@auth.allow('GET_SALARY_BY_ID',T(java.util.Map).of('currentUser', #empId))")
     @GetMapping("/getSalaryById/{empId}")
     public ResponseEntity<Optional<SalaryModel>> getSalaryById(@PathVariable("empId") Integer empId) {
 		LOGGER.info("Payroll service: salary:  getSalaryById Info level log msg");
 		return new ResponseEntity<>(salaryService.getSalaryById(empId), HttpStatus.OK);
     }
 
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+    @PreAuthorize("@auth.allow('SAVE_SALARY')")
     @PostMapping("/saveSalary")
     public ResponseEntity<String> saveSalary(@RequestBody SalaryModel salaryModel){
         LOGGER.info("Payroll service: salary:  create salary for employee Info level log msg");
         return new ResponseEntity<>(salaryService.saveSalary(salaryModel), HttpStatus.OK);
     }
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+    @PreAuthorize("@auth.allow('SALARY_DETAILS_BY_EMPLOYEE_NAME')")
     @GetMapping("/searchByName")
     public ResponseEntity<List<SalaryModel>> searchByName(@RequestParam("name") String name){
         LOGGER.info("Payroll service: salary:  search employee By Name Info level log msg");

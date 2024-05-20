@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import com.adt.payroll.service.TableDataExtractor;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwt;
@@ -22,13 +24,27 @@ public class Auth {
 
 	@Autowired
 	private HttpServletRequest request;
+	
+	@Autowired
+	private TableDataExtractor dataExtractor;
+
 
 	public boolean allow(String authority, Map<String, String> resourceAttributes) {
 		String token = getToken(request);
 		Claims claims = getUserIdFromJWT(token);
-		List<GrantedAuthority> authorities = getAuthorities(claims);
+		List<GrantedAuthority> authorities = getAuthorities(claims);	
+		boolean isValidAuthority = false;
+		String sql = "SELECT r.role_name FROM user_schema.role r JOIN av_schema.api_maping  am ON r.role_id = am.role_id JOIN av_schema.api_details ad ON am.api_id = ad.api_id WHERE ad.api_name ="
+				+ "'" + authority + "'";
+		List<Map<String, Object>> priortimeData = dataExtractor.extractDataFromTable(sql);
+		for (Map<String, Object> priortime : priortimeData) {
+			authority = String.valueOf(priortime.get("role_name"));
+			isValidAuthority = checkAuthority(authority, authorities);
+			if (isValidAuthority) {
+				break;
+			}
+		}
 		boolean isValidResourse = checkResourse(resourceAttributes, claims);
-		boolean isValidAuthority = checkAuthority(authority, authorities);
 		return isValidResourse && isValidAuthority;
 	}
 
@@ -36,7 +52,16 @@ public class Auth {
 		String token = getToken(request);
 		Claims claims = getUserIdFromJWT(token);
 		List<GrantedAuthority> authorities = getAuthorities(claims);
-		boolean isValidAuthority = checkAuthority(authority, authorities);
+		boolean isValidAuthority = false;
+		String sql = "SELECT r.role_name FROM user_schema.role r JOIN av_schema.api_maping  am ON r.role_id = am.role_id JOIN av_schema.api_details ad ON am.api_id = ad.api_id WHERE ad.api_name ="+"'"+authority+"'";
+		List<Map<String, Object>> priortimeData = dataExtractor.extractDataFromTable(sql);
+		for (Map<String, Object> priortime : priortimeData) {
+	    	 authority = String.valueOf(priortime.get("role_name"));
+	    	 isValidAuthority = checkAuthority(authority, authorities);
+	    	 if (isValidAuthority) {
+					break;
+				}
+		}
 		return isValidAuthority;
 	}
 
