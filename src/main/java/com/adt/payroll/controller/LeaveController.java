@@ -48,7 +48,7 @@ public class LeaveController {
 		return new ResponseEntity<>(leaveService.getAllEmpLeave(), HttpStatus.OK);
 	}
 
-	@PreAuthorize("@auth.allow('GET_ALL_EMPLOYEE_LEAVE_BALANCE',T(java.util.Map).of('currentUser', #empId))")
+	@PreAuthorize("@auth.allow('GET_EMPLOYEE_LEAVES_BALANCE_BY_ID',T(java.util.Map).of('currentUser', #empId))")
 	@GetMapping("/getById/{empId}")
 	public ResponseEntity<LeaveModel> getEmpLeaves(@PathVariable("empId") int empId) {
 		LOGGER.info("Payroll service: leave:  getEmpLeaves Info level log msg");
