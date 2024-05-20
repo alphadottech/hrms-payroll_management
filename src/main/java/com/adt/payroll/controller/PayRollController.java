@@ -37,19 +37,19 @@ public class PayRollController {
     @Autowired
     private TimeSheetRepo timeSheetRepo;
 
-    @PreAuthorize("@auth.allow('ROLE_ADMIN') or @auth.allow('ROLE_USER',T(java.util.Map).of('currentUser', #empId))")
+    @PreAuthorize(" @auth.allow('CREATE_PAYSLIP',T(java.util.Map).of('currentUser', #empId))")
     @GetMapping("/slip")
     public ResponseEntity<PaySlip> payrollCreate(@RequestParam("empId") int empId, @RequestParam("month") String month, @RequestParam("year") String year, HttpServletRequest request) throws ParseException, IOException, InvalidFormatException {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
         return ResponseEntity.ok(payRollService.createPaySlip(empId, month, year));
     }
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+    @PreAuthorize("@auth.allow('GENERATE_PAYSLIP_FOR_ALL_EMPLOYEE')")
     @PostMapping("/genPayAll")
     public ResponseEntity<Object> generatePaySlip(@RequestParam("file") MultipartFile file,HttpServletRequest request) throws IOException, ParseException {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
         return  new ResponseEntity<>(payRollService.generatePaySlip(file), HttpStatus.OK);
     }
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+    @PreAuthorize("@auth.allow('VIEW_PAYSLIP')")
     @PostMapping("/viewPay")
     public ResponseEntity<Object> viewPay(HttpServletRequest request, HttpServletResponse response,@RequestBody SalaryModel salaryModel, @RequestParam("month") String month , @RequestParam("year") String year) throws ParseException, IOException {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
@@ -58,14 +58,14 @@ public class PayRollController {
         String base64String = Base64.getEncoder().encodeToString(payPdf);
         return  new ResponseEntity<>(base64String,HttpStatus.OK);
     }
-
+    @PreAuthorize("@auth.allow('UPDATE_NET_AMOUNT_IN_EXCEL')")
     @PostMapping("/calculateNetAmtPayable")
     public ResponseEntity<String> updateNetAmountInExcel(@RequestParam("file") MultipartFile file,HttpServletRequest request) throws IOException {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
         return ResponseEntity.ok(payRollService.updateNetAmountInExcel(file));
     }
 
-    @PreAuthorize("@auth.allow('ROLE_ADMIN')")
+    @PreAuthorize("@auth.allow('GENERATE_PAYSLIP_FOR_ALL_EMPLOYEE_FROM_DB')")
 	@PostMapping("/generatePaySlipForAll")
 	public ResponseEntity<Object> generatePaySlipForAllEmployees(HttpServletRequest request)
 			throws IOException, ParseException {
