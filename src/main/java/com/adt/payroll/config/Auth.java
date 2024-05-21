@@ -29,13 +29,14 @@ public class Auth {
 	private TableDataExtractor dataExtractor;
 
 
-	public boolean allow(String authority, Map<String, String> resourceAttributes) {
+	public boolean allow(String apiName, Map<String, String> resourceAttributes) {
 		String token = getToken(request);
 		Claims claims = getUserIdFromJWT(token);
 		List<GrantedAuthority> authorities = getAuthorities(claims);	
 		boolean isValidAuthority = false;
-		String sql = "SELECT r.role_name FROM user_schema.role r JOIN av_schema.api_maping  am ON r.role_id = am.role_id JOIN av_schema.api_details ad ON am.api_id = ad.api_id WHERE ad.api_name ="
-				+ "'" + authority + "'";
+		String authority=null;
+		String sql = "SELECT r.role_name FROM user_schema.role r JOIN av_schema.api_mapping  am ON r.role_id = am.role_id JOIN av_schema.api_details ad ON am.api_id = ad.api_id WHERE ad.api_name ="
+				+ "'" + apiName + "'";
 		List<Map<String, Object>> priortimeData = dataExtractor.extractDataFromTable(sql);
 		for (Map<String, Object> priortime : priortimeData) {
 			authority = String.valueOf(priortime.get("role_name"));
@@ -48,12 +49,13 @@ public class Auth {
 		return isValidResourse && isValidAuthority;
 	}
 
-	public boolean allow(String authority) {
+	public boolean allow(String apiName) {
 		String token = getToken(request);
 		Claims claims = getUserIdFromJWT(token);
 		List<GrantedAuthority> authorities = getAuthorities(claims);
 		boolean isValidAuthority = false;
-		String sql = "SELECT r.role_name FROM user_schema.role r JOIN av_schema.api_maping  am ON r.role_id = am.role_id JOIN av_schema.api_details ad ON am.api_id = ad.api_id WHERE ad.api_name ="+"'"+authority+"'";
+		String authority=null;
+		String sql = "SELECT r.role_name FROM user_schema.role r JOIN av_schema.api_mapping  am ON r.role_id = am.role_id JOIN av_schema.api_details ad ON am.api_id = ad.api_id WHERE ad.api_name ="+"'"+apiName+"'";
 		List<Map<String, Object>> priortimeData = dataExtractor.extractDataFromTable(sql);
 		for (Map<String, Object> priortime : priortimeData) {
 	    	 authority = String.valueOf(priortime.get("role_name"));
