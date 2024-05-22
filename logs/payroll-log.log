@@ -1,0 +1,301 @@
+12:04:37.457 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Starting HrmsPayrollApplication using Java 17.0.7 with PID 18424 (D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management\target\classes started by hp in D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management)
+12:04:37.473 [main] DEBUG com.adt.payroll.HrmsPayrollApplication / - Running with Spring Boot v3.2.4, Spring v6.1.5
+12:04:37.475 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - No active profile set, falling back to 1 default profile: "default"
+12:04:40.032 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat initialized with port 9094 (http)
+12:04:40.152 [main] INFO  org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext / - Root WebApplicationContext: initialization completed in 2620 ms
+12:04:47.464 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration / - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+12:04:47.498 [main] WARN  org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration / - 
+
+Using generated security password: fa93cbe8-5c3f-4e4b-975d-297fe37523d2
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+12:04:49.514 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat started on port 9094 (http) with context path '/payroll'
+12:04:49.533 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Started HrmsPayrollApplication in 12.672 seconds (process running for 16.015)
+12:05:04.069 [http-nio-9094-exec-2] INFO  org.springframework.web.servlet.DispatcherServlet / - Initializing Servlet 'dispatcherServlet'
+12:05:04.070 [http-nio-9094-exec-2] INFO  org.springframework.web.servlet.DispatcherServlet / - Completed initialization in 1 ms
+12:07:56.143 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Starting HrmsPayrollApplication using Java 17.0.7 with PID 14880 (D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management\target\classes started by hp in D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management)
+12:07:56.151 [main] DEBUG com.adt.payroll.HrmsPayrollApplication / - Running with Spring Boot v3.2.4, Spring v6.1.5
+12:07:56.152 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - No active profile set, falling back to 1 default profile: "default"
+12:07:57.899 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat initialized with port 9094 (http)
+12:07:58.047 [main] INFO  org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext / - Root WebApplicationContext: initialization completed in 1850 ms
+12:08:05.333 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration / - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+12:08:05.358 [main] WARN  org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration / - 
+
+Using generated security password: 4693fc36-61cb-4d31-a03f-02b923966979
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+12:08:07.175 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat started on port 9094 (http) with context path '/payroll'
+12:08:07.192 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Started HrmsPayrollApplication in 11.583 seconds (process running for 12.904)
+12:08:38.544 [http-nio-9094-exec-2] INFO  org.springframework.web.servlet.DispatcherServlet / - Initializing Servlet 'dispatcherServlet'
+12:08:38.546 [http-nio-9094-exec-2] INFO  org.springframework.web.servlet.DispatcherServlet / - Completed initialization in 1 ms
+12:08:38.727 [http-nio-9094-exec-2] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+12:08:46.864 [http-nio-9094-exec-2] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=40, salary=20000.0, bankName=HDFC Bank, designation=Software Engineer, joinDate=15-04-2023, accountNumber=12345678901, ifscCode=123456, basic=9436.2, houseRentAllowance=9436.2, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.4, netSalary=17023.4, medicalInsurance=0.0)
+12:11:23.964 [http-nio-9094-exec-5] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+12:11:30.200 [http-nio-9094-exec-5] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=40, salary=20000.0, bankName=HDFC Bank, designation=Software Engineer, joinDate=15-04-2023, accountNumber=12345678901, ifscCode=1234566, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+12:15:49.845 [http-nio-9094-exec-9] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+12:15:54.238 [http-nio-9094-exec-9] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=19, salary=20000.0, bankName=HDFC BANK PVT LTD, designation=Software Engineer, joinDate=2024-04-13, accountNumber=1234567890, ifscCode=HDFC0882, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+12:19:32.672 [http-nio-9094-exec-1] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+12:19:36.388 [http-nio-9094-exec-1] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=100, salary=20000.0, bankName=HDFC BANK PVT LTD, designation=Software Engineer, joinDate=2024-04-13, accountNumber=1234567890, ifscCode=HDFC0882, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+12:23:25.324 [http-nio-9094-exec-4] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+12:23:30.194 [http-nio-9094-exec-4] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=42, salary=20000.0, bankName=SBI, designation=Software Engineer, joinDate=2024-04-17, accountNumber=1234567999, ifscCode=SBI181190, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+12:25:20.624 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Starting HrmsPayrollApplication using Java 17.0.7 with PID 15732 (D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management\target\classes started by hp in D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management)
+12:25:20.632 [main] DEBUG com.adt.payroll.HrmsPayrollApplication / - Running with Spring Boot v3.2.4, Spring v6.1.5
+12:25:20.634 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - No active profile set, falling back to 1 default profile: "default"
+12:25:22.219 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat initialized with port 9094 (http)
+12:25:22.308 [main] INFO  org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext / - Root WebApplicationContext: initialization completed in 1627 ms
+12:25:29.382 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration / - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+12:25:29.410 [main] WARN  org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration / - 
+
+Using generated security password: 419a6f97-f392-4cc0-bbf3-ba8d8d71dde1
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+12:25:31.298 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat started on port 9094 (http) with context path '/payroll'
+12:25:31.319 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Started HrmsPayrollApplication in 11.231 seconds (process running for 12.625)
+12:25:40.529 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Initializing Servlet 'dispatcherServlet'
+12:25:40.531 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Completed initialization in 1 ms
+12:25:40.682 [http-nio-9094-exec-1] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+12:25:44.446 [http-nio-9094-exec-1] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=42, salary=20000.0, bankName=SBI, designation=Software Engineer, joinDate=2024-04-17, accountNumber=1234567999, ifscCode=SBI181190, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+12:26:15.346 [http-nio-9094-exec-1] ERROR org.hibernate.engine.jdbc.spi.SqlExceptionHelper / - ERROR: relation "emp_payroll_details_seq" does not exist
+  Position: 16
+12:28:45.604 [http-nio-9094-exec-1] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - e.printStackTrace()---could not extract ResultSet [ERROR: relation "emp_payroll_details_seq" does not exist
+  Position: 16] [select nextval('emp_payroll_details_seq')]; SQL [select nextval('emp_payroll_details_seq')]
+12:30:12.847 [RMI TCP Connection(8)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:33:17.374 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Starting HrmsPayrollApplication using Java 17.0.7 with PID 11908 (D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management\target\classes started by hp in D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management)
+12:33:17.382 [main] DEBUG com.adt.payroll.HrmsPayrollApplication / - Running with Spring Boot v3.2.4, Spring v6.1.5
+12:33:17.384 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - No active profile set, falling back to 1 default profile: "default"
+12:33:19.021 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat initialized with port 9094 (http)
+12:33:19.128 [main] INFO  org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext / - Root WebApplicationContext: initialization completed in 1701 ms
+12:33:25.938 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration / - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+12:33:25.964 [main] WARN  org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration / - 
+
+Using generated security password: 957cb052-1ae3-4a4a-96ab-f7c68a4adf99
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+12:33:27.746 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat started on port 9094 (http) with context path '/payroll'
+12:33:27.764 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Started HrmsPayrollApplication in 10.923 seconds (process running for 12.264)
+12:33:51.426 [http-nio-9094-exec-2] INFO  org.springframework.web.servlet.DispatcherServlet / - Initializing Servlet 'dispatcherServlet'
+12:33:51.428 [http-nio-9094-exec-2] INFO  org.springframework.web.servlet.DispatcherServlet / - Completed initialization in 2 ms
+12:33:51.593 [http-nio-9094-exec-2] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+12:33:56.839 [http-nio-9094-exec-2] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=42, salary=20000.0, bankName=SBI, designation=Software Engineer, joinDate=2024-04-17, accountNumber=1234567999, ifscCode=SBI181190, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+12:35:41.252 [http-nio-9094-exec-2] ERROR org.hibernate.engine.jdbc.spi.SqlExceptionHelper / - ERROR: relation "emp_payroll_details_seq" does not exist
+  Position: 16
+12:45:41.284 [RMI TCP Connection(16)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:45:41.724 [RMI TCP Connection(17)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:45:42.076 [RMI TCP Connection(18)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:45:42.219 [RMI TCP Connection(19)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:45:42.612 [RMI TCP Connection(20)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:45:43.652 [RMI TCP Connection(21)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:45:43.821 [RMI TCP Connection(22)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:46:06.331 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Starting HrmsPayrollApplication using Java 17.0.7 with PID 16260 (D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management\target\classes started by hp in D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management)
+12:46:06.339 [main] DEBUG com.adt.payroll.HrmsPayrollApplication / - Running with Spring Boot v3.2.4, Spring v6.1.5
+12:46:06.340 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - No active profile set, falling back to 1 default profile: "default"
+12:46:07.963 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat initialized with port 9094 (http)
+12:46:08.070 [main] INFO  org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext / - Root WebApplicationContext: initialization completed in 1686 ms
+12:46:15.260 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration / - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+12:46:15.286 [main] WARN  org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration / - 
+
+Using generated security password: 9240ee8e-f0db-4e0f-b117-640edbbd4bf7
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+12:46:17.088 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat started on port 9094 (http) with context path '/payroll'
+12:46:17.106 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Started HrmsPayrollApplication in 11.371 seconds (process running for 12.766)
+12:46:30.014 [http-nio-9094-exec-2] INFO  org.springframework.web.servlet.DispatcherServlet / - Initializing Servlet 'dispatcherServlet'
+12:46:30.016 [http-nio-9094-exec-2] INFO  org.springframework.web.servlet.DispatcherServlet / - Completed initialization in 2 ms
+12:46:30.177 [http-nio-9094-exec-2] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+12:46:35.700 [http-nio-9094-exec-2] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=42, salary=20000.0, bankName=SBI, designation=Software Engineer, joinDate=2024-04-17, accountNumber=1234567999, ifscCode=SBI181190, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+12:47:01.096 [http-nio-9094-exec-2] ERROR org.hibernate.engine.jdbc.spi.SqlExceptionHelper / - ERROR: relation "emp_payroll_details_seq" does not exist
+  Position: 16
+12:49:02.700 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Starting HrmsPayrollApplication using Java 17.0.7 with PID 4580 (D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management\target\classes started by hp in D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management)
+12:49:02.710 [main] DEBUG com.adt.payroll.HrmsPayrollApplication / - Running with Spring Boot v3.2.4, Spring v6.1.5
+12:49:02.711 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - No active profile set, falling back to 1 default profile: "default"
+12:49:04.282 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat initialized with port 9094 (http)
+12:49:04.380 [main] INFO  org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext / - Root WebApplicationContext: initialization completed in 1628 ms
+12:49:11.081 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration / - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+12:49:11.107 [main] WARN  org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration / - 
+
+Using generated security password: 12c1e258-9c12-424b-ac4a-8b36e66e5e02
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+12:49:13.257 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat started on port 9094 (http) with context path '/payroll'
+12:49:13.277 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Started HrmsPayrollApplication in 11.105 seconds (process running for 12.477)
+12:49:28.553 [http-nio-9094-exec-2] INFO  org.springframework.web.servlet.DispatcherServlet / - Initializing Servlet 'dispatcherServlet'
+12:49:28.554 [http-nio-9094-exec-2] INFO  org.springframework.web.servlet.DispatcherServlet / - Completed initialization in 1 ms
+12:49:28.710 [http-nio-9094-exec-2] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+12:49:33.952 [http-nio-9094-exec-2] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=42, salary=20000.0, bankName=SBI, designation=Software Engineer, joinDate=2024-04-17, accountNumber=1234567999, ifscCode=SBI181190, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+12:49:58.246 [http-nio-9094-exec-2] ERROR org.hibernate.engine.jdbc.spi.SqlExceptionHelper / - ERROR: relation "payroll_schema.emp_payroll_details_seq" does not exist
+  Position: 16
+12:50:03.956 [RMI TCP Connection(3)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:50:04.093 [RMI TCP Connection(5)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:50:05.274 [RMI TCP Connection(6)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:50:05.450 [RMI TCP Connection(7)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:50:05.971 [RMI TCP Connection(8)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:50:06.139 [RMI TCP Connection(9)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:50:06.532 [RMI TCP Connection(10)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:50:06.689 [RMI TCP Connection(11)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:50:07.170 [RMI TCP Connection(12)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:50:07.330 [RMI TCP Connection(13)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+12:50:07.498 [RMI TCP Connection(14)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.
+14:01:19.685 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Starting HrmsPayrollApplication using Java 17.0.7 with PID 12524 (D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management\target\classes started by hp in D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management)
+14:01:19.693 [main] DEBUG com.adt.payroll.HrmsPayrollApplication / - Running with Spring Boot v3.2.4, Spring v6.1.5
+14:01:19.695 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - No active profile set, falling back to 1 default profile: "default"
+14:01:21.287 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat initialized with port 9094 (http)
+14:01:21.378 [main] INFO  org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext / - Root WebApplicationContext: initialization completed in 1639 ms
+14:01:28.482 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration / - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+14:01:28.507 [main] WARN  org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration / - 
+
+Using generated security password: 64812269-8b68-4609-8e49-75446bc1db36
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+14:01:30.321 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat started on port 9094 (http) with context path '/payroll'
+14:01:30.341 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Started HrmsPayrollApplication in 11.185 seconds (process running for 12.519)
+14:01:37.427 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Initializing Servlet 'dispatcherServlet'
+14:01:37.431 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Completed initialization in 2 ms
+14:01:37.587 [http-nio-9094-exec-1] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+14:01:50.846 [http-nio-9094-exec-4] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+14:01:54.768 [http-nio-9094-exec-1] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=42, salary=20000.0, bankName=SBI, designation=Software Engineer, joinDate=2024-04-17, accountNumber=1234567999, ifscCode=SBI181190, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+14:02:24.366 [http-nio-9094-exec-1] ERROR org.hibernate.engine.jdbc.spi.SqlExceptionHelper / - ERROR: relation "emp_payroll_details_seq" does not exist
+  Position: 16
+14:03:14.139 [http-nio-9094-exec-1] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - e.printStackTrace()---could not extract ResultSet [ERROR: relation "emp_payroll_details_seq" does not exist
+  Position: 16] [select nextval('emp_payroll_details_seq')]; SQL [select nextval('emp_payroll_details_seq')]
+14:03:15.066 [http-nio-9094-exec-4] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=42, salary=20000.0, bankName=SBI, designation=Software Engineer, joinDate=2024-04-17, accountNumber=1234567999, ifscCode=SBI181190, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+14:03:17.425 [http-nio-9094-exec-4] ERROR org.hibernate.engine.jdbc.spi.SqlExceptionHelper / - ERROR: relation "emp_payroll_details_seq" does not exist
+  Position: 16
+14:03:17.957 [http-nio-9094-exec-4] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - e.printStackTrace()---could not extract ResultSet [ERROR: relation "emp_payroll_details_seq" does not exist
+  Position: 16] [select nextval('emp_payroll_details_seq')]; SQL [select nextval('emp_payroll_details_seq')]
+14:15:15.189 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Starting HrmsPayrollApplication using Java 17.0.7 with PID 8572 (D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management\target\classes started by hp in D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management)
+14:15:15.198 [main] DEBUG com.adt.payroll.HrmsPayrollApplication / - Running with Spring Boot v3.2.4, Spring v6.1.5
+14:15:15.199 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - No active profile set, falling back to 1 default profile: "default"
+14:15:16.876 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat initialized with port 9094 (http)
+14:15:16.972 [main] INFO  org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext / - Root WebApplicationContext: initialization completed in 1730 ms
+14:15:24.202 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration / - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+14:15:24.228 [main] WARN  org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration / - 
+
+Using generated security password: 140418ec-75e1-48d3-98f1-5dabd4a54c77
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+14:15:26.152 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat started on port 9094 (http) with context path '/payroll'
+14:15:26.179 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Started HrmsPayrollApplication in 11.53 seconds (process running for 12.869)
+14:15:46.190 [http-nio-9094-exec-2] INFO  org.springframework.web.servlet.DispatcherServlet / - Initializing Servlet 'dispatcherServlet'
+14:15:46.192 [http-nio-9094-exec-2] INFO  org.springframework.web.servlet.DispatcherServlet / - Completed initialization in 2 ms
+14:15:46.330 [http-nio-9094-exec-2] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+14:15:50.067 [http-nio-9094-exec-2] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=42, salary=20000.0, bankName=SBI, designation=Software Engineer, joinDate=2024-04-17, accountNumber=1234567999, ifscCode=SBI181190, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+14:16:35.084 [http-nio-9094-exec-2] ERROR org.hibernate.engine.jdbc.spi.SqlExceptionHelper / - ERROR: relation "emp_payroll_details_seq" does not exist
+  Position: 16
+14:17:30.683 [http-nio-9094-exec-2] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - e.printStackTrace()---could not extract ResultSet [ERROR: relation "emp_payroll_details_seq" does not exist
+  Position: 16] [select nextval('emp_payroll_details_seq')]; SQL [select nextval('emp_payroll_details_seq')]
+14:17:34.479 [http-nio-9094-exec-4] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+14:17:38.054 [http-nio-9094-exec-4] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=42, salary=20000.0, bankName=SBI, designation=Software Engineer, joinDate=2024-04-17, accountNumber=1234567999, ifscCode=SBI181190, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+14:17:52.656 [http-nio-9094-exec-4] ERROR org.hibernate.engine.jdbc.spi.SqlExceptionHelper / - ERROR: relation "emp_payroll_details_seq" does not exist
+  Position: 16
+14:17:57.678 [http-nio-9094-exec-4] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - e.printStackTrace()---could not extract ResultSet [ERROR: relation "emp_payroll_details_seq" does not exist
+  Position: 16] [select nextval('emp_payroll_details_seq')]; SQL [select nextval('emp_payroll_details_seq')]
+14:18:10.805 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Starting HrmsPayrollApplication using Java 17.0.7 with PID 14184 (D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management\target\classes started by hp in D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management)
+14:18:10.817 [main] DEBUG com.adt.payroll.HrmsPayrollApplication / - Running with Spring Boot v3.2.4, Spring v6.1.5
+14:18:10.836 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - No active profile set, falling back to 1 default profile: "default"
+14:18:12.475 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat initialized with port 9094 (http)
+14:18:12.585 [main] INFO  org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext / - Root WebApplicationContext: initialization completed in 1678 ms
+14:18:19.951 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration / - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+14:18:19.977 [main] WARN  org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration / - 
+
+Using generated security password: f989e27c-63eb-4b4d-a74b-124967a42f66
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+14:18:22.090 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat started on port 9094 (http) with context path '/payroll'
+14:18:22.109 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Started HrmsPayrollApplication in 11.904 seconds (process running for 13.229)
+14:18:25.743 [http-nio-9094-exec-3] INFO  org.springframework.web.servlet.DispatcherServlet / - Initializing Servlet 'dispatcherServlet'
+14:18:25.746 [http-nio-9094-exec-3] INFO  org.springframework.web.servlet.DispatcherServlet / - Completed initialization in 3 ms
+14:18:25.893 [http-nio-9094-exec-3] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+14:18:30.383 [http-nio-9094-exec-3] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=42, salary=20000.0, bankName=SBI, designation=Software Engineer, joinDate=2024-04-17, accountNumber=1234567999, ifscCode=SBI181190, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+14:18:51.070 [http-nio-9094-exec-3] ERROR org.hibernate.engine.jdbc.spi.SqlExceptionHelper / - ERROR: relation "emp_payroll_details_seq" does not exist
+  Position: 16
+14:18:56.507 [http-nio-9094-exec-3] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - e.printStackTrace()---could not extract ResultSet [ERROR: relation "emp_payroll_details_seq" does not exist
+  Position: 16] [select nextval('emp_payroll_details_seq')]; SQL [select nextval('emp_payroll_details_seq')]
+14:19:46.668 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Starting HrmsPayrollApplication using Java 17.0.7 with PID 3608 (D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management\target\classes started by hp in D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management)
+14:19:46.676 [main] DEBUG com.adt.payroll.HrmsPayrollApplication / - Running with Spring Boot v3.2.4, Spring v6.1.5
+14:19:46.678 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - No active profile set, falling back to 1 default profile: "default"
+14:19:48.284 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat initialized with port 9094 (http)
+14:19:48.381 [main] INFO  org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext / - Root WebApplicationContext: initialization completed in 1660 ms
+14:19:55.217 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration / - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+14:19:55.243 [main] WARN  org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration / - 
+
+Using generated security password: 1847204b-179e-46b8-acb6-8d66ff9c0383
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+14:19:57.252 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat started on port 9094 (http) with context path '/payroll'
+14:19:57.280 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Started HrmsPayrollApplication in 11.147 seconds (process running for 12.55)
+14:20:02.020 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Initializing Servlet 'dispatcherServlet'
+14:20:02.022 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Completed initialization in 1 ms
+14:20:02.190 [http-nio-9094-exec-1] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+14:20:14.495 [http-nio-9094-exec-1] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=42, salary=20000.0, bankName=SBI, designation=Software Engineer, joinDate=2024-04-17, accountNumber=1234567999, ifscCode=SBI181190, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+14:20:37.762 [http-nio-9094-exec-1] ERROR org.hibernate.engine.jdbc.spi.SqlExceptionHelper / - ERROR: insert or update on table "emp_payroll_details" violates foreign key constraint "fk436lb15nrngkicoe0ol53fiml"
+  Detail: Key (emp_id)=(0) is not present in table "_employee".
+14:21:59.799 [http-nio-9094-exec-1] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - e.printStackTrace()---could not execute statement [ERROR: insert or update on table "emp_payroll_details" violates foreign key constraint "fk436lb15nrngkicoe0ol53fiml"
+  Detail: Key (emp_id)=(0) is not present in table "_employee".] [insert into payroll_schema.emp_payroll_details (account_number,bank_name,designation,emp_id,ifsc_code,joining_date,salary,id) values (?,?,?,?,?,?,?,?)]; SQL [insert into payroll_schema.emp_payroll_details (account_number,bank_name,designation,emp_id,ifsc_code,joining_date,salary,id) values (?,?,?,?,?,?,?,?)]; constraint [fk436lb15nrngkicoe0ol53fiml]
+14:29:17.963 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Starting HrmsPayrollApplication using Java 17.0.7 with PID 6888 (D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management\target\classes started by hp in D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management)
+14:29:17.971 [main] DEBUG com.adt.payroll.HrmsPayrollApplication / - Running with Spring Boot v3.2.4, Spring v6.1.5
+14:29:17.972 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - No active profile set, falling back to 1 default profile: "default"
+14:29:19.528 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat initialized with port 9094 (http)
+14:29:19.622 [main] INFO  org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext / - Root WebApplicationContext: initialization completed in 1607 ms
+14:29:26.076 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration / - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+14:29:26.102 [main] WARN  org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration / - 
+
+Using generated security password: cb7a2979-6853-42f9-bdd9-cd34098f57e3
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+14:29:27.966 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat started on port 9094 (http) with context path '/payroll'
+14:29:27.991 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Started HrmsPayrollApplication in 10.55 seconds (process running for 11.914)
+14:29:36.618 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Initializing Servlet 'dispatcherServlet'
+14:29:36.620 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Completed initialization in 2 ms
+14:29:36.789 [http-nio-9094-exec-1] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+14:29:39.663 [http-nio-9094-exec-1] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=42, salary=20000.0, bankName=SBI, designation=Software Engineer, joinDate=2024-04-17, accountNumber=1234567999, ifscCode=SBI181190, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+14:31:51.372 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Starting HrmsPayrollApplication using Java 17.0.7 with PID 17864 (D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management\target\classes started by hp in D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management)
+14:31:51.380 [main] DEBUG com.adt.payroll.HrmsPayrollApplication / - Running with Spring Boot v3.2.4, Spring v6.1.5
+14:31:51.381 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - No active profile set, falling back to 1 default profile: "default"
+14:31:53.026 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat initialized with port 9094 (http)
+14:31:53.134 [main] INFO  org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext / - Root WebApplicationContext: initialization completed in 1710 ms
+14:32:00.083 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration / - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+14:32:00.108 [main] WARN  org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration / - 
+
+Using generated security password: c7e2fbca-e6ab-4706-b3cb-7c58a12dadcc
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+14:32:01.979 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat started on port 9094 (http) with context path '/payroll'
+14:32:01.997 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Started HrmsPayrollApplication in 11.15 seconds (process running for 12.515)
+14:32:08.984 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Initializing Servlet 'dispatcherServlet'
+14:32:08.986 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Completed initialization in 2 ms
+14:32:09.156 [http-nio-9094-exec-1] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+14:32:28.252 [http-nio-9094-exec-1] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=42, salary=20000.0, bankName=SBI, designation=Software Engineer, joinDate=2024-04-17, accountNumber=1234567999, ifscCode=SBI181190, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)
+14:32:58.845 [http-nio-9094-exec-1] ERROR org.hibernate.engine.jdbc.spi.SqlExceptionHelper / - ERROR: insert or update on table "emp_payroll_details" violates foreign key constraint "fk436lb15nrngkicoe0ol53fiml"
+  Detail: Key (emp_id)=(0) is not present in table "_employee".
+14:34:38.718 [http-nio-9094-exec-1] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - e.printStackTrace()---could not execute statement [ERROR: insert or update on table "emp_payroll_details" violates foreign key constraint "fk436lb15nrngkicoe0ol53fiml"
+  Detail: Key (emp_id)=(0) is not present in table "_employee".] [insert into payroll_schema.emp_payroll_details (account_number,bank_name,designation,emp_id,ifsc_code,joining_date,salary,id) values (?,?,?,?,?,?,?,?)]; SQL [insert into payroll_schema.emp_payroll_details (account_number,bank_name,designation,emp_id,ifsc_code,joining_date,salary,id) values (?,?,?,?,?,?,?,?)]; constraint [fk436lb15nrngkicoe0ol53fiml]
+14:51:51.448 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Starting HrmsPayrollApplication using Java 17.0.7 with PID 11892 (D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management\target\classes started by hp in D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management)
+14:51:51.459 [main] DEBUG com.adt.payroll.HrmsPayrollApplication / - Running with Spring Boot v3.2.4, Spring v6.1.5
+14:51:51.460 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - No active profile set, falling back to 1 default profile: "default"
+14:51:53.065 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat initialized with port 9094 (http)
+14:51:53.158 [main] INFO  org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext / - Root WebApplicationContext: initialization completed in 1656 ms
+14:51:59.901 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration / - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+14:51:59.927 [main] WARN  org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration / - 
+
+Using generated security password: f2d9e213-839c-4784-99a0-2e6caecc15d9
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+14:52:01.980 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat started on port 9094 (http) with context path '/payroll'
+14:52:02.003 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Started HrmsPayrollApplication in 11.096 seconds (process running for 12.607)
+14:52:08.737 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Initializing Servlet 'dispatcherServlet'
+14:52:08.739 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Completed initialization in 2 ms
+14:52:08.886 [http-nio-9094-exec-1] INFO  com.adt.payroll.controller.SalaryDetailsController / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg
+14:52:12.505 [http-nio-9094-exec-1] INFO  com.adt.payroll.service.SalaryDetailsServiceImpl / - PayrollService: SalaryDetailsController: Employee saveSalaryDetails: SalaryDetailsDTO(empId=42, salary=20000.0, bankName=SBI, designation=Software Engineer, joinDate=2024-04-17, accountNumber=1234567999, ifscCode=SBI181190, basic=9436.1, houseRentAllowance=9436.1, employeeESICAmount=650.0, employerESICAmount=150.0, employeePFAmount=1200.0, employerPFAmount=1300.0, grossSalary=18873.2, netSalary=17023.4, medicalInsurance=0.0)

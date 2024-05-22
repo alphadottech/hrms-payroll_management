@@ -1,0 +1,38 @@
+18:08:11.194 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Starting HrmsPayrollApplication using Java 17.0.7 with PID 12008 (D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management\target\classes started by hp in D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management)
+18:08:11.205 [main] DEBUG com.adt.payroll.HrmsPayrollApplication / - Running with Spring Boot v3.2.4, Spring v6.1.5
+18:08:11.207 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - No active profile set, falling back to 1 default profile: "default"
+18:08:13.177 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat initialized with port 9094 (http)
+18:08:13.276 [main] INFO  org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext / - Root WebApplicationContext: initialization completed in 2018 ms
+18:08:20.493 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration / - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+18:08:20.519 [main] WARN  org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration / - 
+
+Using generated security password: 8dd2ff26-aa9f-48bc-b032-fa7c429ffd30
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+18:08:22.512 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat started on port 9094 (http) with context path '/payroll'
+18:08:22.531 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Started HrmsPayrollApplication in 11.935 seconds (process running for 14.589)
+18:08:51.549 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Initializing Servlet 'dispatcherServlet'
+18:08:51.552 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Completed initialization in 3 ms
+18:09:03.689 [http-nio-9094-exec-1] INFO  com.adt.payroll.controller.PayRollController / - Payroll-service: PayRollController: getEmployeePayrollDetailsById info level log message AND API Call From IP: 0:0:0:0:0:0:0:1
+18:20:08.908 [http-nio-9094-exec-4] INFO  com.adt.payroll.controller.PayRollController / - Payroll-service: PayRollController: getEmployeePayrollDetailsById info level log message AND API Call From IP: 0:0:0:0:0:0:0:1
+18:21:53.029 [http-nio-9094-exec-8] INFO  com.adt.payroll.controller.PayRollController / - Payroll-service: PayRollController: getEmployeePayrollDetailsById info level log message AND API Call From IP: 0:0:0:0:0:0:0:1
+18:22:48.239 [http-nio-9094-exec-9] INFO  com.adt.payroll.controller.PayRollController / - Payroll-service: PayRollController: getEmployeePayrollDetailsById info level log message AND API Call From IP: 0:0:0:0:0:0:0:1
+18:30:04.723 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Starting HrmsPayrollApplication using Java 17.0.7 with PID 8088 (D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management\target\classes started by hp in D:\RITIKA_PROJECTS\HRMS_16May2024_Code\hrms-payroll_management)
+18:30:04.737 [main] DEBUG com.adt.payroll.HrmsPayrollApplication / - Running with Spring Boot v3.2.4, Spring v6.1.5
+18:30:04.738 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - No active profile set, falling back to 1 default profile: "default"
+18:30:06.291 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat initialized with port 9094 (http)
+18:30:06.385 [main] INFO  org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext / - Root WebApplicationContext: initialization completed in 1592 ms
+18:30:13.288 [main] WARN  org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration / - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+18:30:13.318 [main] WARN  org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration / - 
+
+Using generated security password: 3eb371d3-116c-4cfe-accd-07dd346091dc
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+18:30:14.971 [main] INFO  org.springframework.boot.web.embedded.tomcat.TomcatWebServer / - Tomcat started on port 9094 (http) with context path '/payroll'
+18:30:14.987 [main] INFO  com.adt.payroll.HrmsPayrollApplication / - Started HrmsPayrollApplication in 10.86 seconds (process running for 11.894)
+18:30:24.269 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Initializing Servlet 'dispatcherServlet'
+18:30:24.272 [http-nio-9094-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet / - Completed initialization in 3 ms
+18:30:24.329 [http-nio-9094-exec-1] INFO  com.adt.payroll.controller.PayRollController / - Payroll-service: PayRollController: getEmployeePayrollDetailsById info level log message AND API Call From IP: 0:0:0:0:0:0:0:1
+18:33:50.275 [RMI TCP Connection(7)-127.0.0.1] INFO  org.springframework.boot.admin.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin / - Application shutdown requested.

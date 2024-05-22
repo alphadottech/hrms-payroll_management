@@ -10,8 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.adt.payroll.dto.SalaryDetailsDTO;
+import com.adt.payroll.model.EmpPayrollDetails;
 import com.adt.payroll.model.SalaryDetails;
 import com.adt.payroll.model.User;
+import com.adt.payroll.repository.EmpPayrollDetailsRepo;
 import com.adt.payroll.repository.SalaryDetailsRepository;
 import com.adt.payroll.repository.UserRepo;
 
@@ -19,6 +21,9 @@ import com.adt.payroll.repository.UserRepo;
 public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 
 	private static final Logger log = LogManager.getLogger(SalaryDetailsServiceImpl.class);
+
+	@Autowired
+	public EmpPayrollDetailsRepo empPayrollDetailsRepo;
 
 	@Autowired
 	public SalaryDetailsRepository salaryDetailsRepo;
@@ -34,25 +39,68 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 			Optional<User> existEmployee = userRepo.findById(salaryDetailsDTO.getEmpId());
 			if (existEmployee.isPresent()) {
 
+				Optional<EmpPayrollDetails> empPayrollOptional = empPayrollDetailsRepo
+						.findByEmployeeId(salaryDetailsDTO.getEmpId());
 				Optional<SalaryDetails> salaryDetails = salaryDetailsRepo.findByEmployeeId(salaryDetailsDTO.getEmpId());
 
-				if (salaryDetails.isPresent()) {
-					salaryDetails.get().setBasic(salaryDetailsDTO.getBasic());
-					salaryDetails.get().setHouseRentAllowance(salaryDetailsDTO.getHouseRentAllowance());
-					salaryDetails.get().setEmployeeESICAmount(salaryDetailsDTO.getEmployeeESICAmount());
-					salaryDetails.get().setEmployerESICAmount(salaryDetailsDTO.getEmployerESICAmount());
-					salaryDetails.get().setEmployeePFAmount(salaryDetailsDTO.getEmployeePFAmount());
-					salaryDetails.get().setEmployerPFAmount(salaryDetailsDTO.getEmployerPFAmount());
-					salaryDetails.get().setMedicalInsurance(salaryDetailsDTO.getMedicalInsurance());
-					salaryDetails.get().setGrossSalary(salaryDetailsDTO.getGrossSalary());
-					salaryDetails.get().setNetSalary(salaryDetailsDTO.getNetSalary());
-					salaryDetailsRepo.save(salaryDetails.get());
+				if (empPayrollOptional.isPresent()) {
 
-					return new ResponseEntity<>(
-							"EmployeeSalaryDetails of EmpId:" + salaryDetailsDTO.getEmpId() + " is Updated Succesfully",
-							HttpStatus.OK);
+					empPayrollOptional.get().setSalary(salaryDetailsDTO.getSalary());
+					empPayrollOptional.get().setBankName(salaryDetailsDTO.getBankName());
+					empPayrollOptional.get().setDesignation(salaryDetailsDTO.getDesignation());
+					empPayrollOptional.get().setJoinDate(salaryDetailsDTO.getJoinDate());
+					empPayrollOptional.get().setAccountNumber(salaryDetailsDTO.getAccountNumber());
+					empPayrollOptional.get().setIfscCode(salaryDetailsDTO.getIfscCode());
+					empPayrollDetailsRepo.save(empPayrollOptional.get());
 
+					if (salaryDetails.isPresent()) {
+
+						salaryDetails.get().setBasic(salaryDetailsDTO.getBasic());
+						salaryDetails.get().setHouseRentAllowance(salaryDetailsDTO.getHouseRentAllowance());
+						salaryDetails.get().setEmployeeESICAmount(salaryDetailsDTO.getEmployeeESICAmount());
+						salaryDetails.get().setEmployerESICAmount(salaryDetailsDTO.getEmployerESICAmount());
+						salaryDetails.get().setEmployeePFAmount(salaryDetailsDTO.getEmployeePFAmount());
+						salaryDetails.get().setEmployerPFAmount(salaryDetailsDTO.getEmployerPFAmount());
+						salaryDetails.get().setMedicalInsurance(salaryDetailsDTO.getMedicalInsurance());
+						salaryDetails.get().setGrossSalary(salaryDetailsDTO.getGrossSalary());
+						salaryDetails.get().setNetSalary(salaryDetailsDTO.getNetSalary());
+						salaryDetailsRepo.save(salaryDetails.get());
+
+						return new ResponseEntity<>("EmployeeSalaryDetails of EmpId:" + salaryDetailsDTO.getEmpId()
+								+ " is Updated Succesfully", HttpStatus.OK);
+
+					} else {
+
+						SalaryDetails salaryDetailsNew = new SalaryDetails();
+
+						salaryDetailsNew.setEmpId(salaryDetailsDTO.getEmpId());
+						salaryDetailsNew.setBasic(salaryDetailsDTO.getBasic());
+						salaryDetailsNew.setHouseRentAllowance(salaryDetailsDTO.getHouseRentAllowance());
+						salaryDetailsNew.setEmployeeESICAmount(salaryDetailsDTO.getEmployeeESICAmount());
+						salaryDetailsNew.setEmployerESICAmount(salaryDetailsDTO.getEmployerESICAmount());
+						salaryDetailsNew.setEmployeePFAmount(salaryDetailsDTO.getEmployeePFAmount());
+						salaryDetailsNew.setEmployerPFAmount(salaryDetailsDTO.getEmployerPFAmount());
+						salaryDetailsNew.setMedicalInsurance(salaryDetailsDTO.getMedicalInsurance());
+						salaryDetailsNew.setGrossSalary(salaryDetailsDTO.getGrossSalary());
+						salaryDetailsNew.setNetSalary(salaryDetailsDTO.getNetSalary());
+						salaryDetailsRepo.save(salaryDetailsNew);
+
+						return new ResponseEntity<>("EmployeeSalaryDetails of EmpId:" + salaryDetailsDTO.getEmpId()
+								+ " is Saved Succesfully", HttpStatus.OK);
+					}
 				} else {
+
+					EmpPayrollDetails empPayrollDetailsNew = new EmpPayrollDetails();
+
+					empPayrollDetailsNew.setEmpId(salaryDetailsDTO.getEmpId());
+					empPayrollDetailsNew.setSalary(salaryDetailsDTO.getSalary());
+					empPayrollDetailsNew.setBankName(salaryDetailsDTO.getBankName());
+					empPayrollDetailsNew.setDesignation(salaryDetailsDTO.getDesignation());
+					empPayrollDetailsNew.setJoinDate(salaryDetailsDTO.getJoinDate());
+					empPayrollDetailsNew.setAccountNumber(salaryDetailsDTO.getAccountNumber());
+					empPayrollDetailsNew.setIfscCode(salaryDetailsDTO.getIfscCode());
+					empPayrollDetailsRepo.save(empPayrollDetailsNew);
+
 					SalaryDetails salaryDetailsNew = new SalaryDetails();
 
 					salaryDetailsNew.setEmpId(salaryDetailsDTO.getEmpId());
