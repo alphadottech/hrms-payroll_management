@@ -1,5 +1,6 @@
 package com.adt.payroll.dto;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,12 @@ import lombok.NoArgsConstructor;
 public class SalaryDetailsDTO {
 
 	private int empId;
+	private Double salary;
+	private String bankName;
+	private String designation;
+	private String joinDate;
+	private String accountNumber;
+	private String ifscCode;
 	private Double basic;
 	private Double houseRentAllowance;
 	private Double employeeESICAmount;
