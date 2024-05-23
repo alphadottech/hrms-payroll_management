@@ -85,7 +85,7 @@ public class PayRollController {
 	}
 
 	@PreAuthorize("@auth.allow('GET_EMPLOYEE_PAYROLL_SALARY_DETAILS_BY_EMP_ID')")
-	@GetMapping("/getEmployeePayrollSalaryDetailsByEmpId /{empId}")
+	@GetMapping("/getEmployeePayrollSalaryDetailsByEmpId/{empId}")
 	public ResponseEntity<SalaryDetailsDTO> getEmployeePayrollSalaryDetailsByEmpId(@PathVariable("empId") Integer empId,
 			HttpServletRequest request) {
 		LOGGER.info(
