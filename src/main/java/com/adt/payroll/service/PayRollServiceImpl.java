@@ -1081,7 +1081,7 @@ public class PayRollServiceImpl implements PayRollService {
 	}
 
 	@Override
-	public SalaryDetailsDTO getEmployeePayrollDetailsById(Integer empId) {
+	public SalaryDetailsDTO getEmployeePayrollSalaryDetailsByEmpId(Integer empId) {
 		SalaryDetailsDTO salaryDetailsDTO = new SalaryDetailsDTO();
 		Optional<EmpPayrollDetails> empPayrollOptional = empPayrollDetailsRepo.findByEmployeeId(empId);
 		Optional<SalaryDetails> salaryDetailsOptional = salaryDetailsRepo.findByEmployeeId(empId);

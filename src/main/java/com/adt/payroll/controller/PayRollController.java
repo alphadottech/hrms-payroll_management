@@ -84,14 +84,14 @@ public class PayRollController {
 		return new ResponseEntity<>(payRollService.generatePaySlipForAllEmployees(), HttpStatus.OK);
 	}
 
-	@PreAuthorize("@auth.allow('ROLE_ADMIN')")
-	@GetMapping("/getEmployeePayrollDetailsById/{empId}")
-	public ResponseEntity<SalaryDetailsDTO> getEmployeePayrollDetailsById(@PathVariable("empId") Integer empId,
+	@PreAuthorize("@auth.allow('GET_EMPLOYEE_PAYROLL_SALARY_DETAILS_BY_EMP_ID')")
+	@GetMapping("/getEmployeePayrollSalaryDetailsByEmpId /{empId}")
+	public ResponseEntity<SalaryDetailsDTO> getEmployeePayrollSalaryDetailsByEmpId(@PathVariable("empId") Integer empId,
 			HttpServletRequest request) {
 		LOGGER.info(
 				"Payroll-service: PayRollController: getEmployeePayrollDetailsById info level log message AND API Call From IP: "
 						+ request.getRemoteHost());
-		return ResponseEntity.ok(payRollService.getEmployeePayrollDetailsById(empId));
+		return ResponseEntity.ok(payRollService.getEmployeePayrollSalaryDetailsByEmpId(empId));
 	}
 
 }
