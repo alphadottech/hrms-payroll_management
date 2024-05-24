@@ -268,16 +268,19 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
 
     }
 
-    @GetMapping("/exporttoexcel")
-    public ResponseEntity<Resource> allEmpAttendenceExportExcel() throws IOException {
-        String filename="alphadot_exceldata.xlsx";
+	@PreAuthorize("@auth.allow('EXPORT_ALL_EMP_ATTENDANCE_TO_EXCEL')")
+	@GetMapping("/exporttoexcel")
+	public ResponseEntity<Resource> allEmpAttendenceExportExcel() throws IOException {
+		String filename = "alphadot_attendance_data.xlsx";
 
-        ByteArrayInputStream newdata = timeSheetService.getExcelData();
+		ByteArrayInputStream newdata = timeSheetService.getExcelData();
 
-        InputStreamResource file=new InputStreamResource(newdata);
-        ResponseEntity<Resource> body  =ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename="+filename).contentType(MediaType.parseMediaType("application/vnd.ms-excel")).body(file);
-        return body;
-    }
+		InputStreamResource file = new InputStreamResource(newdata);
+		ResponseEntity<Resource> body = ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+				.contentType(MediaType.parseMediaType("application/vnd.ms-excel")).body(file);
+		return body;
+	}
 
 
 
