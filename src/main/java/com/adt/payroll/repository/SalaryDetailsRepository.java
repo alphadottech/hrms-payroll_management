@@ -20,13 +20,12 @@ public interface SalaryDetailsRepository extends JpaRepository<SalaryDetails, In
 	Optional<SalaryDetails> findByEmployeeId(int empId);
 
 //	  Optional<SalaryDetails> findByEmployeeId(int empId);
-	
+
 //	@Transactional
 //	@Modifying
 //	@Query(value = "UPDATE payroll_schema.salary_details SET gross_salary=?1, net_salary=?2 WHERE emp_id=?3", nativeQuery = true)
 //	public void updateGrossAndNetSalaryByEmpId(double grossSalary, double netAmount, int empId);
 
-	
 //	@Transactional
 //	@Modifying
 //	@Query(value = "UPDATE payroll_schema.salary_details SET absent_deduction=?2 WHERE emp_id=?1", nativeQuery = true)
@@ -34,7 +33,6 @@ public interface SalaryDetailsRepository extends JpaRepository<SalaryDetails, In
 
 //	@Query(value = "select absent_deduction from payroll_schema.salary_details WHERE emp_id=?1", nativeQuery = true)
 //	public double findAbsentDeductionbyEmpId(int empId);
-
 
 //	@Query(value = "SELECT * FROM payroll_schema.salary_table  WHERE employee LIKE %?1%", nativeQuery = true)
 //	List<SalaryModel> searchByEmpName(String name);
