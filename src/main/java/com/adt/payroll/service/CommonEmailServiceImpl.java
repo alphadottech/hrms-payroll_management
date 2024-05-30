@@ -361,6 +361,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 			mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 			mimeMessageHelper.setFrom(sender);
 			mimeMessageHelper.setTo("teamhr.adt@gmail.com");
+			//mimeMessageHelper.setTo("nishasingh.adt@gmail.com");
 			mimeMessageHelper.setText(massage);
 			mimeMessageHelper.setSubject("Salary Slip");
 			//mimeMessageHelper.addAttachment(name + ".pdf", source);
