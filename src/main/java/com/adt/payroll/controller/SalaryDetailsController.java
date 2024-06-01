@@ -23,7 +23,7 @@ public class SalaryDetailsController {
 	@Autowired
 	private SalaryDetailsService salaryDetailsService;
 
-	@PreAuthorize("@auth.allow('SAVE_EMPLOYEE_SALARY_DETAILS')")
+	//@PreAuthorize("@auth.allow('SAVE_EMPLOYEE_SALARY_DETAILS')")
 	@PostMapping("/saveEmployeeSalaryDetails")
 	public ResponseEntity<String> saveSalaryDetails(@RequestBody SalaryDetailsDTO salaryDetailsDTO) {
 		LOGGER.info("PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg");
