@@ -37,9 +37,9 @@ public class Auth {
 		String authority=null;
 		String sql = "SELECT r.role_name FROM user_schema.role r JOIN av_schema.api_mapping  am ON r.role_id = am.role_id JOIN av_schema.api_details ad ON am.api_id = ad.api_id WHERE ad.api_name ="
 				+ "'" + apiName + "'";
-		List<Map<String, Object>> priortimeData = dataExtractor.extractDataFromTable(sql);
-		for (Map<String, Object> priortime : priortimeData) {
-			authority = String.valueOf(priortime.get("role_name"));
+		List<Map<String, Object>> roleeData = dataExtractor.extractDataFromTable(sql);
+		for (Map<String, Object> role : roleeData) {
+			authority = String.valueOf(role.get("role_name"));
 			isValidAuthority = checkAuthority(authority, authorities);
 			if (isValidAuthority) {
 				break;
@@ -56,9 +56,9 @@ public class Auth {
 		boolean isValidAuthority = false;
 		String authority=null;
 		String sql = "SELECT r.role_name FROM user_schema.role r JOIN av_schema.api_mapping  am ON r.role_id = am.role_id JOIN av_schema.api_details ad ON am.api_id = ad.api_id WHERE ad.api_name ="+"'"+apiName+"'";
-		List<Map<String, Object>> priortimeData = dataExtractor.extractDataFromTable(sql);
-		for (Map<String, Object> priortime : priortimeData) {
-	    	 authority = String.valueOf(priortime.get("role_name"));
+		List<Map<String, Object>> roleData = dataExtractor.extractDataFromTable(sql);
+		for (Map<String, Object> role : roleData) {
+	    	 authority = String.valueOf(role.get("role_name"));
 	    	 isValidAuthority = checkAuthority(authority, authorities);
 	    	 if (isValidAuthority) {
 					break;
