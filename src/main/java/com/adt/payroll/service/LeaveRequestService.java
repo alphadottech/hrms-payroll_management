@@ -17,9 +17,9 @@ public interface LeaveRequestService {
 
 	public List<LeaveRequestModel> getLeaveRequestDetailsByEmpId(Integer empid);
 
-	public String AcceptLeaveRequest(Integer empid, Integer leaveId,Integer leaveDate) throws TemplateException, MessagingException, IOException;
+	public String AcceptLeaveRequest(Integer empid, Integer leaveId,Integer leaveDate ,String leavetype, String leaveReason) throws TemplateException, MessagingException, IOException;
 	
-	public String RejectLeaveRequest(Integer empid, Integer leaveId) throws TemplateException, MessagingException, IOException;
+	public String RejectLeaveRequest(Integer empid, Integer leaveId,String leavetype, String leaveReason) throws TemplateException, MessagingException, IOException;
 
 	public List<LeaveRequestModel> getAllEmployeeLeaveDetails();
      

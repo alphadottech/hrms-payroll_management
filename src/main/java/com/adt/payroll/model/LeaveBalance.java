@@ -26,13 +26,13 @@ public class LeaveBalance {
 	private int leaveBalance;
 	
 	@Column(name = "half_day")
-	private int halfDay;
+	private Integer  halfDay;
 
 	@Column(name = "paid_leave")
-	private int paidLeave;
+	private Integer  paidLeave;
 	
 	@Column(name = "unpaid_leave")
-	private int unpaidLeave;
+	private Integer  unpaidLeave;
 
 	
 }

@@ -8,6 +8,7 @@ import jakarta.mail.MessagingException;
 
 import com.adt.payroll.event.OnEmployeeExpenseAcceptOrRejectEvent;
 import com.adt.payroll.event.OnEmployeeExpenseDetailsSavedEvent;
+import com.adt.payroll.event.OnLeaveAcceptOrRejectEvent;
 import com.adt.payroll.event.OnPriorTimeAcceptOrRejectEvent;
 import com.adt.payroll.event.OnPriorTimeDetailsSavedEvent;
 import com.adt.payroll.model.LeaveRequestModel;
@@ -30,6 +31,9 @@ public interface CommonEmailService {
 	public void send(Mail mail) throws MessagingException, UnsupportedEncodingException;
 	
 	public void sendAccountChangeEmailRejected(OnPriorTimeAcceptOrRejectEvent event);
+	
+	public void sendLeaveAcceptAndRejectedEmail(OnLeaveAcceptOrRejectEvent event);
+	
 	//END:- For Prior Time
 
 	//*** Send email after generating PaySlip ***

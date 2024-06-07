@@ -21,4 +21,8 @@ public class TableDataExtractor {
 
         return jdbcTemplate.queryForList(sql);
     }
+    
+    public int  insertDataFromTable(String sql){   
+ 	   return jdbcTemplate.update(sql);
+     }
 }
