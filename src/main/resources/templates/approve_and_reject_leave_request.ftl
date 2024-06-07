@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Leave Request Notification</title>
+    <title>Leave Request Status Notification</title>
    <style>
           body {
               font-family: Arial, sans-serif;
@@ -57,17 +57,7 @@
               margin-right: 10px;
           }
 
-          .button.reject {
-           color: #fff;
-            background-color: #8c190d;
-          }
-          
-           .button.approve {
-            color: #fff;
-            background-color: #088F8F;
-          }
-
-          .button:hover {
+              .button:hover {
               background-color: #1e4bb5;
           }
 
@@ -92,20 +82,18 @@
       </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Leave Request Notification</h1>
+    <div class="container" >
+        <h1>Leave Request Status Notification</h1>
         <p>
-            Dear <span id="Name">HR</span>,
+            Dear <span id="Name">${Name}</span>,
             <br>
-            I kindly request your approval for this leave request and would be happy to discuss this further if needed.
+            <span id="Message">${Message}</span>
+            
         </p>
 
         <table>
-             <tr>
-                <th>Applicant Name</th>
-                <td><span id="Name">${Name}</span></td>
-            </tr>
             <tr>
+            
                 <th>Leave Type</th>
                 <td><span id="LeaveType">${LeaveType}</span></td>
             </tr>
@@ -119,21 +107,13 @@
             </tr>
             <tr>
                 <th>Status</th>
-                <td><span id="Status">Pending</span></td>
+                <td><span id="Status">${Status}</span></td>
             </tr>
         </table>
 
         <p>
             Available Leave: <span id="LeaveBalance">${LeaveBalance} </span>
         </p>
-
-        <p>
-            Please take the appropriate action on this leave request.
-        </p>
-
-        <a class="button approve" href="${leaveApprovalLink}" target="_blank" rel="noopener">Approve</a>
-        <a class="button reject" href="${leaveRejectionLink}" target="_blank" rel="noopener">Reject</a>
-
         <div class="support">
             <p>
                 Contact our support team if you have any questions or concerns.

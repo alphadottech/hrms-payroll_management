@@ -22,6 +22,7 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import com.adt.payroll.dto.EmployeeExpenseDTO;
 import com.adt.payroll.event.OnEmployeeExpenseAcceptOrRejectEvent;
 import com.adt.payroll.event.OnEmployeeExpenseDetailsSavedEvent;
+import com.adt.payroll.event.OnLeaveAcceptOrRejectEvent;
 import com.adt.payroll.event.OnPriorTimeAcceptOrRejectEvent;
 import com.adt.payroll.event.OnPriorTimeDetailsSavedEvent;
 import com.adt.payroll.model.LeaveRequestModel;
@@ -100,6 +101,17 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		String recipientAddress = event.getPriortime().get().getEmail();
 		try {
 			sendAccountChangeEmail(event, action, actionStatus, recipientAddress);
+		} catch (IOException | TemplateException | MessagingException e) {
+			throw new MailSendException(recipientAddress);
+		}
+	}
+	
+	@Override
+	public void sendLeaveAcceptAndRejectedEmail(OnLeaveAcceptOrRejectEvent event) {
+		log.info("sendAccountChangeEmailRejected");
+		String recipientAddress = null;
+		try {
+			sendleaveResponseEmail(event, recipientAddress);
 		} catch (IOException | TemplateException | MessagingException e) {
 			throw new MailSendException(recipientAddress);
 		}
@@ -219,14 +231,22 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		Mail mail =  new Mail();
 		mail.setSubject("Leave Request");
 		//*** From whom the mail should come ***
-		mail.setFrom(sender);
-
-		//*** To whom we should send the mail ***
 		Integer empID = lr.getEmpid();
 		Optional<User> user = userRepo.findById(empID);
 		String userEmail = user.get().getEmail();
-		mail.setTo(userEmail);
+		mail.setFrom(userEmail);
+		String sql = "select * from av_schema.priortime_email";
+		List<String> emailArray = new ArrayList<>();
+		List<Map<String, Object>> priortimeData = dataExtractor.extractDataFromTable(sql);
+		for (Map<String, Object> priortime : priortimeData) {
+			String email = String.valueOf(priortime.get("email_id"));
+			emailArray.add(email);
+		}
 
+		//*** To whom we should send the mail ***
+	
+		//mail.setTo(userEmail);
+		mail.setToArray(emailArray);
 		mail.getModel().put("leaveApprovalLink", Url);
 		mail.getModel().put("leaveRejectionLink", Url1);
 		mail.getModel().put("LeaveId", event.getLeaveRequestModel().getLeaveid().toString() );
@@ -315,6 +335,29 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		mail.setContent(mailContent);
 		send(mail);
 	}
+	
+	
+	public void sendleaveResponseEmail(OnLeaveAcceptOrRejectEvent event,
+			String to) throws IOException, TemplateException, MessagingException {
+		Mail mail = new Mail();
+		mail.setSubject("Leave Request Status");
+		mail.setFrom(mailFrom);
+		mail.setTo(event.getLeaveInfo().get().getEmail());
+		mail.getModel().put("Message",event.getLeaveInfo().get().getMessage());
+		mail.getModel().put("Name", event.getLeaveInfo().get().getName());
+		mail.getModel().put("LeaveBalance", event.getLeaveInfo().get().getLeaveBalance().toString());
+		mail.getModel().put("LeaveType", event.getLeaveInfo().get().getLeaveType());
+		mail.getModel().put("Reason", event.getLeaveInfo().get().getLeaveReason());
+		mail.getModel().put("LeaveDates", event.getLeaveInfo().get().getLeavedate().toString());
+		mail.getModel().put("Status", event.getLeaveInfo().get().getStatus());
+		templateConfiguration.setClassForTemplateLoading(getClass(), basePackagePath);
+		Template template = templateConfiguration.getTemplate("approve_and_reject_leave_request.ftl");
+		String mailContent = FreeMarkerTemplateUtils.processTemplateIntoString(template, mail.getModel());
+		mail.setContent(mailContent);
+		send(mail);
+			
+	}
+	
 
 	@Override
 	public void sendAccountChangeEmailApproved(OnEmployeeExpenseAcceptOrRejectEvent event)
