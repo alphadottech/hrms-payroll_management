@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import org.apache.commons.math3.exception.NoDataException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,6 +140,15 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         String message = ex.getLocalizedMessage();
         ApiError errors = new ApiError(HttpStatus.OK,message, ex);
         ErrorResponse errorResponse = new ErrorResponse(errors.getStatus().value(), errors.getMessage(), errors.getTimestamp());
+        return new ResponseEntity<>(errorResponse, errors.getStatus());
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<Object> handleAccessDeniedException(ExpiredJwtException ex) {
+        String message = ex.getMessage();
+        ApiError errors = new ApiError(HttpStatus.UNAUTHORIZED, message, ex);
+        ErrorResponse errorResponse = new ErrorResponse(errors.getStatus().value(), "Your session has expired. Please log in again.",
+                errors.getTimestamp());
         return new ResponseEntity<>(errorResponse, errors.getStatus());
     }
     
