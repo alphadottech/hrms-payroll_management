@@ -39,7 +39,11 @@ public class LeaveRequestModel {
     private String leaveReason;
 	@Transient
     private String name;
-
+	@Transient
+    private String email;
+	@Transient
+	private String message;
+	
     @ElementCollection
     @CollectionTable(catalog = "EmployeeDB", schema = "payroll_schema", name = "LEAVE_DATES", joinColumns = @JoinColumn(name = "LEAVE_ID"))
     @Column(name = "leavedate")

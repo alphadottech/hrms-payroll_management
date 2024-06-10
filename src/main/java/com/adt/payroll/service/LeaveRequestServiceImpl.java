@@ -2,7 +2,9 @@ package com.adt.payroll.service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.mail.MessagingException;
@@ -19,11 +21,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.adt.payroll.event.OnLeaveAcceptOrRejectEvent;
+import com.adt.payroll.model.LeaveBalance;
 import com.adt.payroll.model.LeaveModel;
 import com.adt.payroll.model.LeaveRequestModel;
 import com.adt.payroll.model.Mail;
 import com.adt.payroll.model.OnLeaveRequestSaveEvent;
 import com.adt.payroll.model.User;
+import com.adt.payroll.repository.LeaveBalanceRepository;
 import com.adt.payroll.repository.LeaveRepository;
 import com.adt.payroll.repository.LeaveRequestRepo;
 import com.adt.payroll.repository.UserRepo;
@@ -49,9 +54,28 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
 	@Value("${spring.mail.username}")
 	private String sender;
+	
+
+    @Value("${-Dmy.port}")
+	private String serverPort;
+
+	@Value("${-Dmy.property}")
+	private String ipaddress;
+	
+	@Value("${-UI.scheme}")
+	private String scheme;
+
+	@Value("${-UI.context}")
+	private String context;
        
 	@Autowired
 	private ApplicationEventPublisher applicationEventPublisher;
+	
+	@Autowired
+	private LeaveBalanceRepository leaveBalanceRepo;
+	
+	@Autowired
+	private TableDataExtractor dataExtractor;
 
 	public LeaveRequestServiceImpl() {
 
@@ -81,26 +105,29 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 				}
 			}
 		}
+		String sql="select leave_balance from payroll_schema.leave_balance where emp_id="+lr.getEmpid();
+		 List<Map<String, Object>> tableData = dataExtractor.extractDataFromTable(sql);
+		 Map<String, Object> firstMap = tableData.get(0);
+		 lr.setLeaveBalance(Integer.valueOf(String.valueOf(firstMap.get("leave_balance"))));
+			
 		if (counter == 0) {
-			// List<String> li = lr.getLeavedate();
-			// lr.setLeavedate(li);
 			lr.setStatus("Pending");
-
 			leaveRequestRepo.save(lr);
 			int id = lr.getEmpid();
 			int leaveId = lr.getLeaveid();
-			UriComponentsBuilder urlBuilder = ServletUriComponentsBuilder.fromCurrentContextPath()
-					.path("/leave/leave/Accepted/" + id + "/" + leaveId + "/" + lr.getLeavedate().size());
-			UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.fromCurrentContextPath()
-					.path("/leave/leave/Rejected/" + id + "/" + leaveId);
-
-			System.out.println(urlBuilder.toUriString());
-			System.out.println(urlBuilder1.toUriString());
-
-			// UriComponentsBuilder urlBuilder2 =
-			// ServletUriComponentsBuilder.fromHttpUrl("http://localhost:9095/payroll/leave/leave/Rejected/"+id+"/"+leaveId);
-
-			OnLeaveRequestSaveEvent onLeaveRequestSaveEvent = new OnLeaveRequestSaveEvent(urlBuilder, urlBuilder1, lr);
+			 UriComponentsBuilder urlBuilder = ServletUriComponentsBuilder.newInstance()
+						.scheme(scheme)
+						.host(ipaddress)
+						.port(serverPort)
+						.path(context+"/payroll/leave/leave/Accepted/"+ id + "/" + leaveId + "/" + lr.getLeavedate().size()+"/"+lr.getLeaveType()+"/"+lr.getLeaveReason());
+			
+			 UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.newInstance()
+						.scheme(scheme)
+						.host(ipaddress)
+						.port(serverPort)
+						.path(context+"/payroll/leave/leave/Rejected/"+ id + "/" + leaveId+"/"+lr.getLeaveType()+"/"+lr.getLeaveReason());
+			 
+				OnLeaveRequestSaveEvent onLeaveRequestSaveEvent = new OnLeaveRequestSaveEvent(urlBuilder, urlBuilder1, lr);
 			applicationEventPublisher.publishEvent(onLeaveRequestSaveEvent);
 
 		} else {
@@ -130,32 +157,45 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 	}
 
 	@Override
-	public String AcceptLeaveRequest(Integer empid, Integer leaveId, Integer leaveDate)
+	public String AcceptLeaveRequest(Integer empid, Integer leaveId, Integer leaveDate ,String leaveType,String leaveReason)
 			throws TemplateException, MessagingException, IOException {
-
+		Optional<LeaveRequestModel> leaveRequest = Optional.of(new LeaveRequestModel());
 		LeaveRequestModel opt = leaveRequestRepo.search(empid, leaveId);
-
 		Optional<User> user = Optional.ofNullable(userRepo.findById(empid)
 				.orElseThrow(() -> new EntityNotFoundException("employee not found :" + empid)));
 		String email = user.get().getEmail();
-
 		if (opt != null && opt.getStatus().equalsIgnoreCase("Pending")) {
 			String message = "Accepted";
-
-			LeaveModel leaveModel = leaveRepository.findByEmpId(empid);
-
-			if (leaveModel.getLeaveBalance() >= leaveDate) {
-
-				sendEmail(email, message);
-
-				opt.setStatus("Accepted");
-				leaveRequestRepo.save(opt);
-				leaveModel.setLeaveBalance(leaveModel.getLeaveBalance() - leaveDate);
+			LeaveBalance leaveBalance = leaveBalanceRepo.findByEmpId(empid);
+			if (leaveBalance.getLeaveBalance() >= leaveDate) {
+				leaveBalance.setLeaveBalance(leaveBalance.getLeaveBalance() - leaveDate);
+				leaveBalance.setPaidLeave(leaveBalance.getPaidLeave() + leaveDate);
 			} else {
-
-				return "You dont have sufficient Leave Balance";
+				int leaveNo = leaveDate - leaveBalance.getLeaveBalance();
+				leaveBalance.setPaidLeave(leaveBalance.getPaidLeave() + leaveBalance.getLeaveBalance());
+				leaveBalance.setUnpaidLeave(leaveNo);
+				leaveBalance.setLeaveBalance(0);
 			}
-			leaveRepository.save(leaveModel);
+			List<String> leaveDatelist = new ArrayList<>();
+			String sql = "select leavedate from payroll_schema.leave_dates where leave_id=" + leaveId;
+			List<Map<String, Object>> leaveData = dataExtractor.extractDataFromTable(sql);
+			for (Map<String, Object> leaveMap : leaveData) {
+				leaveDatelist.add((String.valueOf(leaveMap.get("leavedate"))));
+			}
+			leaveRequest.get().setName(leaveBalance.getName());
+			leaveRequest.get().setLeaveType(leaveType);
+			leaveRequest.get().setLeaveReason(leaveReason);
+			leaveRequest.get().setLeavedate(leaveDatelist);
+			leaveRequest.get().setStatus(message);
+			leaveRequest.get().setLeaveBalance(leaveBalance.getLeaveBalance());
+			leaveRequest.get().setEmail(email);
+			leaveRequest.get().setMessage("Your leave request has been approved. Find blow leave request approved details");
+			opt.getLeaveBalance();
+			OnLeaveAcceptOrRejectEvent onLeaveAcceptOrRejectEvent = new OnLeaveAcceptOrRejectEvent(leaveRequest);
+			applicationEventPublisher.publishEvent(onLeaveAcceptOrRejectEvent);
+			opt.setStatus("Accepted");
+			leaveBalanceRepo.save(leaveBalance);
+			leaveRequestRepo.save(opt);
 			return opt.getLeaveid() + " leave Request Accepted";
 		} else {
 			return empid + "leave request status already updated";
@@ -164,19 +204,36 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 	}
 
 	@Override
-	public String RejectLeaveRequest(Integer empid, Integer leaveId)
+	public String RejectLeaveRequest(Integer empid, Integer leaveId,String leaveType,String leaveReason)
 			throws TemplateException, MessagingException, IOException {
+		Optional<LeaveRequestModel> leaveRequest = Optional.of(new LeaveRequestModel());
 		LeaveRequestModel opt = leaveRequestRepo.search(empid, leaveId);
 		Optional<User> user = Optional.ofNullable(userRepo.findById(empid)
 				.orElseThrow(() -> new EntityNotFoundException("employee not found :" + empid)));
 		String email = user.get().getEmail();
-
+		LeaveBalance leaveBalance = leaveBalanceRepo.findByEmpId(empid);
 		if (opt != null && opt.getStatus().equalsIgnoreCase("Pending")) {
+			List<String> leaveDatelist = new ArrayList<>();
+			String sql1 = "select leavedate from payroll_schema.leave_dates where leave_id=" + leaveId;
+			List<Map<String, Object>> leaveData = dataExtractor.extractDataFromTable(sql1);
+			for (Map<String, Object> leaveMap : leaveData) {
+				leaveDatelist.add((String.valueOf(leaveMap.get("leavedate"))));
+			}
 			String message = "Rejected";
-
-			sendEmail(email, message);
+			String sql = "delete from payroll_schema.leave_dates where leave_id=" + leaveId;
+			dataExtractor.insertDataFromTable(sql);
+			leaveRequest.get().setName(leaveBalance.getName());
+			leaveRequest.get().setLeaveType(leaveType);
+			leaveRequest.get().setLeaveReason(leaveReason);
+			leaveRequest.get().setLeavedate(leaveDatelist);
+			leaveRequest.get().setStatus(message);
+			leaveRequest.get().setLeaveBalance(leaveBalance.getLeaveBalance());
+			leaveRequest.get().setEmail(email);
+			leaveRequest.get().setMessage("Your leave request has been rejected. Find blow leave request rejected details");
 			opt.setStatus("Rejected");
 			leaveRequestRepo.save(opt);
+			OnLeaveAcceptOrRejectEvent onLeaveAcceptOrRejectEvent = new OnLeaveAcceptOrRejectEvent(leaveRequest);
+			applicationEventPublisher.publishEvent(onLeaveAcceptOrRejectEvent);
 			return opt.getLeaveid() + " leave Request Rejected";
 		} else {
 			return empid + " leave request status already updated";
