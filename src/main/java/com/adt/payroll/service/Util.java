@@ -137,7 +137,8 @@ public class Util {
             + "Thank you for your attention to this matter and for your continued dedication to the company.\r\n"
             + "\r\n"
             + "Best regards,\r\n"
-            + "[Your Name]\r\n";
+            + "[Your Name]\r\n"
+            + "[Company Name]\r\n";
 
     public CurrentDateTime getDateTime() {
 		CurrentDateTime currentDateTime = new CurrentDateTime();

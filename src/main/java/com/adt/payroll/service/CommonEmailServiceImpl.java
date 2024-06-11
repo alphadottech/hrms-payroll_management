@@ -418,7 +418,8 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 	
 	@Override
 	public void sendEmailForTimeSheet(ByteArrayOutputStream baos, String name, String gmail) {
-		String massage = Util.TIME_SHEET_MSG.replace("[Name]", name).replace("[Your Name]", "AlphaDot Technologies");
+		String massage = Util.TIME_SHEET_MSG.replace("[Name]", name).replace("[Company Name]", "AlphaDot Technologies")
+				.replace("[Your Name]", "Team HR");
 
 		MimeMessage mimeMessage = mailSender.createMimeMessage();
 		MimeMessageHelper mimeMessageHelper;
@@ -429,7 +430,6 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 			mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 			mimeMessageHelper.setFrom(sender);
 			mimeMessageHelper.setTo(gmail);
-			//mimeMessageHelper.setTo("nishasingh.adt@gmail.com");
 			mimeMessageHelper.setText(massage);
 			mimeMessageHelper.setSubject("Weekly Time Sheet Report");
 			mimeMessageHelper.addAttachment(name + ".xlsx", source);
