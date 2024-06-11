@@ -56,5 +56,8 @@ public interface TimeSheetRepo extends JpaRepository<TimeSheetModel, Integer> {
 
 	@Query(value = "SELECT count(*) as empHalfDay FROM payroll_schema.time_sheet where employee_id=?1 and month=?2 and year=?3 and status='Present' and working_hour<'6:00:00'", nativeQuery = true)
 	public int findEmpTotalHalfDayCount(int empId, String month, String year);
+	
+    @Query(value = "SELECT * FROM payroll_schema.Time_sheet t WHERE  t.month=?1 and t.year=?2 and (t.check_in IS NULL OR t.check_out IS NULL OR (t.working_hour IS NULL OR t.working_hour<'9:30:00'))", nativeQuery = true)
+	public List<TimeSheetModel> findTimeSheetWithNullValues(String month, String year);
 }
 

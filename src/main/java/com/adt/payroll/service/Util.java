@@ -125,6 +125,19 @@ public class Util {
             + "Regards,"
             + "\r\n"
             +"AlphaDot Technologies";
+    
+    public static final String TIME_SHEET_MSG = "Dear [Name],\r\n"
+            + "\r\n"
+            + "I hope this email finds you well. I am writing to bring to your attention some discrepancies in your timesheet for the last Week.\r\n"
+            + "\r\n"
+            + "It appears that there are instances where your check-in or check-out times are not recorded properly. This could lead to inaccuracies in your total working hours.\r\n"
+            + "Kindly Check the below attached weekly timesheet report and provide any necessary corrections or explanations."
+            + "If you need assistance or have any questions regarding your timesheet, please do not hesitate to contact the HR department.\r\n"
+            + "\r\n"
+            + "Thank you for your attention to this matter and for your continued dedication to the company.\r\n"
+            + "\r\n"
+            + "Best regards,\r\n"
+            + "[Your Name]\r\n";
 
     public CurrentDateTime getDateTime() {
 		CurrentDateTime currentDateTime = new CurrentDateTime();
