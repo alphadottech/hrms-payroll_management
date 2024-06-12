@@ -79,7 +79,7 @@ public class MonthlyScheduler {
 					ByteArrayOutputStream employeeReport = generateExcelReport(e);
 					mailService.sendEmailForTimeSheet(employeeReport,
 							user.get().getFirstName() + " " + user.get().getLastName(), user.get().getEmail(),
-							startDate.format(formatter) + "-" + endDate.format(formatter));
+							startDate.format(formatter) + " to " + endDate.format(formatter));
 				} catch (IOException ex) {
 					log.error("Error while generating timesheet report.", ex.getMessage());
 				}
