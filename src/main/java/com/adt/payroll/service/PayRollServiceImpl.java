@@ -358,6 +358,9 @@ public class PayRollServiceImpl implements PayRollService {
 					gmail = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Gmail)));
 					joiningDate = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.JoiningDate)));
 					bankName = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.BankName)));
+					esic = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Esic)));
+					pf = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.PF)));
+
 					try {
 						adjustment = Integer.parseInt(
 								dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.ADJUSTMENT))));

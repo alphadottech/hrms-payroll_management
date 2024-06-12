@@ -55,6 +55,6 @@ public interface CommonEmailService {
 	
 	public void sendEmail( String name, String msg);
 
-	void sendEmailForTimeSheet(ByteArrayOutputStream baos, String name, String gmail);
+	void sendEmailForTimeSheet(ByteArrayOutputStream baos, String name, String gmail, String date);
 
 }

@@ -128,7 +128,7 @@ public class Util {
     
     public static final String TIME_SHEET_MSG = "Dear [Name],\r\n"
             + "\r\n"
-            + "I hope this email finds you well. I am writing to bring to your attention some discrepancies in your timesheet for the last Week.\r\n"
+            + "I hope this email finds you well. I am writing to bring to your attention some discrepancies in your timesheet for the last Week [date-range].\r\n"
             + "\r\n"
             + "It appears that there are instances where your check-in or check-out times are not recorded properly. This could lead to inaccuracies in your total working hours.\r\n"
             + "Kindly Check the below attached weekly timesheet report and provide any necessary corrections or explanations."

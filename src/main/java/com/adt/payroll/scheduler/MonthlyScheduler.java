@@ -2,8 +2,10 @@ package com.adt.payroll.scheduler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
@@ -58,16 +60,15 @@ public class MonthlyScheduler {
 
     }
   
-    //@Scheduled(cron = "0 */2 * * * *")
-    @Scheduled(cron = "0 0 8 * * MON") // Executes on the every Monday at 8 AM
+   // @Scheduled(cron = "0 */2 * * * *")
+	@Scheduled(cron = "0 0 8 * * MON") // Executes on the every Monday at 8 AM
 	public void sendNotificationForTimeSheet() {
-    	log.info("Generate weekly time sheet report ");
-		LocalDate date = LocalDate.now();
-		Month month = date.getMonth();
-		int year = date.getYear();
-		String monthName = month.getDisplayName(TextStyle.FULL, Locale.ENGLISH);
-		List<TimeSheetModel> timeSheet = timeSheetRepo.findTimeSheetWithNullValues(monthName.toUpperCase(),
-				String.valueOf(year));
+		log.info("Generate weekly time sheet report ");
+		LocalDate endDate = LocalDate.now();
+		LocalDate startDate = endDate.minusDays(8);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		List<TimeSheetModel> timeSheet = timeSheetRepo.findTimeSheetWithNullValues(startDate.format(formatter),
+				endDate.format(formatter));
 		if (!timeSheet.isEmpty() && timeSheet.size() > 0) {
 			Map<Integer, List<TimeSheetModel>> employeeTimeSheetDetails = timeSheet.stream()
 					.collect(Collectors.groupingBy(TimeSheetModel::getEmployeeId));
@@ -77,7 +78,8 @@ public class MonthlyScheduler {
 							.orElseThrow(() -> new NoDataFoundException("employee not found :" + i)));
 					ByteArrayOutputStream employeeReport = generateExcelReport(e);
 					mailService.sendEmailForTimeSheet(employeeReport,
-							user.get().getFirstName() + " " + user.get().getLastName(), user.get().getEmail());
+							user.get().getFirstName() + " " + user.get().getLastName(), user.get().getEmail(),
+							startDate.format(formatter) + "-" + endDate.format(formatter));
 				} catch (IOException ex) {
 					log.error("Error while generating timesheet report.", ex.getMessage());
 				}
