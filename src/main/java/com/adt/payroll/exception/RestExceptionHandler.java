@@ -1,16 +1,17 @@
 package com.adt.payroll.exception;
 
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import org.apache.commons.math3.exception.NoDataException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,10 +29,18 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.adt.payroll.config.Auth;
 import com.adt.payroll.errorResponse.ApiError;
 import com.adt.payroll.errorResponse.ErrorResponse;
 import com.adt.payroll.errorResponse.FieldErrors;
 
+import freemarker.core.ParseException;
+import freemarker.template.Configuration;
+import freemarker.template.MalformedTemplateNameException;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateNotFoundException;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.persistence.EntityNotFoundException;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -38,6 +48,16 @@ import jakarta.persistence.EntityNotFoundException;
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @Autowired
     private MessageSource messageSource;
+    
+    @Value("${api.form.html}")
+   	public String apiNames;
+       
+       @Value("${app.velocity.templates.location}")
+   	private String basePackagePath;
+
+       
+   	 @Autowired
+   	 private Configuration freemarkerConfig;
 
     //Handle All Exceptions
     @ExceptionHandler(Exception.class)
@@ -144,13 +164,21 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<Object> handleAccessDeniedException(ExpiredJwtException ex) {
-        String message = ex.getMessage();
-        ApiError errors = new ApiError(HttpStatus.UNAUTHORIZED, message, ex);
-        ErrorResponse errorResponse = new ErrorResponse(errors.getStatus().value(), "Your session has expired. Please log in again.",
-                errors.getTimestamp());
-        return new ResponseEntity<>(errorResponse, errors.getStatus());
-    }
+  	public ResponseEntity<?> handleAccessDeniedException(ExpiredJwtException ex) throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateException {
+  		String message = ex.getMessage();
+  		ApiError errors = new ApiError(HttpStatus.UNAUTHORIZED, message, ex);
+  		ErrorResponse errorResponse = new ErrorResponse(errors.getStatus().value(), "Your session has expired. Please log in again.",
+  				errors.getTimestamp());
+  		freemarkerConfig.setClassForTemplateLoading(getClass(), basePackagePath);
+  		Template template = freemarkerConfig.getTemplate("message.ftl");
+  		 Map<String, Object> model = new HashMap<>();
+  		  model.put("Message", "You don't have access to this link. because request has been expired.");
+  		  model.put("Email", "");
+  		if(apiNames.contains(Auth.apiConstant)) {
+  			return new ResponseEntity<>(FreeMarkerTemplateUtils.processTemplateIntoString(template, model), errors.getStatus());
+  		}
+  		return new ResponseEntity<>(errorResponse, errors.getStatus());
+  	}
     
 }
 

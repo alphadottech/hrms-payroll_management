@@ -30,6 +30,9 @@ public class LeaveRequestModel {
 
     @Column(name = "status")
     private String status;
+    
+    @Column(name = "updated_by")
+    private String updatedBy;
 
 	@Transient
     private Integer leaveBalance;
