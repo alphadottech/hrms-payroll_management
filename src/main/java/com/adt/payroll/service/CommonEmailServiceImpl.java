@@ -19,6 +19,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
+import com.adt.payroll.config.Auth;
 import com.adt.payroll.dto.EmployeeExpenseDTO;
 import com.adt.payroll.event.OnEmployeeExpenseAcceptOrRejectEvent;
 import com.adt.payroll.event.OnEmployeeExpenseDetailsSavedEvent;
@@ -65,7 +66,9 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 	@Autowired
 	private TableDataExtractor dataExtractor;
 
-
+	@Autowired
+	private Auth auth;
+	
 	public CommonEmailServiceImpl(JavaMailSender mailSender, Configuration templateConfiguration) {
 		this.mailSender = mailSender;
 		this.templateConfiguration = templateConfiguration;
@@ -240,29 +243,25 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		List<Map<String, Object>> priortimeData = dataExtractor.extractDataFromTable(sql);
 		for (Map<String, Object> priortime : priortimeData) {
 			String email = String.valueOf(priortime.get("email_id"));
-			emailArray.add(email);
-		}
-
-		//*** To whom we should send the mail ***
-	
-		//mail.setTo(userEmail);
-		mail.setToArray(emailArray);
-		mail.getModel().put("leaveApprovalLink", Url);
-		mail.getModel().put("leaveRejectionLink", Url1);
-		mail.getModel().put("LeaveId", event.getLeaveRequestModel().getLeaveid().toString() );
-		mail.getModel().put("EmpId", event.getLeaveRequestModel().getEmpid().toString());
-		mail.getModel().put("Name", event.getLeaveRequestModel().getName());
-		mail.getModel().put("LeaveBalance", event.getLeaveRequestModel().getLeaveBalance().toString());
-		mail.getModel().put("LeaveType", event.getLeaveRequestModel().getLeaveType());
-		mail.getModel().put("Reason", event.getLeaveRequestModel().getLeaveReason());
-		mail.getModel().put("LeaveDates", event.getLeaveRequestModel().getLeavedate().toString());
-		mail.getModel().put("Status", event.getLeaveRequestModel().getStatus());
-
-		templateConfiguration.setClassForTemplateLoading(getClass(), basePackagePath);
-		Template template = templateConfiguration.getTemplate("leave_status_change.ftl");
-		String mailContent = FreeMarkerTemplateUtils.processTemplateIntoString(template, mail.getModel());
-		mail.setContent(mailContent);
-		send(mail);
+			String token=auth.tokenGanreate(email);
+			mail.setTo(email);
+			mail.getModel().put("leaveApprovalLink", Url+"?Authorization="+token);		
+			mail.getModel().put("leaveRejectionLink", Url1+"?Authorization="+token);
+			mail.getModel().put("LeaveId", event.getLeaveRequestModel().getLeaveid().toString() );
+			mail.getModel().put("EmpId", event.getLeaveRequestModel().getEmpid().toString());
+			mail.getModel().put("Name", event.getLeaveRequestModel().getName());
+			mail.getModel().put("LeaveBalance", event.getLeaveRequestModel().getLeaveBalance().toString());
+			mail.getModel().put("LeaveType", event.getLeaveRequestModel().getLeaveType());
+			mail.getModel().put("Reason", event.getLeaveRequestModel().getLeaveReason());
+			mail.getModel().put("LeaveDates", event.getLeaveRequestModel().getLeavedate().toString());
+			mail.getModel().put("Status", event.getLeaveRequestModel().getStatus());
+			templateConfiguration.setClassForTemplateLoading(getClass(), basePackagePath);
+			Template template = templateConfiguration.getTemplate("leave_status_change.ftl");
+			String mailContent = FreeMarkerTemplateUtils.processTemplateIntoString(template, mail.getModel());
+			mail.setContent(mailContent);
+			send(mail);
+			
+		}	
 
 		return "Mail Sent Successfully";
 	}
