@@ -77,19 +77,19 @@ public class LeaveController {
 	}
 
 	
-	@GetMapping("/leave/Accepted/{empid}/{leaveId}/{leaveDates}/{leaveType}/{leaveRecson}")
+	@GetMapping("/leave/Accepted/{empid}/{leaveId}/{leaveDates}/{leaveType}/{leaveReason}")
 	public ResponseEntity<String> AcceptLeaveRequest(@PathVariable("empid") Integer empid,
-			@PathVariable("leaveId") Integer leaveId,@PathVariable("leaveDates") Integer leaveDate,@PathVariable("leaveType") String leaveType,@PathVariable("leaveRecson") String leaveRecson) throws TemplateException, MessagingException, IOException {
+			@PathVariable("leaveId") Integer leaveId,@PathVariable("leaveDates") Integer leaveDate,@PathVariable("leaveType") String leaveType,@PathVariable("leaveReason") String leaveReason) throws TemplateException, MessagingException, IOException {
 		LOGGER.info("Payroll service: leave:  AcceptLeaveRequest Info level log msg");
-		return new ResponseEntity<>(leaveRequestService.AcceptLeaveRequest(empid, leaveId,leaveDate,leaveType,leaveRecson), HttpStatus.OK);
+		return new ResponseEntity<>(leaveRequestService.AcceptLeaveRequest(empid, leaveId,leaveDate,leaveType,leaveReason), HttpStatus.OK);
 	}
 	
 	
-	@GetMapping("/leave/Rejected/{empid}/{leaveId}/{leaveType}/{leaveRecson}")
+	@GetMapping("/leave/Rejected/{empid}/{leaveId}/{leaveType}/{leaveReason}")
 	public ResponseEntity<String> RejectLeaveRequest(@PathVariable("empid") Integer empid,
-			@PathVariable("leaveId") Integer leaveId,@PathVariable("leaveType") String leaveType,@PathVariable("leaveRecson") String leaveRecson) throws TemplateException, MessagingException, IOException {
+			@PathVariable("leaveId") Integer leaveId,@PathVariable("leaveType") String leaveType,@PathVariable("leaveReason") String leaveReason) throws TemplateException, MessagingException, IOException {
 		LOGGER.info("Payroll service: leave:  RejectLeaveRequest Info level log msg");
-		return new ResponseEntity<>(leaveRequestService.RejectLeaveRequest(empid, leaveId,leaveType,leaveRecson), HttpStatus.OK);
+		return new ResponseEntity<>(leaveRequestService.RejectLeaveRequest(empid, leaveId,leaveType,leaveReason), HttpStatus.OK);
 	}
 	
 	@PreAuthorize("@auth.allow('GET_ALL_EMPLOYEE_LEAVE_DETAILS')")

@@ -228,6 +228,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
         SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
         SimpleDateFormat dateformater = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -1);
         String sql = "select * from employee_schema.holiday";
         List<Map<String, Object>> tableData = dataExtractor.extractDataFromTable(sql);
         List<String> listOfDate = new ArrayList<>();
@@ -334,7 +335,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
             TimeSheetModel timesheet = timesheetData.get();
             timesheet.setCheckIn(priortime.get().getCheckIn());
             timesheet.setCheckOut(priortime.get().getCheckOut());
-            timesheet.setStatus("PRESENT");
+            timesheet.setStatus("Present");
             timesheet.setWorkingHour(priortime.get().getWorkingHour());
             timesheet.setCheckOutLatitude(priortime.get().getCheckOutLatitude());
             timesheet.setCheckOutLongitude(priortime.get().getCheckOutLongitude());
@@ -349,7 +350,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
             timesheet.setMonth(priortime.get().getMonth());
             timesheet.setYear(priortime.get().getYear());
             timesheet.setWorkingHour(priortime.get().getWorkingHour());
-            timesheet.setStatus("PRESENT");
+            timesheet.setStatus("Present");
             timesheet.setCheckOutLatitude(priortime.get().getCheckOutLatitude());
             timesheet.setCheckOutLongitude(priortime.get().getCheckOutLongitude());
             timesheet.setCheckOutDistance(priortime.get().getCheckOutDistance());
@@ -362,54 +363,6 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
     }
 
-//	@Override
-//	public List<TimesheetDTO> empAttendence(int empId, LocalDate fromDate, LocalDate toDate) {
-//		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-//		String startDate = String.valueOf(dateTimeFormatter.format(fromDate));
-//		String endDate = String.valueOf(dateTimeFormatter.format(toDate));
-//		List<TimeSheetModel> timeSheetModelList = timeSheetRepo.findAllByEmployeeId(empId, startDate, endDate);
-//		if (timeSheetModelList.isEmpty()) {
-//			throw new NullPointerException("No attendence data available with given ID: " + empId);
-//		}
-//		List<TimesheetDTO> timesheetDTOList = new ArrayList<TimesheetDTO>();
-//		for (TimeSheetModel timeSheetModel : timeSheetModelList) {
-//			TimesheetDTO timesheetDTO = TimesheetDTO.builder().employeeId(timeSheetModel.getEmployeeId())
-//					.date(timeSheetModel.getDate()).checkIn(timeSheetModel.getCheckIn())
-//					.checkOut(timeSheetModel.getCheckOut()).workingHour(timeSheetModel.getWorkingHour())
-//					.leaveInterval(timeSheetModel.getLeaveInterval()).status(timeSheetModel.getStatus()).build();
-//			timesheetDTOList.add(timesheetDTO);
-//		}
-//		return timesheetDTOList;
-//	}
-
-    // JIRA no. - HRMS-88
-//    @Override
-//    public List<TimesheetDTO> empAttendence(int empId, String fromDate, String toDate) {
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-//        LocalDate startDate = LocalDate.parse(fromDate, formatter);
-//        LocalDate endDate = LocalDate.parse(toDate, formatter);
-//        List<TimeSheetModel> list = timeSheetRepo.findAllByEmployeeId(empId);
-//        List<TimeSheetModel> list2 = list.stream().filter(t -> {
-//            LocalDate date = LocalDate.parse(t.getDate(), formatter);
-//            int d1 = date.compareTo(startDate);
-//            int d2 = date.compareTo(endDate);
-//            if ((d1 > 0 && d2 < 0) || d1 == 0 || 0 == d2) {
-//                return true;
-//            }
-//            return false;
-//        }).collect(Collectors.toList());
-//        List<TimesheetDTO> timesheetDTOList = new ArrayList<TimesheetDTO>();
-//        for (TimeSheetModel timeSheetModel : list2) {
-//            TimesheetDTO timesheetDTO = TimesheetDTO.builder().employeeId(timeSheetModel.getEmployeeId())
-//                    .date(timeSheetModel.getDate()).checkIn(timeSheetModel.getCheckIn())
-//                    .checkOut(timeSheetModel.getCheckOut()).workingHour(timeSheetModel.getWorkingHour())
-//                    .leaveInterval(timeSheetModel.getLeaveInterval()).status(timeSheetModel.getStatus()).build();
-//            timesheetDTOList.add(timesheetDTO);
-//        }
-//        return timesheetDTOList;
-//    }
-
-
     @Override
     public List<TimesheetDTO> empAttendence(int empId, LocalDate fromDate, LocalDate toDate) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -417,7 +370,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
         String endDate = String.valueOf(dateTimeFormatter.format(toDate));
         List<TimeSheetModel> timeSheetModelList = timeSheetRepo.findAllByEmployeeIdWithinSpecifiedDateRange(empId, startDate, endDate);
         if (timeSheetModelList.isEmpty()) {
-            throw new NoDataFoundException("No attendence data available with given ID: " + empId);
+            throw new NoDataFoundException("No attendance data available with given ID: " + empId);
         }
         List<TimesheetDTO> timesheetDTOList = new ArrayList<TimesheetDTO>();
         for (TimeSheetModel timeSheetModel : timeSheetModelList) {
@@ -524,12 +477,6 @@ public class TimeSheetServiceImpl implements TimeSheetService {
         }
     }
 
-//	    public static EmployeeExpense saveEmployeeExpenseDetail(EmployeeExpense employeeExpense, List<MultipartFile> image) throws IOException, SQLException {
-//	        Blob blob = new SerialBlob(IOUtils.toByteArray(image.getInputStream()));
-//	        employeeExpense.setImage(blob);
-//	        return employeeExpense;
-//	    }
-
     public static EmployeeExpenseDTO changeToDTO(EmployeeExpense employeeExpense, EmployeeExpenseDTO employeeExpenseDTO,
                                                  User employee) {
         employeeExpenseDTO.setExpenseId(employeeExpense.getExpenseId());
@@ -598,44 +545,6 @@ public class TimeSheetServiceImpl implements TimeSheetService {
         }
     }
 
-//	    @Override
-//	    public EmployeeExpenseDTO rejectedEmployeeExpense(int expenseId) {
-//	        Optional<EmployeeExpense> employeeExpenseOptional = employeeExpenseRepo.findById(expenseId);
-//	        EmployeeExpenseDTO employeeExpenseDTO = new EmployeeExpenseDTO();
-//	        if (employeeExpenseOptional.isPresent()) {
-//	            EmployeeExpense employeeExpense = employeeExpenseOptional.get();
-//	            employeeExpense.setStatus("Rejected");
-//	            EmployeeExpense employeeExpense1 = employeeExpenseRepo.save(employeeExpense);
-//	            String employeeId = employeeExpense1.getEmployeeId();
-//	            Optional<Employee> employeeOptional = employeeRepo.findByEmpId(Integer.parseInt(employeeId));
-//	            if (employeeOptional.isPresent()) {
-//	                Employee employee = employeeOptional.get();
-//	                employeeExpenseDTO.setStatus(employeeExpense1.getStatus());
-//	                changeToDTO(employeeExpense1, employeeExpenseDTO, employee);
-//	                if (employeeExpense1.getInvoices() != null) {
-//	                    String invoices = employeeExpense1.getInvoices();
-//	                    HashMap<String, File> map = new HashMap<>();
-//	                    if (invoices.contains(",")) {
-//	                        String[] filePaths = invoices.split(",");
-//	                        for (String filePath : filePaths) {
-//	                            File file = getFileFromPath(filePath);
-//	                            map.put(file.getName(), file);
-//	                        }
-//	                    } else {
-//	                        File file = getFileFromPath(invoices);
-//	                        map.put(file.getName(), file);
-//	                    }
-//	                    employeeExpenseDTO.setInvoices(map);
-//	                }
-//	            }
-//	            return employeeExpenseDTO;
-//	        } else {
-//	            String message = "Expense id: " + expenseId + " does not exists";
-//	            logger.error(message);
-//	            throw new RuntimeException(message);
-//	        }
-//	    }
-
     public File getFileFromPath(String filePath) {
         File file = new File(filePath);
         try {
@@ -655,40 +564,6 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
     @Override
     public String approveEmployeeExpenseById(int expenseId) {
-//		Optional<EmployeeExpense> employeeExpenseOptional = employeeExpenseRepo.findById(expenseId);
-//		EmployeeExpenseDTO employeeExpenseDTO = new EmployeeExpenseDTO();
-//		if (employeeExpenseOptional.isPresent()) {
-//			EmployeeExpense employeeExpense = employeeExpenseOptional.get();
-//			String employeeId = employeeExpense.getEmployeeId();
-//			Optional<User> employeeOptional = userRepo.findById(Integer.parseInt(employeeId));
-//			if (employeeOptional.isPresent()) {
-//				User employee = employeeOptional.get();
-//				// employeeExpenseDTO.setStatus(employeeExpense.getStatus());
-//				changeToDTO(employeeExpense, employeeExpenseDTO, employee);
-//				if (employeeExpense.getInvoices() != null) {
-//					String invoices = employeeExpense.getInvoices();
-//					HashMap<String, File> map = new HashMap<>();
-//					if (invoices.contains(",")) {
-//						String[] filePaths = invoices.split(",");
-//						for (String filePath : filePaths) {
-//							File file = getFileFromPath(filePath);
-//							map.put(file.getName(), file);
-//						}
-//					} else {
-//						File file = getFileFromPath(invoices);
-//						map.put(file.getName(), file);
-//					}
-//					employeeExpenseDTO.setInvoices(map);
-//				}
-//
-//			}
-//			return employeeExpenseDTO;
-//		} else {
-//			String message = "Expense id: " + expenseId + " does not exists";
-//			LOGGER.error(message);
-//			throw new RuntimeException(message);
-
-        //}
         EmployeeExpense employeeExpense = employeeExpenseRepo.findByExpenseId(expenseId);
         if (employeeExpense.getStatus().equalsIgnoreCase("pending")) {
             employeeExpense.setStatus("Approve");
@@ -735,16 +610,18 @@ public class TimeSheetServiceImpl implements TimeSheetService {
     }
 
     @Override
-    public ByteArrayInputStream getExcelData() throws IOException {
-        List<TimeSheetModel> all = timeSheetRepo.findAll();
-        Map<Integer, String> employeeNames = fetchEmployeeNames(all);
+    public ByteArrayInputStream getExcelData(LocalDate fromtDate, LocalDate toDate) throws IOException {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String startDate = String.valueOf(dateTimeFormatter.format(fromtDate));
+        String endDate = String.valueOf(dateTimeFormatter.format(toDate));
+        List<TimeSheetModel> specifiedDateRangeData = timeSheetRepo.findAllWithinSpecifiedDateRange(startDate, endDate);
+        Map<Integer, String> employeeNames = fetchEmployeeNames(specifiedDateRangeData);
 
-        for (TimeSheetModel timeSheet : all) {
+        for (TimeSheetModel timeSheet : specifiedDateRangeData) {
             String employeeName = employeeNames.get(timeSheet.getEmployeeId());
             timeSheet.setEmployeeName(employeeName);
         }
-        ByteArrayInputStream byteArrayInputStream = Helper.dataToExcel(all);
-        return byteArrayInputStream;
+        return Helper.dataToExcel(specifiedDateRangeData);
     }
 
     private Map<Integer, String> fetchEmployeeNames(List<TimeSheetModel> timeSheets) {
