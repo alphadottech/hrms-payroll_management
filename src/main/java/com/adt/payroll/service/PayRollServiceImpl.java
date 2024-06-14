@@ -358,6 +358,9 @@ public class PayRollServiceImpl implements PayRollService {
 					gmail = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Gmail)));
 					joiningDate = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.JoiningDate)));
 					bankName = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.BankName)));
+					esic = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Esic)));
+					pf = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.PF)));
+
 					try {
 						adjustment = Integer.parseInt(
 								dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.ADJUSTMENT))));
@@ -440,10 +443,10 @@ public class PayRollServiceImpl implements PayRollService {
 		float pfAmount = 0;
 		double grossSalary = Double.parseDouble(salary);
 
-		if (esic.equals("Yes") && pf.equalsIgnoreCase("Yes")) {
+		if (esic.equalsIgnoreCase("Yes") && pf.equalsIgnoreCase("Yes")) {
 			grossSalary = Math
 					.round(grossSalary - ((grossSalary / 2) * 0.13) - grossSalary * 0.04 + (grossSalary * 0.01617));
-		} else if (esic.equals("No") && pf.equalsIgnoreCase("Yes")) {
+		} else if (esic.equalsIgnoreCase("No") && pf.equalsIgnoreCase("Yes")) {
 
 			grossSalary = Math.round(grossSalary - ((grossSalary / 2) * 0.13) + (grossSalary * 0.01617));
 		}

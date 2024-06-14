@@ -415,6 +415,32 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		}
 	}
 	
+	@Override
+	public void sendEmailForTimeSheet(ByteArrayOutputStream baos, String name, String gmail, String date) {
+		String massage = Util.TIME_SHEET_MSG.replace("[Name]", name).replace("[Company Name]", "AlphaDot Technologies")
+				.replace("[Your Name]", "Team HR").replace("[date-range]", date);
+
+		MimeMessage mimeMessage = mailSender.createMimeMessage();
+		MimeMessageHelper mimeMessageHelper;
+
+		try {
+
+			DataSource source = new ByteArrayDataSource(baos.toByteArray(), "application/octet-stream");
+			mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+			mimeMessageHelper.setFrom(sender);
+			mimeMessageHelper.setTo(gmail);
+			mimeMessageHelper.setText(massage);
+			mimeMessageHelper.setSubject("Weekly Time Sheet Report");
+			mimeMessageHelper.addAttachment(name + ".xlsx", source);
+
+			mailSender.send(mimeMessage);
+
+			log.info("Mail send Successfully");
+		} catch (MessagingException e) {
+			log.info("Error");
+
+		}
+	}
 	
 
 }
