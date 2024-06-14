@@ -209,8 +209,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 			DataSource source = new ByteArrayDataSource(baos.toByteArray(), "application/octet-stream");
 			mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 			mimeMessageHelper.setFrom(sender);
-		//	mimeMessageHelper.setTo(gmail);
-			mimeMessageHelper.setTo("nishasingh.adt@gmail.com");
+			mimeMessageHelper.setTo(gmail);
 			mimeMessageHelper.setText(massage);
 			mimeMessageHelper.setSubject("Salary Slip" + "-" + monthYear);
 			mimeMessageHelper.addAttachment(name + ".pdf", source);
