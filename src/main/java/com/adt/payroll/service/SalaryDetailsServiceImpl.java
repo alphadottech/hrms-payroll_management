@@ -161,7 +161,11 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 		double salary = dto.getSalary();
 		double actualBasic = salary / 2;
 		double grossSalaryAmount = salary;
+		double basic=0.0;
 		// employer pf and esic portion calculation 13% and 0.75% respectively
+		if (dto.getBasic() <= 15000) {
+			actualBasic=dto.getBasic();
+		}
 		double employerPFAmount = actualBasic * 0.13;
 		double employerESICAmount = grossSalaryAmount * 0.0075;
 
@@ -182,12 +186,12 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 				errorMsg.add(msg);
 			}
 		}
+		
 		if (Math.abs(employerPFAmount - dto.getEmployerPFAmount()) > 100) {
 			msg = "Employer pf amount difference exceeds the difference limit."
 					+ Math.abs(employerPFAmount - dto.getEmployerPFAmount());
 			errorMsg.add(msg);
 		}
-
 		if (isESIC) {
 //				grossSalaryAmount = Math.round(grossSalaryAmount - employerPFAmount
 //						- (employeeESICAmount + employerESICAmount) + (grossSalaryAmount * 0.01617));
@@ -195,21 +199,21 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 						grossSalaryAmount - employerPFAmount - employerESICAmount + (grossSalaryAmount * 0.01617));
 
 			} else {
-				if (dto.getBasic() <= 15000) {
-					grossSalaryAmount = Math
-							.round(grossSalaryAmount - (dto.getBasic() * 0.13) + (grossSalaryAmount * 0.01617));
-				} else {
-					grossSalaryAmount = Math
-							.round(grossSalaryAmount - employerPFAmount + (grossSalaryAmount * 0.01617));
-				}
-			}
 
+				grossSalaryAmount = Math.round(grossSalaryAmount - employerPFAmount + (grossSalaryAmount * 0.01617));
+			}
+		
 		if (Math.abs(grossSalaryAmount - dto.getGrossSalary()) > 100) {
 			msg = "gross amount different exceeds the difference limit."
 					+ Math.abs(grossSalaryAmount - dto.getGrossSalary());
 			errorMsg.add(msg);
 		}
-		double basic = grossSalaryAmount / 2;
+		if(dto.getBasic()<=15000) {
+			basic =dto.getBasic();
+		}else {
+			basic = grossSalaryAmount / 2;
+		}
+		
 		double empCalcutedPFAmount = basic * 0.12;
 		if (Math.abs(empCalcutedPFAmount - dto.getEmployeePFAmount()) > 100) {
 			msg = "Employee pf amount different exceeds the difference limit."
