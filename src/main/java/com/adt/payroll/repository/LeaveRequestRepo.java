@@ -2,6 +2,8 @@ package com.adt.payroll.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -12,6 +14,8 @@ import com.adt.payroll.model.LeaveRequestModel;
 public interface LeaveRequestRepo extends JpaRepository<LeaveRequestModel, Integer> {
 
 List<LeaveRequestModel> findByempid(Integer empid);
+
+Page<LeaveRequestModel> findByempid(Integer empid,Pageable pageable);
 
 LeaveRequestModel findByLeaveid(int leaveid);
 

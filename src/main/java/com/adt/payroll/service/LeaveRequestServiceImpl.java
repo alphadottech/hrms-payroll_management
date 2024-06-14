@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -36,6 +37,11 @@ import com.adt.payroll.repository.UserRepo;
 
 import freemarker.template.TemplateException;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 
 @Service
 public class LeaveRequestServiceImpl implements LeaveRequestService {
@@ -115,7 +121,10 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 			
 		if (counter == 0) {
 			lr.setStatus("Pending");
+			long millisecondsInFiveDays = TimeUnit.DAYS.toMillis(5);
+			long currentTime=System.currentTimeMillis();
 			leaveRequestRepo.save(lr);
+			lr.setExpiryTime(currentTime+millisecondsInFiveDays);
 			int id = lr.getEmpid();
 			int leaveId = lr.getLeaveid();
 			 UriComponentsBuilder urlBuilder = ServletUriComponentsBuilder.newInstance()
@@ -149,11 +158,25 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 	}
 
 	@Override
-	public List<LeaveRequestModel> getLeaveRequestDetailsByEmpId(Integer empid) {
+	public Page<LeaveRequestModel> getLeaveRequestDetailsByEmpId(int page, int size,Integer empid) {
 		LOGGER.info("Payroll service: LeaveRequestServiceImpl:  getLeaveRequestDetailsByEmpId Info level log msg");
-		List<LeaveRequestModel> opt = leaveRequestRepo.findByempid(empid);
-		if (!opt.isEmpty()) {
-			return opt;
+		long currentTime1=System.currentTimeMillis();
+		long millisecondsInFiveDays1 = TimeUnit.DAYS.toMillis(5);
+		Pageable pageable = PageRequest.of(page, size);
+		Page<LeaveRequestModel> leaveResponse = leaveRequestRepo.findByempid(empid,pageable);
+		for(LeaveRequestModel leave : leaveResponse) {
+			if(leave.getStatus().equalsIgnoreCase("Pending")) {
+				long millisecondsInFiveDays = TimeUnit.DAYS.toMillis(5);
+				long currentTime=System.currentTimeMillis();
+				if(leave.getExpiryTime()<currentTime) {
+					leave.setStatus("Resend");
+					leaveRequestRepo.save(leave);
+				}
+			}
+			
+		}
+		if (!leaveResponse.isEmpty()) {
+			return leaveResponse;
 		} else {
 			return null;
 		}
@@ -280,5 +303,39 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 	public List<LeaveRequestModel> getAllEmployeeLeaveDetails() {
 		return leaveRequestRepo.findAll();
 	}
+	
+     public  String reSendLeaveRequest(int leaveId) {
+    	 Optional<LeaveRequestModel>  leaveRequest= leaveRequestRepo.findById(leaveId);
+    	if(leaveRequest.isPresent()) {
+    		int id=leaveRequest.get().getEmpid();
+    		Optional<LeaveModel>leaveBalance= leaveRepository.findById(id);
+    		LeaveRequestModel leaveReq=	leaveRequest.get();
+    		leaveReq.setLeaveBalance(leaveBalance.get().getLeaveBalance());
+    		leaveReq.setStatus("Pending");
+    		leaveReq.setName(leaveBalance.get().getName());
+    		long millisecondsInFiveDays = TimeUnit.DAYS.toMillis(5);
+    		long currentTime=System.currentTimeMillis();
+    		leaveReq.setExpiryTime(currentTime+millisecondsInFiveDays);
+    		 UriComponentsBuilder urlBuilder = ServletUriComponentsBuilder.newInstance()
+						.scheme(scheme)
+						.host(ipaddress)
+						.port(serverPort)
+						.path(context+"/payroll/leave/leave/Accepted/"+ id + "/" + leaveId + "/" + leaveRequest.get().getLeavedate().size()+"/"+leaveRequest.get().getLeaveType()+"/"+leaveRequest.get().getLeaveReason());			            
+
+			 UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.newInstance()
+						.scheme(scheme)
+						.host(ipaddress)
+						.port(serverPort)
+						.path(context+"/payroll/leave/leave/Rejected/"+ id + "/" + leaveId+"/"+leaveRequest.get().getLeaveType()+"/"+leaveRequest.get().getLeaveReason());
+			           
+				OnLeaveRequestSaveEvent onLeaveRequestSaveEvent = new OnLeaveRequestSaveEvent(urlBuilder, urlBuilder1, leaveReq);
+			applicationEventPublisher.publishEvent(onLeaveRequestSaveEvent);
+			leaveRequestRepo.save(leaveReq);
+			return "reSend email successfully";
+    	}
+    	return "this records  not persent "; 
+    	 
+     }
+	
 
 }
