@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.adt.payroll.model.Priortime;
 import com.adt.payroll.model.TimeSheetModel;
@@ -56,5 +57,8 @@ public interface TimeSheetRepo extends JpaRepository<TimeSheetModel, Integer> {
 
 	@Query(value = "SELECT count(*) as empHalfDay FROM payroll_schema.time_sheet where employee_id=?1 and month=?2 and year=?3 and status='Present' and working_hour<'6:00:00'", nativeQuery = true)
 	public int findEmpTotalHalfDayCount(int empId, String month, String year);
+	
+    @Query(value = "SELECT * FROM payroll_schema.Time_sheet t WHERE (t.date ~ '^\\d{2}-\\d{2}-\\d' AND TO_DATE(t.date, 'dd-MM-yyyy') BETWEEN TO_DATE(?1, 'dd-MM-yyyy') AND TO_DATE(?2, 'dd-MM-yyyy')) and (t.check_in IS NULL OR t.check_out IS NULL OR (t.working_hour IS NULL OR t.working_hour<'9:30:00'))", nativeQuery = true)
+	public List<TimeSheetModel> findTimeSheetWithNullValues(String startDate, String endDate);
 }
 
