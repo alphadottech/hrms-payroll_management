@@ -42,6 +42,7 @@ public class Auth {
 	public static String apiConstant;
 
 	public boolean allow(String apiName, Map<String, String> resourceAttributes) {
+		apiConstant=apiName;
 		String token = getToken(request);
 		Claims claims = getUserIdFromJWT(token);
 		List<GrantedAuthority> authorities = getAuthorities(claims);	

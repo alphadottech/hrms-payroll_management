@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -84,9 +86,11 @@ public class LeaveController {
 
 	@PreAuthorize("@auth.allow('GET_LEAVE_REQUEST_DETAILS_BY_EMPLOYEE_ID',T(java.util.Map).of('currentUser', #empId))")
 	@GetMapping("getAllLeaveByEmpId/{empId}")
-	public ResponseEntity<List<LeaveRequestModel>> getLeaveRequestDetailsByEmpId(@PathVariable("empId") int empId) {
+	public ResponseEntity<Page<LeaveRequestModel>> getLeaveRequestDetailsByEmpId(@PathVariable("empId") int empId,
+			@RequestParam(value = "page", defaultValue = "0", required = false) int page,
+			@RequestParam(value = "size", defaultValue = "10", required = false) int size) {
 		LOGGER.info("Payroll service: leave:  getLeaveRequestDetailsByEmpId Info level log msg");
-		return new ResponseEntity<>(leaveRequestService.getLeaveRequestDetailsByEmpId(empId), HttpStatus.OK);
+		return new ResponseEntity<Page<LeaveRequestModel>>(leaveRequestService.getLeaveRequestDetailsByEmpId(page,size,empId), HttpStatus.OK);
 	}
 
 	
@@ -145,5 +149,12 @@ public class LeaveController {
 		LOGGER.info("Payroll service: leave:  RejectLeaveRequest Info level log msg");
 		return new ResponseEntity<>(leaveRequestService.getAllEmployeeLeaveDetails(), HttpStatus.OK);
 	}
-
+	
+	@PreAuthorize("@auth.allow('RESEND_LEAVE_REQUEST')")
+	@PutMapping("/reSendLeaveRequest/{leaveId}") 
+	public ResponseEntity<String> reSendLeaveRequest(@PathVariable("leaveId") int leaveId) {
+		LOGGER.info("Payroll service: leave:  RejectLeaveRequest Info level log msg");
+		return new ResponseEntity<>(leaveRequestService.reSendLeaveRequest(leaveId), HttpStatus.OK);
+	}
+	
 }
