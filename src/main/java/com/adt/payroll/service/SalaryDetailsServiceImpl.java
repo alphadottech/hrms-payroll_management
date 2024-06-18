@@ -295,6 +295,10 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 					if (salaryDetailsDTO.getSalary() <= 21000) {
 						isEsic = true;
 					}
+					
+					if(salaryDetailsDTO.getBasic()!=0.0 ||salaryDetailsDTO.isOnlyBasic()) {
+						return calculatePFAndEsicAmount(salaryDetailsDTO, isEsic, name);
+					}
 					EmpPayrollDetails updateEmpPayroll= empPayrollExist.get();
 					updateEmpPayroll.setSalary(salaryDetailsDTO.getSalary());
 					updateEmpPayroll.setBankName(salaryDetailsDTO.getBankName());
@@ -303,10 +307,6 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 					updateEmpPayroll.setAccountNumber(salaryDetailsDTO.getAccountNumber());
 					updateEmpPayroll.setIfscCode(salaryDetailsDTO.getIfscCode());
 					empPayrollDetailsRepo.save(updateEmpPayroll);
-					
-					if(salaryDetailsDTO.getBasic()!=0.0 ||salaryDetailsDTO.isOnlyBasic()) {
-						return calculatePFAndEsicAmount(salaryDetailsDTO, isEsic, name);
-					}
 
 					if (salaryDetailsExist.isPresent()) {
 						SalaryDetails updateEmpsalary=salaryDetailsExist.get();
