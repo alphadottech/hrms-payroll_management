@@ -269,6 +269,7 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 
 			double empCalcutedPFAmount = basic * 0.12;
 			response.setEmployeePFAmount(empCalcutedPFAmount);
+			response.setOnlyBasic(false);
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -296,7 +297,7 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 						isEsic = true;
 					}
 					
-					if(salaryDetailsDTO.getBasic()!=0.0 ||salaryDetailsDTO.isOnlyBasic()) {
+					if(salaryDetailsDTO.isOnlyBasic()) {
 						return calculatePFAndEsicAmount(salaryDetailsDTO, isEsic, name);
 					}
 					EmpPayrollDetails updateEmpPayroll= empPayrollExist.get();
