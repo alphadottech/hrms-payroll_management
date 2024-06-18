@@ -272,7 +272,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
         return ResponseEntity.ok(new ApiResponse(true, "Expense Submitted Successfully."));
     }
 
-    @PreAuthorize("@auth.allow('APPROVE_EMPLOYEE_EXPENSE')")
+    @PreAuthorize("@auth.allow('APPROV_EEMPLOYEE_EXPENSE')")
     @PutMapping("/employeeExpenseApprove/{expenseId}")
     public ResponseEntity<String> ApproveEmployeeExpense(@PathVariable int expenseId, HttpServletRequest request) {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
@@ -306,20 +306,20 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
 
     }
 
-	@PreAuthorize("@auth.allow('EXPORT_ALL_EMP_ATTENDANCE_TO_EXCEL')")
-	@GetMapping("/exporttoexcel")
-	public ResponseEntity<Resource> allEmpAttendenceExportExcel(@RequestParam("fromDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
-            @RequestParam("toDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate) throws IOException {
-		String filename = "alphadot_attendance_data.xlsx";
+    @PreAuthorize("@auth.allow('EXPORT_ALL_EMP_ATTENDANCE_TO_EXCEL')")
+    @GetMapping("/exporttoexcel")
+    public ResponseEntity<Resource> allEmpAttendanceExportExcel(@RequestParam("fromDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
+                                                                @RequestParam("toDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate) throws IOException {
+        String filename = "alphadot_attendance_data.xlsx";
 
-		ByteArrayInputStream newdata = timeSheetService.getExcelData(fromDate, toDate);
+        ByteArrayInputStream newdata = timeSheetService.getExcelData(fromDate, toDate);
 
-		InputStreamResource file = new InputStreamResource(newdata);
-		ResponseEntity<Resource> body = ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
-				.contentType(MediaType.parseMediaType("application/vnd.ms-excel")).body(file);
-		return body;
-	}
+        InputStreamResource file = new InputStreamResource(newdata);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+                .body(file);
+    }
 
 	
 	  @PreAuthorize("@auth.allow('RESEND_PRIORTIME_REQUEST')") 
