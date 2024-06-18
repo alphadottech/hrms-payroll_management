@@ -11,7 +11,7 @@ public interface PriorTimeRepository extends JpaRepository<Priortime,Integer>{
 	
 	 TimeSheetModel findByEmployeeId(int id);
 	 
-	 Priortime findByEmployeeIdAndDate(int id, String date);
+	 Optional<Priortime>   findByEmployeeIdAndDate(int id, String date);
 
 	void save(Optional<Priortime> priortime2);
 	
