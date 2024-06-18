@@ -325,7 +325,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
 	  @PreAuthorize("@auth.allow('RESEND_PRIORTIME_REQUEST')") 
 	  @PutMapping("/reSendPriorTimeRequest/{priortimeId}") 
 	  public ResponseEntity<String>reSendLeaveRequest(@PathVariable("priortimeId") int priortimeId) {
-	  LOGGER.info("Payroll service: leave:  RejectLeaveRequest Info level log msg");   
+	   LOGGER.info("Payroll service: leave:  RejectLeaveRequest Info level log msg");   
 	  return new ResponseEntity<>(timeSheetService.reSendPriorTimeRequest(priortimeId), HttpStatus.OK); 
 	  }
 	 
