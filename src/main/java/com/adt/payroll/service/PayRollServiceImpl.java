@@ -1088,11 +1088,10 @@ public class PayRollServiceImpl implements PayRollService {
 		SalaryDetailsDTO salaryDetailsDTO = new SalaryDetailsDTO();
 		Optional<EmpPayrollDetails> empPayrollOptional = empPayrollDetailsRepo.findByEmployeeId(empId);
 		Optional<SalaryDetails> salaryDetailsOptional = salaryDetailsRepo.findByEmployeeId(empId);
-
+		salaryDetailsDTO.setEmpId(empId);
 		try {
 			if (empPayrollOptional.isPresent()) {
 
-				salaryDetailsDTO.setEmpId(empId);
 				salaryDetailsDTO.setSalary(empPayrollOptional.get().getSalary());
 				salaryDetailsDTO.setBankName(empPayrollOptional.get().getBankName());
 				salaryDetailsDTO.setDesignation(empPayrollOptional.get().getDesignation());
