@@ -124,19 +124,16 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 	public void sendEmailVerification(OnPriorTimeDetailsSavedEvent event, String emailVerificationUrl1,
 			String emailVerificationUrl2, String from) throws IOException, TemplateException, MessagingException {
 		String sql = "select * from av_schema.priortime_email";
-		List<String> emailArray = new ArrayList<>();
 		List<Map<String, Object>> priortimeData = dataExtractor.extractDataFromTable(sql);
 		for (Map<String, Object> priortime : priortimeData) {
-			String email = String.valueOf(priortime.get("email_id"));
-			emailArray.add(email);
-		}
-		
+		String email = String.valueOf(priortime.get("email_id"));
+		String token=auth.tokenGanreate(email);
 		Mail mail = new Mail();
+		mail.setTo(email);
 		mail.setSubject("Email Verification [Team CEP]");
-		mail.setToArray(emailArray);
 		mail.setFrom(from);
-		mail.getModel().put("approveLeaveRequestLink1", emailVerificationUrl1);
-		mail.getModel().put("RejectLeaveRequestLink2", emailVerificationUrl2);
+		mail.getModel().put("approveLeaveRequestLink1", emailVerificationUrl1+"?Authorization="+token);
+		mail.getModel().put("RejectLeaveRequestLink2", emailVerificationUrl2+"?Authorization="+token);
 		mail.getModel().put("Email", event.getPriorTime().getEmail());
 		mail.getModel().put("CheckInTime", event.getPriorTime().getCheckIn());
 		mail.getModel().put("CheckOutTime", event.getPriorTime().getCheckOut());
@@ -151,6 +148,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 
 		mail.setContent(mailContent);
 		send(mail);
+		}
 
 	}
 

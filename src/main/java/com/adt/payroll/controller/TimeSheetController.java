@@ -4,7 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.adt.payroll.config.Auth;
 import com.adt.payroll.dto.CheckStatusDTO;
 import com.adt.payroll.dto.EmployeeExpenseDTO;
 import com.adt.payroll.dto.TimesheetDTO;
@@ -52,6 +56,11 @@ import com.adt.payroll.repository.TimeSheetRepo;
 import com.adt.payroll.service.TimeSheetService;
 import com.google.gson.Gson;
 
+import freemarker.template.Configuration;
+import freemarker.template.MalformedTemplateNameException;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
@@ -68,9 +77,16 @@ public class TimeSheetController {
 
     @Autowired
     TimeSheetRepo timeSheetRepo;
+   
 
     @Autowired
     PriorTimeRepository priorTimeRepository;
+    
+    @Value("${app.velocity.templates.location}")
+	private String basePackagePath;
+    
+     @Autowired
+	 private Configuration freemarkerConfig;
     
     @Value("${-Dmy.port}")
 	private String serverPort;
@@ -149,7 +165,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
 					.scheme(scheme)
 					.host(ipaddress)
 					.port(serverPort)
-					.path(context+"/payroll/timeSheet/updatePriorTime/Accepted/" + priortimeId);
+					.path(context+"/payroll/timeSheet/updatePriorTime/Accepted/" + priortimeId);              
             UriComponentsBuilder urlBuilder2 = ServletUriComponentsBuilder.newInstance()
 					.scheme(scheme)
 					.host(ipaddress)
@@ -165,37 +181,59 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
                 "Missing user details in database"));
     }
 
- 
+    @PreAuthorize("@auth.allow('ACCEPT_PRIORTIME_REQUEST')")
     @GetMapping("/updatePriorTime/Accepted/{priortimeId}")
-    public ResponseEntity<ApiResponse> updatePriorTimeAccepted(@PathVariable(name = "priortimeId") int priortimeId,
-                                                               HttpServletRequest request) throws ParseException {
+    public ResponseEntity<?> updatePriorTimeAccepted(@PathVariable(name = "priortimeId") int priortimeId,
+                                                               HttpServletRequest request) throws ParseException, TemplateNotFoundException, MalformedTemplateNameException, freemarker.core.ParseException, IOException, TemplateException {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
         Optional<Priortime> priortime = priorTimeRepository.findById(priortimeId);
+        freemarkerConfig.setClassForTemplateLoading(getClass(), basePackagePath);
+		 Template  template = freemarkerConfig.getTemplate("message.ftl");
+		 Map<String, Object> model = new HashMap<>();
+		 String status="rejected";
+        if(priortime.get().getStatus().equalsIgnoreCase("Pending")) {
         timeSheetService.saveConfirmedDetails(priortime);
         priortime.get().setStatus("Accepted");
         priorTimeRepository.save(priortime.get());
         String email = priortime.get().getEmail();
         OnPriorTimeAcceptOrRejectEvent onPriortimeApprovalEvent = new OnPriorTimeAcceptOrRejectEvent(priortime,
                 "PriorTimesheet Entry", "Approved");
-
         applicationEventPublisher.publishEvent(onPriortimeApprovalEvent);
-        return ResponseEntity.ok(new ApiResponse(true, "Details for PriorTime Timesheet entry updated successfully"));
-
+        model.put("Message", " priortime request has been successfully approved.!");
+        model.put("Email", "");
+	    return new ResponseEntity<>(FreeMarkerTemplateUtils.processTemplateIntoString(template, model), HttpStatus.OK);
+        }
+        if(priortime.get().getStatus().equalsIgnoreCase("Accepted")) {
+			 status="approved";
+		}
+		 model.put("Message", " priortime request has been already "+status+" by");
+		 model.put("Email",priortime.get().getUpdatedBy());
+     return new ResponseEntity<>(FreeMarkerTemplateUtils.processTemplateIntoString(template, model), HttpStatus.OK);
+	
     }
-
-  
+    
+    @PreAuthorize("@auth.allow('REJECT_PRIORTIME_REQUEST')")
     @GetMapping("/updatePriorTime/Rejected/{priortimeId}")
-    public ResponseEntity<ApiResponse> updatePriorTimeRejected(@PathVariable(name = "priortimeId") int priortimeId,
-                                                               HttpServletRequest request) {
+    public ResponseEntity<?> updatePriorTimeRejected(@PathVariable(name = "priortimeId") int priortimeId,
+                                                               HttpServletRequest request) throws TemplateNotFoundException, MalformedTemplateNameException, freemarker.core.ParseException, IOException, TemplateException {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
         Optional<Priortime> priortime = priorTimeRepository.findById(priortimeId);
-        priortime.get().setStatus("Rejected");
+        freemarkerConfig.setClassForTemplateLoading(getClass(), basePackagePath);
+     		 Template  template = freemarkerConfig.getTemplate("message.ftl");
+     		 Map<String, Object> model = new HashMap<>();
+     		 String status="rejected";
+     	if(priortime.get().getStatus().equalsIgnoreCase("Pending")) {
         priorTimeRepository.save(priortime.get());
         OnPriorTimeAcceptOrRejectEvent onPriortimeApprovalEvent = new OnPriorTimeAcceptOrRejectEvent(priortime,
                 "PriorTimesheet Entry", "Rejected");
-
         applicationEventPublisher.publishEvent(onPriortimeApprovalEvent);
-        return ResponseEntity.ok(new ApiResponse(true, "Details for PriorTime Timesheet entry updated as Rejected"));
+        model.put("Message", " priortime request has been successfully rejected.!");
+        model.put("Email", "");
+        return new ResponseEntity<>(FreeMarkerTemplateUtils.processTemplateIntoString(template, model), HttpStatus.OK);
+     	}
+     	 model.put("Message", " priortime request has been already "+status+" by");
+		 model.put("Email",priortime.get().getUpdatedBy());
+     return new ResponseEntity<>(FreeMarkerTemplateUtils.processTemplateIntoString(template, model), HttpStatus.OK);
 
     }
 
@@ -234,7 +272,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
         return ResponseEntity.ok(new ApiResponse(true, "Expense Submitted Successfully."));
     }
 
-    @PreAuthorize("@auth.allow('APPROVE_EMPLOYEE_EXPENSE')")
+    @PreAuthorize("@auth.allow('APPROV_EEMPLOYEE_EXPENSE')")
     @PutMapping("/employeeExpenseApprove/{expenseId}")
     public ResponseEntity<String> ApproveEmployeeExpense(@PathVariable int expenseId, HttpServletRequest request) {
         LOGGER.info("API Call From IP: " + request.getRemoteHost());
@@ -282,6 +320,15 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
                 .contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
                 .body(file);
     }
+
+	
+	  @PreAuthorize("@auth.allow('RESEND_PRIORTIME_REQUEST')") 
+	  @PutMapping("/reSendPriorTimeRequest/{priortimeId}") 
+	  public ResponseEntity<String>reSendLeaveRequest(@PathVariable("priortimeId") int priortimeId) {
+	   LOGGER.info("Payroll service: leave:  RejectLeaveRequest Info level log msg");   
+	  return new ResponseEntity<>(timeSheetService.reSendPriorTimeRequest(priortimeId), HttpStatus.OK); 
+	  }
+	 
 
 
 }

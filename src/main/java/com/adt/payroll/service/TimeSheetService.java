@@ -61,4 +61,6 @@ List<TimesheetDTO> empAttendence(int empId, LocalDate fromDate, LocalDate toDate
 
 	List<EmployeeExpense> getAllExpenseDetail();
 	public ByteArrayInputStream getExcelData(LocalDate fromDate, LocalDate toDate) throws IOException;
+	
+	public  String reSendPriorTimeRequest(int priortimeId);
 }
