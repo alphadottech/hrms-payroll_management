@@ -287,6 +287,9 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 			Optional<User> existEmployee = userRepo.findById(salaryDetailsDTO.getEmpId());
 			String name = existEmployee.get().getFirstName() + " " + existEmployee.get().getLastName();
 			if (existEmployee.isPresent()) {
+				if (salaryDetailsDTO.getSalary() <= 21000) {
+					isEsic = true;
+				}
 				// here we calculate the pf and esic on the basis of given basic
 				if(salaryDetailsDTO.isOnlyBasic()) {
 					return calculatePFAndEsicAmount(salaryDetailsDTO, isEsic, name);
@@ -297,9 +300,7 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 				Optional<SalaryDetails> salaryDetailsExist = salaryDetailsRepo.findByEmployeeId(salaryDetailsDTO.getEmpId());
 				
 				if (empPayrollExist.isPresent()) {
-					if (salaryDetailsDTO.getSalary() <= 21000) {
-						isEsic = true;
-					}
+					
 					EmpPayrollDetails updateEmpPayroll= empPayrollExist.get();
 					updateEmpPayroll.setSalary(salaryDetailsDTO.getSalary());
 					updateEmpPayroll.setBankName(salaryDetailsDTO.getBankName());
