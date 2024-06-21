@@ -83,7 +83,7 @@ public class LeaveRequestServiceTest {
 	@Test
 	@DisplayName("JUnit test for getLeaveRequestDetailsByEmpId() method")
 	void verify_getLeaveRequestDetailsByEmpId() {
-		this.leaveReqService.getLeaveRequestDetailsByEmpId(1);
+		this.leaveReqService.getLeaveRequestDetailsByEmpId(0,10,1);
 		verify(leaveRequestRepo).findByempid(1);
 	}
 	

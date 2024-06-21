@@ -1,6 +1,7 @@
 package com.adt.payroll.model;
 
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import jakarta.persistence.CollectionTable;
@@ -30,13 +31,22 @@ public class LeaveRequestModel {
 
     @Column(name = "status")
     private String status;
-
+    
+    @Column(name = "updated_by")
+    private String updatedBy;
+    
+    @Column(name="expiry_time")
+    private Long expiryTime;
+    
+    @Column(name="leave_type")
+    private String leaveType;
+    
+    @Column(name="leave_reason")
+    private String leaveReason;
+    
 	@Transient
     private Integer leaveBalance;
-	@Transient
-    private String leaveType;
-	@Transient
-    private String leaveReason;
+	
 	@Transient
     private String name;
 	@Transient

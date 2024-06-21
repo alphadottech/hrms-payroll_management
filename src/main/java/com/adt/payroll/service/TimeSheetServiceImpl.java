@@ -4,9 +4,13 @@ import com.adt.payroll.dto.CheckStatusDTO;
 import com.adt.payroll.dto.CurrentDateTime;
 import com.adt.payroll.dto.EmployeeExpenseDTO;
 import com.adt.payroll.dto.TimesheetDTO;
+import com.adt.payroll.event.OnPriorTimeDetailsSavedEvent;
 import com.adt.payroll.exception.NoDataFoundException;
 import com.adt.payroll.service.Helper;
 import com.adt.payroll.model.EmployeeExpense;
+import com.adt.payroll.model.LeaveModel;
+import com.adt.payroll.model.LeaveRequestModel;
+import com.adt.payroll.model.OnLeaveRequestSaveEvent;
 import com.adt.payroll.model.Priortime;
 import com.adt.payroll.model.TimeSheetModel;
 import com.adt.payroll.model.User;
@@ -21,8 +25,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.*;
 import java.text.DateFormat;
@@ -56,6 +63,9 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
     @Autowired
     private EmployeeExpenseRepo employeeExpenseRepo;
+    
+    @Autowired
+    ApplicationEventPublisher applicationEventPublisher;
 
     @Value("${Expenses_Invoice_Path}")
     private String invoicePath;
@@ -71,6 +81,18 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
     @Value("${MAX_DISTANCE_THRESHOLD}")
     private double MAX_DISTANCE_THRESHOLD;
+    
+    @Value("${-Dmy.port}")
+   	private String serverPort;
+
+   	@Value("${-Dmy.property}")
+   	private String ipaddress;
+   	
+   	@Value("${-UI.scheme}")
+   	private String scheme;
+
+   	@Value("${-UI.context}")
+   	private String context;
 
     @Override
     public String updateCheckIn(int empId, double latitude, double longitude) {
@@ -226,29 +248,38 @@ public class TimeSheetServiceImpl implements TimeSheetService {
         List<ResponseModel> list = new ArrayList<>();
         User use = userRepo.getById(empId);
         SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
-        SimpleDateFormat dateformater = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateformater = new SimpleDateFormat("yyyy-MM-dd");  
         Calendar cal = Calendar.getInstance();
+        Calendar calender = Calendar.getInstance();
         cal.add(Calendar.DATE, -1);
+        calender.add(Calendar.DATE, -15);
+        String from = dateformater.format(cal.getTime());
+        String to = dateformater.format(calender.getTime());
+        String leaveSql ="SELECT ld.leavedate FROM payroll_schema.leave_dates ld JOIN payroll_schema.leave_request lr ON lr.leaveid = ld.leave_id WHERE lr.empid = "+empId+"  AND ld.leavedate BETWEEN "+"'"+to+"'"+" AND "+"'"+from+"'";
+        List<Map<String, Object>> leaveData = dataExtractor.extractDataFromTable(leaveSql);
+        List<String> listOfLeaveDate = new ArrayList<>();
+        for (Map<String, Object> leave : leaveData) {
+        	listOfLeaveDate.add(String.valueOf(leave.get("leavedate")));
+        }
         String sql = "select * from employee_schema.holiday";
         List<Map<String, Object>> tableData = dataExtractor.extractDataFromTable(sql);
         List<String> listOfDate = new ArrayList<>();
         for (Map<String, Object> holiday : tableData) {
             listOfDate.add(String.valueOf(holiday.get("date")));
         }
-
         int temp = 15;
         boolean checkDay;
         while (temp > 0) {
             checkDay = true;
             ResponseModel responseModel = new ResponseModel();
             responseModel.setEmployeeId(empId);
-            String Checkdate = dateformater.format(cal.getTime());
+            String checkDate = dateformater.format(cal.getTime());
             int dayNumber = cal.get(Calendar.DAY_OF_MONTH);
             String dayNames[] = new DateFormatSymbols().getWeekdays();
             String nameDay = dayNames[cal.get(Calendar.DAY_OF_WEEK)];
             if ((nameDay.equalsIgnoreCase(Util.SATURDAY))
                     && ((dayNumber >= 8 && dayNumber <= 14) || (dayNumber >= 22 && dayNumber <= 28))
-                    || (nameDay.equalsIgnoreCase(Util.SUNDAY)) || (listOfDate.contains(Checkdate))) {
+                    || (nameDay.equalsIgnoreCase(Util.SUNDAY)) || (listOfDate.contains(checkDate))||(listOfLeaveDate.contains(checkDate))) {
                 checkDay = false;
             }
             String date = f.format(cal.getTime());
@@ -268,12 +299,23 @@ public class TimeSheetServiceImpl implements TimeSheetService {
                     responseModel.setDate(timeSheetModelData.get().getDate());
                     responseModel.setEmail(use.getEmail());
                     list.add(responseModel);
-
                 }
 
-            }
-            temp--;
-        }
+				Optional<Priortime> priortime = priorTimeRepository.findByEmployeeIdAndDate(empId, date);
+				if (priortime.isPresent()) {
+					Priortime prior = priortime.get();
+					long currentTime = System.currentTimeMillis();
+					if (priortime.get().getExpiryTime() <= currentTime
+							&& !prior.getStatus().equalsIgnoreCase("Accepted")) {
+						responseModel.setStatus("Resend");
+						prior.setStatus("Resend");
+						priorTimeRepository.save(prior);
+					}
+				}
+
+			}
+			temp--;
+		}
 
         return list;
     }
@@ -322,7 +364,9 @@ public class TimeSheetServiceImpl implements TimeSheetService {
         priortimeuser.setWorkingHour(differenceInHours + ":" + differenceInMinutes + ":" + differenceInSeconds);
         priortimeuser.setMonth(month.toUpperCase());
         priortimeuser.setYear(year.toUpperCase());
-
+        long millisecondsInFiveDays = TimeUnit.DAYS.toMillis(5);
+		long currentTime=System.currentTimeMillis();
+        priortimeuser.setExpiryTime(currentTime+millisecondsInFiveDays);
         Priortime priortime = priorTimeRepository.save(priortimeuser);
         return Optional.ofNullable(priortime);
     }
@@ -641,4 +685,37 @@ public class TimeSheetServiceImpl implements TimeSheetService {
         return employeeNames;
 
     }
+    
+    public  String reSendPriorTimeRequest(int priortimeId) {
+    Optional<Priortime>  priorTimeRequest= priorTimeRepository.findById(priortimeId);
+	if (priorTimeRequest.isPresent()) {
+		Priortime priortime=priorTimeRequest.get();
+		priortime.setStatus("Pending");
+		long millisecondsInFiveDays = TimeUnit.DAYS.toMillis(5);
+   		long currentTime=System.currentTimeMillis();
+   		priortime.setExpiryTime(currentTime+millisecondsInFiveDays);
+   	  UriComponentsBuilder urlBuilder1 = ServletUriComponentsBuilder.newInstance()
+				.scheme(scheme)
+				.host(ipaddress)
+				.port(serverPort)
+				.path(context+"/payroll/timeSheet/updatePriorTime/Accepted/" + priortimeId);              
+      UriComponentsBuilder urlBuilder2 = ServletUriComponentsBuilder.newInstance()
+				.scheme(scheme)
+				.host(ipaddress)
+				.port(serverPort)
+				.path(context+"/payroll/timeSheet/updatePriorTime/Rejected/" + priortimeId);
+      OnPriorTimeDetailsSavedEvent onPriorTimeDetailsSavedEvent = new OnPriorTimeDetailsSavedEvent(priortime,
+              urlBuilder1, urlBuilder2);
+      applicationEventPublisher.publishEvent(onPriorTimeDetailsSavedEvent);	
+       priorTimeRepository.save(priortime);
+      return "reSend email successfully";
+	}
+   
+   	return "this records  not persent "; 
+   	 
+    }
+    
+   
+
+
 }

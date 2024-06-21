@@ -62,6 +62,12 @@ public class Priortime {
 
     @Column(name = "checkOutDistance")
     private String checkOutDistance;
+    
+    @Column(name="expiry_time")
+    private Long expiryTime;
+    
+    @Column(name = "updated_by")
+    private String updatedBy;
 	
 
 }

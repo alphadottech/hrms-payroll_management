@@ -1101,6 +1101,7 @@ public class PayRollServiceImpl implements PayRollService {
 		salaryDetailsDTO.setEmpId(empId);
 		try {
 			if (empPayrollOptional.isPresent()) {
+
 				salaryDetailsDTO.setSalary(empPayrollOptional.get().getSalary());
 				salaryDetailsDTO.setBankName(empPayrollOptional.get().getBankName());
 				salaryDetailsDTO.setDesignation(empPayrollOptional.get().getDesignation());
