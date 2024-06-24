@@ -20,7 +20,8 @@ public interface PayRollService {
 
 	String updateNetAmountInExcel(MultipartFile file) throws IOException;
 
-	public String generatePaySlipForAllEmployees() throws ParseException, IOException;
+	public String generatePaySlipForAllEmployees(String emailInput) throws ParseException, IOException;
+
 
 	public SalaryDetailsDTO getEmployeePayrollSalaryDetailsByEmpId(Integer empId);
 

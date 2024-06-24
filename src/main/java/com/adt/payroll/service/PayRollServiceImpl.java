@@ -812,7 +812,7 @@ public class PayRollServiceImpl implements PayRollService {
 
 //  generate salary code modification
 	@Override
-	public String generatePaySlipForAllEmployees() throws ParseException, IOException {
+	public String generatePaySlipForAllEmployees(String emailInput) throws ParseException, IOException {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		// int officeTotalWorkingDay = util.getWorkingDays();
@@ -820,7 +820,7 @@ public class PayRollServiceImpl implements PayRollService {
 		List<SalaryDetails> salaryDetailsList = salaryDetailsRepo.findAll();
 		String name = null;
 		PaySlip paySlip = null;
-
+		Map<ByteArrayOutputStream, String> payslip= new HashMap<>();
 		if ((!salaryDetailsList.isEmpty()) || (salaryDetailsList.size() > 0)) {
 
 			for (SalaryDetails salaryDetails : salaryDetailsList) {
@@ -915,6 +915,10 @@ public class PayRollServiceImpl implements PayRollService {
 									baos = DetailedSalarySlip.builder().build().generateDetailedSalarySlipPDF(
 											salaryDetails, paySlip, empPayrollDetailsOptional.get().getJoinDate(),
 											paySlipDetails.get(Util.MONTH), 0);
+									
+									if(!emailInput.isEmpty() && !emailInput.isBlank()) {
+										payslip.put(baos, name);
+									}
 
 									log.info("baos:---createPDF");
 
@@ -922,8 +926,9 @@ public class PayRollServiceImpl implements PayRollService {
 									mailService.sendEmail(name);
 									continue;
 								}
-								mailService.sendEmail(baos, name, gmail,
-										paySlipDetails.get(Util.MONTH) + " " + paySlipDetails.get(Util.YEAR));
+								if (emailInput.isEmpty())
+									mailService.sendEmail(baos, name, gmail,
+											paySlipDetails.get(Util.MONTH) + " " + paySlipDetails.get(Util.YEAR));
 							}
 
 						} catch (Exception e) {
@@ -938,6 +943,11 @@ public class PayRollServiceImpl implements PayRollService {
 					log.info("e.printStackTrace()----" + e.getMessage());
 					break;
 				}
+			}
+			
+			if(!emailInput.isEmpty() && !emailInput.isBlank()) {
+				mailService.sendEmail(payslip, "Hr", emailInput,
+						paySlipDetails.get(Util.MONTH) + " " + paySlipDetails.get(Util.YEAR));
 			}
 		}
 		return "Mail Send Successfully";

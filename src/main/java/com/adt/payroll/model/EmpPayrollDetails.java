@@ -41,6 +41,9 @@ public class EmpPayrollDetails {
 
 	@Column(name = "ifsc_code")
 	private String ifscCode;
+	
+	@Column(name = "variable_amount")
+	private Double variable;
 
 	@OneToOne
 	@JoinColumn(name = "empId", referencedColumnName = "EMPLOYEE_ID", nullable = false, insertable = false, updatable = false)

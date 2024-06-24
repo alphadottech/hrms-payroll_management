@@ -261,7 +261,7 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 			}
 			response.setGrossSalary(grossSalaryAmount);
 
-			if (dto.getBasic() <= 15000) {
+			if (dto.getBasic() == 15000) {
 				basic = dto.getBasic();
 			} else {
 				basic = grossSalaryAmount / 2;
@@ -269,6 +269,10 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 
 			double empCalcutedPFAmount = basic * 0.12;
 			response.setEmployeePFAmount(empCalcutedPFAmount);
+			//gross-> basic and hra saved
+			response.setBasic(basic);
+			response.setHouseRentAllowance(grossSalaryAmount - basic);
+
 			response.setOnlyBasic(false);
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
@@ -287,19 +291,20 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 			Optional<User> existEmployee = userRepo.findById(salaryDetailsDTO.getEmpId());
 			String name = existEmployee.get().getFirstName() + " " + existEmployee.get().getLastName();
 			if (existEmployee.isPresent()) {
-
+				if (salaryDetailsDTO.getSalary() <= 21000) {
+					isEsic = true;
+				}
+				// here we calculate the pf and esic on the basis of given basic
+				if(salaryDetailsDTO.isOnlyBasic()) {
+					return calculatePFAndEsicAmount(salaryDetailsDTO, isEsic, name);
+				}
+				
 				Optional<EmpPayrollDetails> empPayrollExist = empPayrollDetailsRepo
 						.findByEmployeeId(salaryDetailsDTO.getEmpId());
 				Optional<SalaryDetails> salaryDetailsExist = salaryDetailsRepo.findByEmployeeId(salaryDetailsDTO.getEmpId());
-
+				
 				if (empPayrollExist.isPresent()) {
-					if (salaryDetailsDTO.getSalary() <= 21000) {
-						isEsic = true;
-					}
 					
-					if(salaryDetailsDTO.isOnlyBasic()) {
-						return calculatePFAndEsicAmount(salaryDetailsDTO, isEsic, name);
-					}
 					EmpPayrollDetails updateEmpPayroll= empPayrollExist.get();
 					updateEmpPayroll.setSalary(salaryDetailsDTO.getSalary());
 					updateEmpPayroll.setBankName(salaryDetailsDTO.getBankName());
@@ -307,6 +312,8 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 					updateEmpPayroll.setJoinDate(salaryDetailsDTO.getJoinDate());
 					updateEmpPayroll.setAccountNumber(salaryDetailsDTO.getAccountNumber());
 					updateEmpPayroll.setIfscCode(salaryDetailsDTO.getIfscCode());
+					updateEmpPayroll.setVariable(salaryDetailsDTO.getVariableAmount());
+
 					empPayrollDetailsRepo.save(updateEmpPayroll);
 
 					if (salaryDetailsExist.isPresent()) {
@@ -339,7 +346,7 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 							saveEmpsalary.setEmployerPFAmount(salaryDetailsDTO.getEmployerPFAmount());
 							saveEmpsalary.setMedicalInsurance(salaryDetailsDTO.getMedicalInsurance());
 							saveEmpsalary.setGrossSalary(salaryDetailsDTO.getGrossSalary());
-							saveEmpsalary.setNetSalary(salaryDetailsDTO.getNetSalary());
+							saveEmpsalary.setNetSalary(salaryDetailsDTO.getVariableAmount());
 							salaryDetailsRepo.save(saveEmpsalary);
 
 							return new ResponseEntity("EmployeeSalaryDetails of EmpId:" + salaryDetailsDTO.getEmpId()
@@ -356,6 +363,7 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 					saveEmpPayroll.setJoinDate(salaryDetailsDTO.getJoinDate());
 					saveEmpPayroll.setAccountNumber(salaryDetailsDTO.getAccountNumber());
 					saveEmpPayroll.setIfscCode(salaryDetailsDTO.getIfscCode());
+					saveEmpPayroll.setVariable(salaryDetailsDTO.getVariableAmount());
 					empPayrollDetailsRepo.save(saveEmpPayroll);
 
 					SalaryDetails saveEmpSalary = new SalaryDetails();

@@ -3,6 +3,7 @@ package com.adt.payroll.service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 import jakarta.mail.MessagingException;
 
@@ -56,5 +57,8 @@ public interface CommonEmailService {
 	public void sendEmail( String name, String msg);
 
 	void sendEmailForTimeSheet(ByteArrayOutputStream baos, String name, String gmail, String date);
+	
+	public void sendEmail(Map<ByteArrayOutputStream, String> baos, String name, String gmail, String monthYear);
+
 
 }
