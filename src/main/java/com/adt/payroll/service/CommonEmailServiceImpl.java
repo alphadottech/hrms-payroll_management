@@ -427,6 +427,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 			mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 			mimeMessageHelper.setFrom(sender);
 			mimeMessageHelper.setTo(gmail);
+			mimeMessageHelper.setCc("teamhr.adt@gmail.com");
 			mimeMessageHelper.setText(massage);
 			mimeMessageHelper.setSubject("Weekly Time Sheet Report");
 			mimeMessageHelper.addAttachment(name + ".xlsx", source);
@@ -440,5 +441,39 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		}
 	}
 	
+	@Override
+	public void sendEmail(Map<ByteArrayOutputStream, String> baos, String name, String gmail, String monthYear) {
+		String massage = Util.msg.replace("[Name]", name).replace("[Your Name]", "AlphaDot Technologies")
+				.replace("[Month, Year]", monthYear);
 
+		MimeMessage mimeMessage = mailSender.createMimeMessage();
+		MimeMessageHelper mimeMessageHelper;
+
+		try {
+			
+			
+			mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+			mimeMessageHelper.setFrom(sender);
+			mimeMessageHelper.setTo(gmail);
+			mimeMessageHelper.setText(massage);
+			mimeMessageHelper.setSubject("Salary Slip" + "-" + monthYear);
+			
+			baos.entrySet().forEach(m->{
+				DataSource source = new ByteArrayDataSource(m.getKey().toByteArray(), "application/octet-stream");
+				try {
+					mimeMessageHelper.addAttachment(m.getValue() + ".pdf", source);
+				} catch (MessagingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} );
+
+			mailSender.send(mimeMessage);
+
+			log.info("Mail send Successfully");
+		} catch (MessagingException e) {
+			log.info("Error");
+
+		}
+	}
 }
