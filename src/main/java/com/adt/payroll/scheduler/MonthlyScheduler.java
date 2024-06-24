@@ -61,7 +61,7 @@ public class MonthlyScheduler {
     }
   
    // @Scheduled(cron = "0 */2 * * * *")
-	@Scheduled(cron = "0 0 8 * * MON") // Executes on the every Monday at 8 AM
+    @Scheduled(cron = "0 0 8 * * MON") // Executes on the every Monday at 8 AM
 	public void sendNotificationForTimeSheet() {
 		log.info("Generate weekly time sheet report ");
 		LocalDate endDate = LocalDate.now();
