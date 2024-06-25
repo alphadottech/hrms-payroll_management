@@ -22,7 +22,6 @@ public interface PayRollService {
 
 	public String generatePaySlipForAllEmployees(String emailInput) throws ParseException, IOException;
 
-
 	public SalaryDetailsDTO getEmployeePayrollSalaryDetailsByEmpId(Integer empId);
 
 }

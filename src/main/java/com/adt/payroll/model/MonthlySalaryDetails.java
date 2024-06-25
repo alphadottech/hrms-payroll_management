@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(catalog = "hrms_sit", schema = "payroll_schema", name = "monthly_salary_details")
 public class MonthlySalaryDetails {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
@@ -67,32 +67,37 @@ public class MonthlySalaryDetails {
 
 	@Column(name = "gross_deduction")
 	private Double grossDeduction;
-	
+
 	@Column(name = "absent_deduction")
 	private Double absentDeduction;
-	
+
 	@Column(name = "salary_credited_date")
 	private String creditedDate;
-	
+
 	@Column(name = "salary_month")
 	private String month;
-	
+
 	@Column(name = "bonus")
 	private Double bonus;
-	
+
 	@Column(name = "present_days")
 	private Integer presentDays;
+
 	@Column(name = "absent_leaves")
 	private Integer absentDays;
+
 	@Column(name = "total_working_days")
 	private Integer totalWorkingDays;
+
 	@Column(name = "half_day")
 	private Integer halfDay;
+
 	@Column(name = "paid_leave")
 	private Integer paidLeave;
+
 	@Column(name = "unpaid_leave")
 	private Integer unpaidLeave;
-	
+
 	@OneToOne
 	@JoinColumn(name = "empId", referencedColumnName = "EMPLOYEE_ID", nullable = false, insertable = false, updatable = false)
 	private User employee;
