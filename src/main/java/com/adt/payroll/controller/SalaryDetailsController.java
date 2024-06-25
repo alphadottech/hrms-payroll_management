@@ -1,5 +1,6 @@
 package com.adt.payroll.controller;
 
+import com.adt.payroll.model.AppraisalDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,22 @@ public class SalaryDetailsController {
 	@PostMapping("/saveEmployeeSalaryDetails")
 	public ResponseEntity<SalaryDetailsDTO> saveSalaryDetails(@RequestBody SalaryDetailsDTO salaryDetailsDTO) {
 		LOGGER.info("PayrollService: SalaryDetailsController: Employee saveSalaryDetails Info level log msg");
-	//	return salaryDetailsService.saveSalaryDetails(salaryDetailsDTO);
-		return salaryDetailsService.calculateAndSaveSalaryDetails(salaryDetailsDTO);	
+		//	return salaryDetailsService.saveSalaryDetails(salaryDetailsDTO);
+		return salaryDetailsService.calculateAndSaveSalaryDetails(salaryDetailsDTO);
 	}
 
+	@PreAuthorize("@auth.allow('SAVE_APPRAISAL_DETAILS')")
+	@PostMapping("/addAppraisalDetails")
+	public ResponseEntity<String> addAppraisalDetails(@RequestBody AppraisalDetails appraisalDetails) {
+		LOGGER.info("PayrollService: SalaryDetailsController:Employee addAppraisalDetails Info level log msg");
+		ResponseEntity<String> responseEntity = salaryDetailsService.addAppraisalDetails(appraisalDetails);
+		LOGGER.info("Successfully added appraisal details for employee with ID: {}", appraisalDetails.getEmpId());
+		return responseEntity;
+	}
 }
+
+
+
+
+
+
