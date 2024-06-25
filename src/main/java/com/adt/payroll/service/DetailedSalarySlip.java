@@ -348,7 +348,8 @@ public class DetailedSalarySlip {
 //         double grossDeduction = esicAmount + pfAmount + (unpaidLeaveAmount-halfDayAmount) + adjustment + medicalInsurance + tds;
          PdfPTable deductionsTable =  createParallelTable("Deductions", "Esic Deduction", String.valueOf(salaryDetails.getEmployeeESICAmount()), "PF Deduction", String.valueOf(salaryDetails.getEmployeePFAmount()), "Adjustment", String.valueOf(adjustment), "Absent Deduction", String.valueOf(Math.round(paySlip.getLeaveDeductionAmount())), "Medical Insurance", String.valueOf(salaryDetails.getMedicalInsurance()));
          PdfPCell deductionsCell = new PdfPCell(deductionsTable);
-         double grossDeduction = salaryDetails.getEmployeeESICAmount() + salaryDetails.getEmployeePFAmount() + paySlip.getLeaveDeductionAmount() + salaryDetails.getMedicalInsurance();
+         double grossDeductionCal = salaryDetails.getEmployeeESICAmount() + salaryDetails.getEmployeePFAmount() + paySlip.getLeaveDeductionAmount() + salaryDetails.getMedicalInsurance();
+         double grossDeduction = Math.round(grossDeductionCal)<=Math.round(grossEarning)?Math.round(grossDeductionCal):Math.round(grossEarning);
          mainTable.addCell(deductionsCell);
          document.add(mainTable);
 
