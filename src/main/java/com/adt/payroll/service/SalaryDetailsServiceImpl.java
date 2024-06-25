@@ -1,10 +1,14 @@
 package com.adt.payroll.service;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
+import com.adt.payroll.model.*;
+import com.adt.payroll.repository.AppraisalDetailsRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.adt.payroll.dto.SalaryDetailsDTO;
-import com.adt.payroll.model.EmpPayrollDetails;
-import com.adt.payroll.model.SalaryDetails;
-import com.adt.payroll.model.User;
 import com.adt.payroll.repository.EmpPayrollDetailsRepo;
 import com.adt.payroll.repository.SalaryDetailsRepository;
 import com.adt.payroll.repository.UserRepo;
@@ -33,6 +34,9 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 
 	@Autowired
 	public UserRepo userRepo;
+
+	@Autowired
+    private AppraisalDetailsRepository appraisalDetailsRepository;
 
 	@Autowired
 	private CommonEmailService mailService;
@@ -399,4 +403,20 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 
 	}
 
+	@Override
+	public ResponseEntity<String> addAppraisalDetails(AppraisalDetails appraisalDetails) {
+		try {
+			AppraisalDetails savedAppraisalDetails = appraisalDetailsRepository.save(appraisalDetails);
+			return new ResponseEntity<>("AppraisalDetails saved successfully with ID: " + savedAppraisalDetails.getAppr_hist_id(),
+					HttpStatus.CREATED);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(
+					"AppraisalDetails for EmpId:" + appraisalDetails.getEmployee().getId()+ " could not be saved",
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }
+
+
