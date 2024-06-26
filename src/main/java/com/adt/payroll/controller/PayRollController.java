@@ -78,12 +78,10 @@ public class PayRollController {
 
 	@PreAuthorize("@auth.allow('GENERATE_PAYSLIP_FOR_ALL_EMPLOYEE_FROM_DB')")
 	@GetMapping("/generatePaySlipForAll")
-	public ResponseEntity<Object> generatePaySlipForAllEmployees(HttpServletRequest request, @RequestParam("emailInput") String emailInput)
-			throws IOException, ParseException {
+	public ResponseEntity<Object> generatePaySlipForAllEmployees(HttpServletRequest request,
+			@RequestParam("emailInput") String emailInput) throws IOException, ParseException {
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
-		//return new ResponseEntity<>(payRollService.generatePaySlipForAllEmployees(), HttpStatus.OK);
 		return new ResponseEntity<>(payRollService.generatePaySlipForAllEmployees(emailInput), HttpStatus.OK);
-
 	}
 
 	@PreAuthorize("@auth.allow('GET_EMPLOYEE_PAYROLL_SALARY_DETAILS_BY_EMP_ID')")
