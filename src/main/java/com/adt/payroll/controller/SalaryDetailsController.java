@@ -1,5 +1,6 @@
 package com.adt.payroll.controller;
 
+import com.adt.payroll.dto.AppraisalDetailsDTO;
 import com.adt.payroll.model.AppraisalDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.adt.payroll.dto.SalaryDetailsDTO;
 import com.adt.payroll.service.SalaryDetailsService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/salarydetails")
@@ -38,8 +41,14 @@ public class SalaryDetailsController {
 	public ResponseEntity<String> addAppraisalDetails(@RequestBody AppraisalDetails appraisalDetails) {
 		LOGGER.info("PayrollService: SalaryDetailsController:Employee addAppraisalDetails Info level log msg");
 		ResponseEntity<String> responseEntity = salaryDetailsService.addAppraisalDetails(appraisalDetails);
-		LOGGER.info("Successfully added appraisal details for employee with ID: {}", appraisalDetails.getEmpId());
 		return responseEntity;
+	}
+
+	@PreAuthorize("@auth.allow('GET_ALL_EMPLOYEE_APPRAISAL_DETAILS')")
+	@GetMapping("/getAllEmployeesWithLatestAppraisal")
+	public ResponseEntity<List<AppraisalDetailsDTO>> getEmployeesWithLatestAppraisal() {
+		LOGGER.info("PayrollService: SalaryDetailsController: Getting all employees with latest appraisal details");
+		return salaryDetailsService.getEmployeesWithLatestAppraisal();
 	}
 }
 
