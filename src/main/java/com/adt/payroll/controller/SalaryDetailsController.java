@@ -46,8 +46,8 @@ public class SalaryDetailsController {
 
 	@PreAuthorize("@auth.allow('GET_ALL_EMPLOYEE_APPRAISAL_DETAILS')")
 	@GetMapping("/getAllEmployeesWithLatestAppraisal")
-	public ResponseEntity<List<AppraisalDetailsDTO>> getEmployeesWithLatestAppraisal() {
-		LOGGER.info("PayrollService: SalaryDetailsController: Getting all employees with latest appraisal details");
+	public ResponseEntity<List<AppraisalDetailsDTO>> getAllEmployeesWithLatestAppraisal() {
+		LOGGER.info("PayrollService: SalaryDetailsController:Getting all employees appraisal details Info level log msg");
 		return salaryDetailsService.getEmployeesWithLatestAppraisal();
 	}
 }
