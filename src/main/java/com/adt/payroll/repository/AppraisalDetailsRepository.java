@@ -29,4 +29,19 @@ public interface AppraisalDetailsRepository extends JpaRepository<AppraisalDetai
             nativeQuery = true)
     List<Object[]> findLatestAppraisalDetails();
 
+    @Query(value = "SELECT CONCAT(e.first_name, ' ', e.last_name) AS name, " +
+            "e.employee_id, "+
+            "ep.joining_date, " +
+            "ep.salary, " +
+            "ep.variable_amount, " +
+            "sd.bonus " +
+            "FROM user_schema._employee e " +
+            "LEFT JOIN payroll_schema.emp_payroll_details ep ON e.employee_id = ep.emp_id " +
+            "LEFT JOIN payroll_schema.salary_details sd ON e.employee_id = sd.emp_id " +
+            "WHERE e.employee_id NOT IN " +
+            "(SELECT ad.emp_id " +
+            "FROM payroll_schema.appraisal_historical_details ad)",
+            nativeQuery = true)
+    List<Object[]> findEmployeesWithoutAppraisal();
+
 }

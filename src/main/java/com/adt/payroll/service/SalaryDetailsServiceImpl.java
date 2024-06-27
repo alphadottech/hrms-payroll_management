@@ -1,5 +1,6 @@
 package com.adt.payroll.service;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -405,6 +406,15 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 	@Override
 	public ResponseEntity<String> addAppraisalDetails(AppraisalDetails appraisalDetails) {
 		log.info("Adding appraisal details for Employee ID: {}", appraisalDetails.getEmpId());
+		if (appraisalDetails.getSalary() == null || appraisalDetails.getSalary() < 0) {
+			log.error("Salary must be specified and must be non-negative.");
+			return new ResponseEntity<>("Salary must be specified and must be non-negative.", HttpStatus.BAD_REQUEST);
+		}
+		if (appraisalDetails.getAmount() == null || appraisalDetails.getAmount() < 0) {
+			log.error("Amount must be specified and must be non-negative.");
+			return new ResponseEntity<>("Amount must be specified and must be non-negative.", HttpStatus.BAD_REQUEST);
+		}
+
 		try {
 			Optional<User> employeeOptional = userRepo.findById(appraisalDetails.getEmpId());
 			if (employeeOptional.isEmpty()) {
@@ -428,37 +438,70 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 	public ResponseEntity<List<AppraisalDetailsDTO>> getEmployeesWithLatestAppraisal() {
 		log.info("Getting all employees with latest appraisal details");
 
+		List<AppraisalDetailsDTO> appraisalDetailsDTOList = new ArrayList<>();
+
 		try {
 			List<Object[]> resultList = appraisalDetailsRepository.findLatestAppraisalDetails();
-			if (resultList.isEmpty()) {
-				log.warn("Employee not found for latest appraisal");
-				return new ResponseEntity(
-						"Employee not found for latest appraisal",
-						HttpStatus.NOT_FOUND);
-			}
-			List<AppraisalDetailsDTO> appraisalDetailsDTOList = new ArrayList<>();
-			for (Object[] result : resultList) {
-				AppraisalDetailsDTO appraisalDetailsDTO = new AppraisalDetailsDTO();
-				appraisalDetailsDTO.setAppr_hist_id((Integer) result[0]);
-				appraisalDetailsDTO.setEmpId((int) result[1]);
-				appraisalDetailsDTO.setYear(String.valueOf(result[2]));
-				appraisalDetailsDTO.setMonth(String.valueOf(result[3]));
-				appraisalDetailsDTO.setBonus((Double) result[4]);
-				appraisalDetailsDTO.setVariable((Double) result[5]);
-				appraisalDetailsDTO.setAmount((Double) result[6]);
-				appraisalDetailsDTO.setAppraisalDate(String.valueOf(result[7]));
-				appraisalDetailsDTO.setSalary((Double) result[8]);
-				appraisalDetailsDTO.setName((String) result[9]);
 
-				appraisalDetailsDTOList.add(appraisalDetailsDTO);
-			}
+			if (resultList == null || resultList.isEmpty()) {
+				log.warn("No employee with latest appraisal details found");
+			} else {
+				for (Object[] result : resultList) {
+					AppraisalDetailsDTO appraisalDetailsDTO = new AppraisalDetailsDTO();
+					appraisalDetailsDTO.setAppr_hist_id((Integer) result[0]);
+					appraisalDetailsDTO.setEmpId((int) result[1]);
+					appraisalDetailsDTO.setYear(String.valueOf(result[2]));
+					appraisalDetailsDTO.setMonth(String.valueOf(result[3]));
+					appraisalDetailsDTO.setBonus((Double) result[4]);
+					appraisalDetailsDTO.setVariable((Double) result[5]);
+					appraisalDetailsDTO.setAmount((Double) result[6]);
+					appraisalDetailsDTO.setAppraisalDate(String.valueOf(result[7]));
+					appraisalDetailsDTO.setSalary((Double) result[8]);
+					appraisalDetailsDTO.setName((String) result[9]);
 
-			return new ResponseEntity<>(appraisalDetailsDTOList, HttpStatus.OK);
+					appraisalDetailsDTOList.add(appraisalDetailsDTO);
+				}
+			}
 		} catch (Exception e) {
 			log.error("Failed to retrieve employees with latest appraisal details", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		}
+
+		log.info("Getting all employees who did not get appraisal");
+
+		try {
+			List<Object[]> employeesWithoutAppraisal = appraisalDetailsRepository.findEmployeesWithoutAppraisal();
+
+			if (employeesWithoutAppraisal == null || employeesWithoutAppraisal.isEmpty()) {
+				log.warn("No employees without appraisal details found");
+			} else {
+				for (Object[] result : employeesWithoutAppraisal) {
+					AppraisalDetailsDTO appraisalDetailsDTO = new AppraisalDetailsDTO();
+					appraisalDetailsDTO.setName((String) result[0]);
+					appraisalDetailsDTO.setEmpId(Integer.parseInt(String.valueOf(result[1])));
+					appraisalDetailsDTO.setAppraisalDate(String.valueOf(result[2]));
+					appraisalDetailsDTO.setSalary((Double) result[3]);
+					appraisalDetailsDTO.setVariable((Double) result[4]);
+					appraisalDetailsDTO.setBonus((Double) result[5]);
+					appraisalDetailsDTO.setAmount(0.0);
+
+					appraisalDetailsDTOList.add(appraisalDetailsDTO);
+				}
+			}
+		} catch (Exception e) {
+			log.error("Failed to retrieve employees without latest appraisal details", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		}
+
+		if (appraisalDetailsDTOList.isEmpty()) {
+			log.warn("No employees found");
+			return new ResponseEntity("No Employee Found", HttpStatus.OK);
+		}
+
+		return new ResponseEntity<>(appraisalDetailsDTOList, HttpStatus.OK);
 	}
+
 }
+
 
 
