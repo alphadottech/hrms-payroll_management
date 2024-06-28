@@ -52,17 +52,18 @@ public class SalaryDetailsController {
 		LOGGER.info("PayrollService: SalaryDetailsController:Getting all employees appraisal details Info level log msg");
 		return salaryDetailsService.getEmployeesWithLatestAppraisal();
 	}
+	@PreAuthorize("@auth.allow('GET_ALL_APPRAISAL_DETAILS_BY_ID')")
 	@GetMapping("/getAllAppraisalDetailsbyId/{id}")
 	public ResponseEntity<AppraisalDetails> getAppraisalDetailsById(@PathVariable Integer id) {
 		return appraisalDetailsService.getAppraisalDetails(id);
 	}
 
-
+	@PreAuthorize("@auth.allow('GET_REWARD_DETAILS_BY_ID')")
 	@GetMapping("/getRewardDetails/{id}")
 	public List<Reward> getRewardDetailByEmployeeId(@PathVariable Integer id) {
 		return appraisalDetailsService.getRewardDetailsByEmployeeId(id);
 	}
-
+	@PreAuthorize("@auth.allow('SAVE_REWARD_DETAILS')")
 	@PostMapping("/saveRewardDetails")
 	public ResponseEntity<String>saveRewardDetails(@RequestBody Reward reward, HttpServletRequest request){
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
