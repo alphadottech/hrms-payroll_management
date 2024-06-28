@@ -8,7 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.adt.payroll.model.SalaryDetails;
 import com.adt.payroll.model.SalaryModel;
+import com.adt.payroll.repository.SalaryDetailsRepository;
 import com.adt.payroll.repository.SalaryRepo;
 
 @Service
@@ -18,10 +20,13 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Autowired
 	private SalaryRepo salaryRepo;
+	
+	@Autowired
+	private SalaryDetailsRepository salaryDetailsRepo;
 
 	@Override
-	public List<SalaryModel> getAllEmpSalary() {
-		List<SalaryModel> list=salaryRepo.findAll();
+	public List<SalaryDetails> getAllEmpSalary() {
+		List<SalaryDetails> list=salaryDetailsRepo.findAll();
 		LOGGER.info("Payroll service: SalaryServiceImpl:  getAllEmpSalary Info level log msg");
 
 		return list;
