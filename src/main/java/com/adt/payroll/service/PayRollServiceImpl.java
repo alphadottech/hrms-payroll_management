@@ -39,6 +39,7 @@ import com.adt.payroll.exception.NoDataFoundException;
 import com.adt.payroll.model.EmpPayrollDetails;
 import com.adt.payroll.model.ImageModel;
 import com.adt.payroll.model.LeaveBalance;
+import com.adt.payroll.model.MonthlySalaryDetails;
 import com.adt.payroll.model.PayRecord;
 import com.adt.payroll.model.PaySlip;
 import com.adt.payroll.model.SalaryDetails;
@@ -48,6 +49,7 @@ import com.adt.payroll.model.User;
 import com.adt.payroll.repository.EmpPayrollDetailsRepo;
 import com.adt.payroll.repository.ImageRepo;
 import com.adt.payroll.repository.LeaveBalanceRepository;
+import com.adt.payroll.repository.MonthlySalaryDetailsRepo;
 import com.adt.payroll.repository.PayRecordRepo;
 import com.adt.payroll.repository.SalaryDetailsRepository;
 import com.adt.payroll.repository.TimeSheetRepo;
@@ -81,6 +83,9 @@ public class PayRollServiceImpl implements PayRollService {
 
 //    @Value("${spring.mail.username}")
 //    private String sender;
+
+	@Autowired
+	private MonthlySalaryDetailsRepo monthlySalaryDetailsRepo;
 
 	@Autowired
 	private TimeSheetRepo timeSheetRepo;
@@ -820,7 +825,7 @@ public class PayRollServiceImpl implements PayRollService {
 		List<SalaryDetails> salaryDetailsList = salaryDetailsRepo.findAll();
 		String name = null;
 		PaySlip paySlip = null;
-		Map<ByteArrayOutputStream, String> payslip= new HashMap<>();
+		Map<ByteArrayOutputStream, String> payslip = new HashMap<>();
 		if ((!salaryDetailsList.isEmpty()) || (salaryDetailsList.size() > 0)) {
 
 			for (SalaryDetails salaryDetails : salaryDetailsList) {
@@ -904,6 +909,15 @@ public class PayRollServiceImpl implements PayRollService {
 									if (empNetSalaryAmount < 0) {
 										empNetSalaryAmount = 0;
 									}
+									Double grossEarning = salaryDetails.getGrossSalary();
+									Double grossDeductionCal = salaryDetails.getEmployeeESICAmount()
+											+ salaryDetails.getEmployeePFAmount() + paySlip.getLeaveDeductionAmount()
+											+ salaryDetails.getMedicalInsurance();
+									double grossDeduction = Math.round(grossDeductionCal) <= Math.round(grossEarning)
+											? Math.round(grossDeductionCal)
+											: Math.round(grossEarning);
+
+									paySlip.setGrossSalary(grossEarning.floatValue());
 									paySlip.setAccountNumber(empPayrollDetailsOptional.get().getAccountNumber());
 									paySlip.setBankName(empPayrollDetailsOptional.get().getBankName());
 									paySlip.setJobTitle(empPayrollDetailsOptional.get().getDesignation());
@@ -912,11 +926,13 @@ public class PayRollServiceImpl implements PayRollService {
 									paySlip.setPayPeriods(paySlipDetails.get(Util.PAY_PERIOD));
 									paySlip.setNetSalaryAmount(empNetSalaryAmount);
 									paySlip.setSalary(empPayrollDetailsOptional.get().getSalary());
+									paySlip.setGrossDeduction(grossDeduction);
+
 									baos = DetailedSalarySlip.builder().build().generateDetailedSalarySlipPDF(
 											salaryDetails, paySlip, empPayrollDetailsOptional.get().getJoinDate(),
 											paySlipDetails.get(Util.MONTH), 0);
-									
-									if(!emailInput.isEmpty() && !emailInput.isBlank()) {
+
+									if (!emailInput.isEmpty() && !emailInput.isBlank()) {
 										payslip.put(baos, name);
 									}
 
@@ -926,9 +942,15 @@ public class PayRollServiceImpl implements PayRollService {
 									mailService.sendEmail(name);
 									continue;
 								}
-								if (emailInput.isEmpty())
+								if (emailInput.isEmpty()) {
 									mailService.sendEmail(baos, name, gmail,
 											paySlipDetails.get(Util.MONTH) + " " + paySlipDetails.get(Util.YEAR));
+
+									MonthlySalaryDetails saveMonthlySalaryDetails = new MonthlySalaryDetails();
+
+									saveMonthlySalaryDetails(saveMonthlySalaryDetails, salaryDetails, paySlipDetails,
+											paySlip);
+								}
 							}
 
 						} catch (Exception e) {
@@ -944,13 +966,56 @@ public class PayRollServiceImpl implements PayRollService {
 					break;
 				}
 			}
-			
-			if(!emailInput.isEmpty() && !emailInput.isBlank()) {
+
+			if (!emailInput.isEmpty() && !emailInput.isBlank()) {
 				mailService.sendEmail(payslip, "Hr", emailInput,
 						paySlipDetails.get(Util.MONTH) + " " + paySlipDetails.get(Util.YEAR));
 			}
 		}
 		return "Mail Send Successfully";
+	}
+
+	private void saveMonthlySalaryDetails(MonthlySalaryDetails saveMonthlySalaryDetails, SalaryDetails salaryDetails,
+			Map<String, String> paySlipDetails, PaySlip paySlip) {
+		try {
+			log.info(
+					"PayRollServiceImpl: generatePaySlipForAllEmployees: saveMonthlySalaryDetails info level log message");
+
+			saveMonthlySalaryDetails.setEmpId(salaryDetails.getEmpId());
+			saveMonthlySalaryDetails.setBasic(salaryDetails.getBasic());
+			saveMonthlySalaryDetails.setEmployeeESICAmount(salaryDetails.getEmployeeESICAmount());
+			saveMonthlySalaryDetails.setEmployerESICAmount(salaryDetails.getEmployerESICAmount());
+			saveMonthlySalaryDetails.setEmployeePFAmount(salaryDetails.getEmployeePFAmount());
+			saveMonthlySalaryDetails.setEmployerPFAmount(salaryDetails.getEmployerPFAmount());
+			saveMonthlySalaryDetails.setMedicalInsurance(salaryDetails.getMedicalInsurance());
+			saveMonthlySalaryDetails.setTds(salaryDetails.getTds());
+			saveMonthlySalaryDetails.setGrossSalary(paySlip.getGrossSalary().doubleValue());
+			saveMonthlySalaryDetails.setNetSalary(paySlip.getNetSalaryAmount());
+			saveMonthlySalaryDetails.setAdhoc(salaryDetails.getAdhoc());
+			saveMonthlySalaryDetails.setAdjustment(salaryDetails.getAdjustment());
+			saveMonthlySalaryDetails.setHouseRentAllowance(salaryDetails.getHouseRentAllowance());
+			saveMonthlySalaryDetails.setDearnessAllowance(salaryDetails.getDearnessAllowance());
+			saveMonthlySalaryDetails.setGrossDeduction(paySlip.getGrossDeduction());
+			saveMonthlySalaryDetails.setAbsentDeduction(paySlip.getLeaveDeductionAmount());
+			saveMonthlySalaryDetails
+					.setCreditedDate("15-" + paySlipDetails.get(Util.MONTH) + "-" + paySlipDetails.get(Util.YEAR));
+			saveMonthlySalaryDetails.setMonth(paySlipDetails.get(Util.MONTH));
+			saveMonthlySalaryDetails.setBonus(salaryDetails.getBonus());
+			saveMonthlySalaryDetails.setPresentDays(paySlip.getYouWorkingDays());
+			saveMonthlySalaryDetails.setAbsentDays(paySlip.getNumberOfLeavesTaken());
+			saveMonthlySalaryDetails.setTotalWorkingDays(paySlip.getTotalWorkingDays());
+			saveMonthlySalaryDetails.setHalfDay(paySlip.getHalfday());
+			saveMonthlySalaryDetails.setPaidLeave(paySlip.getPaidLeave());
+			saveMonthlySalaryDetails.setUnpaidLeave(paySlip.getUnpaidLeave());
+
+			monthlySalaryDetailsRepo.save(saveMonthlySalaryDetails);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(
+					"PayRollServiceImpl: generatePaySlipForAllEmployees: saveMonthlySalaryDetails: e.printStackTrace()---"
+							+ e.getMessage());
+		}
 	}
 
 	// null checks for values

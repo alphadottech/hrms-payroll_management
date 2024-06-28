@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaySlip {
-	
+
 	private Integer empId;
 	private String Name;
 	private String jobTitle;
-    private String presentDate;
+	private String presentDate;
 	private String bankName;
 	private String accountNumber;
 	private String payPeriods;
@@ -20,16 +20,17 @@ public class PaySlip {
 	private Integer totalWorkingDays;
 	private Integer numberOfLeavesTaken;
 	private Float amountDeductedForLeaves;
-    private Float grossSalary;
+	private Float grossSalary;
 	private Float netAmountPayable;
 	private Integer adhoc;
-	
+	private double grossDeduction;
 	private Integer paidLeave;
 	private Integer unpaidLeave;
 	private Integer halfday;
 	private double leaveDeductionAmount;
 	private double netSalaryAmount;
 	private double salary;
+
 	public PaySlip(Integer empId, String name, String jobTitle, String presentDate, String bankName,
 			String accountNumber, String payPeriods, Integer youWorkingDays, Integer totalWorkingDays,
 			Integer numberOfLeavesTaken, Float amountDeductedForLeaves, Float grossSalary, Float netAmountPayable,
@@ -50,6 +51,5 @@ public class PaySlip {
 		this.netAmountPayable = netAmountPayable;
 		this.adhoc = adhoc;
 	}
-	
 
 }
