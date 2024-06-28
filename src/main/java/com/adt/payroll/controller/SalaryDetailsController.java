@@ -2,17 +2,16 @@ package com.adt.payroll.controller;
 
 import com.adt.payroll.dto.AppraisalDetailsDTO;
 import com.adt.payroll.model.AppraisalDetails;
+import com.adt.payroll.model.Reward;
+import com.adt.payroll.service.AppraisalDetailsService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.adt.payroll.dto.SalaryDetailsDTO;
 import com.adt.payroll.service.SalaryDetailsService;
@@ -27,6 +26,9 @@ public class SalaryDetailsController {
 
 	@Autowired
 	private SalaryDetailsService salaryDetailsService;
+
+	@Autowired
+	private AppraisalDetailsService appraisalDetailsService;
 
 	@PreAuthorize("@auth.allow('SAVE_EMPLOYEE_SALARY_DETAILS')")
 	@PostMapping("/saveEmployeeSalaryDetails")
@@ -49,6 +51,29 @@ public class SalaryDetailsController {
 	public ResponseEntity<List<AppraisalDetailsDTO>> getAllEmployeesWithLatestAppraisal() {
 		LOGGER.info("PayrollService: SalaryDetailsController:Getting all employees appraisal details Info level log msg");
 		return salaryDetailsService.getEmployeesWithLatestAppraisal();
+	}
+	@GetMapping("/getAllAppraisalDetailsbyId/{id}")
+	public ResponseEntity<AppraisalDetails> getAppraisalDetailsById(@PathVariable Integer id) {
+		return appraisalDetailsService.getAppraisalDetails(id);
+	}
+
+
+	@GetMapping("/getRewardDetails/{id}")
+	public List<Reward> getRewardDetailByEmployeeId(@PathVariable Integer id) {
+		return appraisalDetailsService.getRewardDetailsByEmployeeId(id);
+	}
+
+	@PostMapping("/saveRewardDetails")
+	public ResponseEntity<String>saveRewardDetails(@RequestBody Reward reward, HttpServletRequest request){
+		LOGGER.info("API Call From IP: " + request.getRemoteHost());
+
+		try {
+			String response = appraisalDetailsService.saveProjectRewardDetails(reward);
+			return new ResponseEntity<>(response, HttpStatus.OK);
+		} catch (IllegalArgumentException e) {
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+
 	}
 }
 
