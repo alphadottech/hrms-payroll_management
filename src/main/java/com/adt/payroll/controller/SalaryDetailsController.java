@@ -1,6 +1,7 @@
 package com.adt.payroll.controller;
 
 import com.adt.payroll.dto.AppraisalDetailsDTO;
+import com.adt.payroll.dto.SalaryDTO;
 import com.adt.payroll.model.AppraisalDetails;
 import com.adt.payroll.model.Reward;
 import com.adt.payroll.service.AppraisalDetailsService;
@@ -42,8 +43,7 @@ public class SalaryDetailsController {
 	@PostMapping("/addAppraisalDetails")
 	public ResponseEntity<String> addAppraisalDetails(@RequestBody AppraisalDetails appraisalDetails) {
 		LOGGER.info("PayrollService: SalaryDetailsController:Employee addAppraisalDetails Info level log msg");
-		ResponseEntity<String> responseEntity = salaryDetailsService.addAppraisalDetails(appraisalDetails);
-		return responseEntity;
+		return salaryDetailsService.addAppraisalDetails(appraisalDetails);
 	}
 
 	@PreAuthorize("@auth.allow('GET_ALL_EMPLOYEE_APPRAISAL_DETAILS')")
@@ -51,6 +51,13 @@ public class SalaryDetailsController {
 	public ResponseEntity<List<AppraisalDetailsDTO>> getAllEmployeesWithLatestAppraisal() {
 		LOGGER.info("PayrollService: SalaryDetailsController:Getting all employees appraisal details Info level log msg");
 		return salaryDetailsService.getEmployeesWithLatestAppraisal();
+	}
+
+	@PreAuthorize("@auth.allow('GET_SALARY_BY_ID')")
+	@GetMapping("/getSalaryDetailsById/{empId}")
+	public ResponseEntity<List<SalaryDTO>> getEmployeeSalaryById(@PathVariable Integer empId) {
+		LOGGER.info("PayrollService: SalaryDetailsController:Getting employee salary by id Info level log msg");
+		return salaryDetailsService.getEmployeeSalaryById(empId);
 	}
 	@PreAuthorize("@auth.allow('GET_ALL_APPRAISAL_DETAILS_BY_ID')")
 	@GetMapping("/getAllAppraisalDetailsbyId/{id}")

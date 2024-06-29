@@ -44,6 +44,6 @@ public class AppraisalDetails {
     @ManyToOne
     @JoinColumn(name = "empId", referencedColumnName = "EMPLOYEE_ID" ,nullable = false, insertable = false, updatable = false)
     private User employee;
-    private int empId;
+    private Integer empId;
 
 }
