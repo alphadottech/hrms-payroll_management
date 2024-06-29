@@ -117,8 +117,6 @@ public class PayRollServiceImpl implements PayRollService {
 
 	@Autowired
 	private CommonEmailService mailService;
-	
-	MonthlySalaryDetails monthlySalaryDetails =new  MonthlySalaryDetails();
 
 	public PaySlip createPaySlip(int empId, String month, String year) throws ParseException, IOException {
 		log.info("inside method");
@@ -409,18 +407,18 @@ public class PayRollServiceImpl implements PayRollService {
 							adhoc1 += Integer.parseInt(String.valueOf(expense.get("expense_amount")));
 						}
 					}
-
+					MonthlySalaryDetails monthlySalaryDetails =new  MonthlySalaryDetails();
 					if (checkEmpDetails(empId, gmail, accountNumber, employee, fName, lName)) {
 						mailService.sendEmail(name);
 						continue;
 
 					}
-
+					
 					if (isNotNull(empId, name, workingDays, present, date, bankName, accountNumber, designation,
 							joiningDate, leave, halfDay, adhoc1, salary, workingDay, paidLeave)) {
 						baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary, paidLeave, date,
 								bankName, accountNumber, designation, joiningDate, adhoc1, payPeriod, esic, pf,
-								adjustment, medicalInsurance, tds);
+								adjustment, medicalInsurance, tds, monthlySalaryDetails);
 
 					} else {
 
@@ -440,12 +438,9 @@ public class PayRollServiceImpl implements PayRollService {
 					if(email==null||email.isEmpty()) {
 					monthlySalaryDetails.setEmpId(Integer.parseInt(empId));
 					monthlySalaryDetails.setMedicalInsurance(medical);
-					monthlySalaryDetails.getGrossSalary();
 					monthlySalaryDetails.setAdhoc(adhoc);
 					monthlySalaryDetails.setAdjustment(adj);
 					monthlySalaryDetails.setDearnessAllowance(0.0);
-					monthlySalaryDetails.setEmployeeESICAmount(null);
-					monthlySalaryDetails.setEmployeePFAmount(null);
 					monthlySalaryDetails.setCreditedDate(date1);
 					monthlySalaryDetails.setMonth(monthName);
 					monthlySalaryDetails.setTotalWorkingDays(workingDays);
@@ -454,9 +449,8 @@ public class PayRollServiceImpl implements PayRollService {
 					monthlySalaryDetails.setPresentDays(present);
 					monthlySalaryDetails.setBonus(0.0);
 					monthlySalaryDetailsRepo.save(monthlySalaryDetails);
-					monthlySalaryDetails=null;
 					}
-					if(email!=null)
+					if(email!=null&&!email.isEmpty())
 					gmail=email; 
 					
 					mailService.sendEmail(baos, name, gmail, monthYear);
@@ -475,19 +469,24 @@ public class PayRollServiceImpl implements PayRollService {
 	public ByteArrayOutputStream createPdf(String empId, String name, int totalWorkingDays, int present, int leave,
 			int halfDay, String salary, String paidLeave, String date, String bankName, String accountNumber,
 			String designation, String joiningDate, int adhoc1, String payPeriod, String esic, String pf,
-			int adjustment, int medicalInsurance, int tds) throws IOException, DocumentException {
+			int adjustment, int medicalInsurance, int tds, MonthlySalaryDetails monthlySalaryDetails ) throws IOException, DocumentException {
 
 		float pfAmount = 0;
 		double grossSalary = Double.parseDouble(salary);
+		double employerPf =  (double) (Math.round(((grossSalary / 2) * 0.13)));
+		double employeeESICAmount = 0;
+		float employerESICAmount  = 0;
 
 		if (esic.equalsIgnoreCase("Yes") && pf.equalsIgnoreCase("Yes")) {
+			employeeESICAmount = Double.valueOf(Math.round(grossSalary * (0.0325)));
+			employerESICAmount  = (float) (Math.round(grossSalary * (0.0075)));
 			grossSalary = Math
-					.round(grossSalary - ((grossSalary / 2) * 0.13) - grossSalary * 0.04 + (grossSalary * 0.01617));
+					.round(grossSalary - employerPf - (employeeESICAmount + employerESICAmount) + (grossSalary * 0.01617));
 		} else if (esic.equalsIgnoreCase("No") && pf.equalsIgnoreCase("Yes")) {
 
-			grossSalary = Math.round(grossSalary - ((grossSalary / 2) * 0.13) + (grossSalary * 0.01617));
+			grossSalary = Math.round(grossSalary - employerPf + (grossSalary * 0.01617));
 		}
-		float esicAmount = 0;
+		
 		double basic = Math.round(grossSalary / 2);
 		double hra = Math.round(grossSalary / 2);
 		int yourWorkingDays = present + Integer.parseInt(paidLeave);
@@ -504,21 +503,23 @@ public class PayRollServiceImpl implements PayRollService {
 			adhoc1 = 0;
 		}
 
-		if (esic.equalsIgnoreCase("yes") && netAmount != 0) {
-			esicAmount = (float) (Math.round(grossSalary * (0.0075)));
-
-		}
+//		if (esic.equalsIgnoreCase("yes") && netAmount != 0) {
+//			employerESICAmount = (float) (Math.round(grossSalary * (0.0075)));
+//
+//		}
 
 		if (pf.equalsIgnoreCase("yes") && netAmount != 0) {
 			pfAmount = (float) (Math.round(basic * 0.120));
 		}
 		double halfDayAmount = ((double) halfDay / 2) * amountPerDay;
-		double grossDeduction = esicAmount + pfAmount + (unpaidLeave - halfDayAmount) + adjustment + medicalInsurance
+//		double grossDeduction = employerESICAmount + pfAmount + (unpaidLeave - halfDayAmount) + adjustment + medicalInsurance
+//				+ tds;
+		double grossDeduction = employeeESICAmount + pfAmount + (unpaidLeave - halfDayAmount) + adjustment + medicalInsurance
 				+ tds;
-		double esic1 =esicAmount;
-		double pf1=pfAmount;
+		double employerEsic =employerESICAmount;
+		double employeePf=pfAmount;
 		double td=tds;
-		netAmount -= esicAmount;
+		netAmount -= employeeESICAmount;
 		netAmount -= pfAmount;
 		netAmount = Math.round(netAmount);
 		netAmount -= medicalInsurance;
@@ -527,45 +528,21 @@ public class PayRollServiceImpl implements PayRollService {
 		monthlySalaryDetails.setBasic(basic);
 		monthlySalaryDetails.setGrossSalary(grossSalary);
 		monthlySalaryDetails.setGrossDeduction(grossDeduction);
-		monthlySalaryDetails.setEmployerESICAmount(esic1);
-		monthlySalaryDetails.setEmployerPFAmount(pf1);
+		monthlySalaryDetails.setEmployerESICAmount(employerEsic);
+		monthlySalaryDetails.setEmployeeESICAmount(employeeESICAmount);
+		monthlySalaryDetails.setEmployeePFAmount(employeePf);
+		monthlySalaryDetails.setEmployerPFAmount(employerPf);
+
 		monthlySalaryDetails.setUnpaidLeave((int)unpaidLeave);
 		monthlySalaryDetails.setNetSalary(netAmount);
 		monthlySalaryDetails.setTds(td);
 		ByteArrayOutputStream byteArrayOutputStream = DetailedSalarySlip.builder().build()
 				.generateDetailedSalarySlipPDF(empId, name, totalWorkingDays, present, leave, halfDay, salary,
 						paidLeave, date, bankName, accountNumber, designation, joiningDate, adhoc1, payPeriod,
-						esicAmount, pfAmount, netAmount, grossSalary, basic, hra, amountPerDay, unpaidLeave, adjustment,
+						employeeESICAmount, pfAmount, netAmount, grossSalary, basic, hra, amountPerDay, unpaidLeave, adjustment,
 						medicalInsurance, tds);
 		return byteArrayOutputStream;
 	}
-
-//    public void sendEmail(ByteArrayOutputStream baos, String name, String gmail, String monthYear) {
-//        String massage = Util.msg.replace("[Name]", name).replace("[Your Name]", "AlphaDot Technologies")
-//                .replace("[Month, Year]", monthYear);
-//
-//        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-//        MimeMessageHelper mimeMessageHelper;
-//
-//        try {
-//
-//            DataSource source = new ByteArrayDataSource(baos.toByteArray(), "application/octet-stream");
-//            mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
-//            mimeMessageHelper.setFrom(sender);
-//            mimeMessageHelper.setTo(gmail);
-//            mimeMessageHelper.setText(massage);
-//            mimeMessageHelper.setSubject("Salary Slip" + "-" + monthYear);
-//            mimeMessageHelper.addAttachment(name + ".pdf", source);
-//
-//            javaMailSender.send(mimeMessage);
-//
-//            log.info("Mail send Successfully");
-//        } catch (MessagingException e) {
-//            log.info("Error");
-//
-//        }
-//
-//    }
 
 	@Override
 	public byte[] viewPay(SalaryModel salaryModel, String month, String year)

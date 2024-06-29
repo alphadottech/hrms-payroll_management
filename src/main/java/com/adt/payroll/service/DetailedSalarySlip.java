@@ -39,7 +39,7 @@ public class DetailedSalarySlip {
 	public ByteArrayOutputStream generateDetailedSalarySlipPDF(String empId, String name, int totalWorkingDays,
 			int present, int leave, int halfDay, String salary, String paidLeave, String date, String bankName,
 			String accountNumber, String designation, String joiningDate, int adhoc1, String payPeriod,
-			float esicAmount, float pfAmount, double netAmount, double grossSalary, double basic, double hra,
+			double esicAmount, float pfAmount, double netAmount, double grossSalary, double basic, double hra,
 			double amountPerDay, double unpaidLeave, int adjustment, int medicalInsurance, int tds)
 			throws DocumentException, IOException {
 		LocalDate currentdate = LocalDate.now();
