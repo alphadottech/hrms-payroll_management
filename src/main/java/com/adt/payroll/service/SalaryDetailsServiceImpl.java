@@ -6,8 +6,9 @@ import java.util.stream.Collectors;
 
 
 import com.adt.payroll.dto.AppraisalDetailsDTO;
+import com.adt.payroll.dto.SalaryDTO;
 import com.adt.payroll.model.*;
-import com.adt.payroll.repository.AppraisalDetailsRepository;
+import com.adt.payroll.repository.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.hpsf.Decimal;
@@ -17,9 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.adt.payroll.dto.SalaryDetailsDTO;
-import com.adt.payroll.repository.EmpPayrollDetailsRepo;
-import com.adt.payroll.repository.SalaryDetailsRepository;
-import com.adt.payroll.repository.UserRepo;
 
 @Service
 public class SalaryDetailsServiceImpl implements SalaryDetailsService {
@@ -34,6 +32,9 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 
 	@Autowired
 	public UserRepo userRepo;
+
+	@Autowired
+	public MonthlySalaryDetailsRepo monthlySalaryDetailsRepo;
 
 	@Autowired
 	private AppraisalDetailsRepository appraisalDetailsRepository;
@@ -406,6 +407,11 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 	@Override
 	public ResponseEntity<String> addAppraisalDetails(AppraisalDetails appraisalDetails) {
 		log.info("Adding appraisal details for Employee ID: {}", appraisalDetails.getEmpId());
+		if (appraisalDetails.getEmpId() == null ) {
+			log.error("Employee Id can not be null.");
+			return new ResponseEntity<>("Employee Id can not be null ", HttpStatus.BAD_REQUEST);
+		}
+
 		if (appraisalDetails.getSalary() == null || appraisalDetails.getSalary() < 0) {
 			log.error("Salary must be specified and must be non-negative.");
 			return new ResponseEntity<>("Salary must be specified and must be non-negative.", HttpStatus.BAD_REQUEST);
@@ -414,7 +420,6 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 			log.error("Amount must be specified and must be non-negative.");
 			return new ResponseEntity<>("Amount must be specified and must be non-negative.", HttpStatus.BAD_REQUEST);
 		}
-
 		try {
 			Optional<User> employeeOptional = userRepo.findById(appraisalDetails.getEmpId());
 			if (employeeOptional.isEmpty()) {
@@ -501,7 +506,38 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 		return new ResponseEntity<>(appraisalDetailsDTOList, HttpStatus.OK);
 	}
 
+	@Override
+	public ResponseEntity<List<SalaryDTO>> getEmployeeSalaryById(Integer empId) {
+		try {
+			List<MonthlySalaryDetails> salaryDetailsList = monthlySalaryDetailsRepo.findSalaryDetailsByEmpId(empId);
+
+			if (salaryDetailsList == null || salaryDetailsList.isEmpty()) {
+				log.warn("No monthly salary details found for employee with ID: {}", empId);
+				return new ResponseEntity("No monthly salary details found ", HttpStatus.NOT_FOUND);
+			}
+
+			List<SalaryDTO> salaryDTOList = new ArrayList<>();
+			for (MonthlySalaryDetails salaryDetails : salaryDetailsList) {
+				SalaryDTO salaryDTO = new SalaryDTO();
+				salaryDTO.setAdhoc(salaryDetails.getAdhoc());
+				salaryDTO.setEmployeePFAmount(salaryDetails.getEmployeePFAmount());
+				salaryDTO.setEmployerPFAmount(salaryDetails.getEmployerPFAmount());
+				salaryDTO.setEmployeeESICAmount(salaryDetails.getEmployeeESICAmount());
+				salaryDTO.setEmployerESICAmount(salaryDetails.getEmployerESICAmount());
+				salaryDTO.setGrossDeduction(salaryDetails.getGrossDeduction());
+
+				salaryDTOList.add(salaryDTO);
+			}
+
+			if (salaryDTOList.isEmpty()) {
+				log.warn("No monthly salary details found for employee with ID: {}", empId);
+				return new ResponseEntity("No monthly salary details found ", HttpStatus.NOT_FOUND);
+			}
+			return ResponseEntity.ok(salaryDTOList);
+		} catch (Exception e) {
+			log.error("Failed to retrieve monthly salary details for employee with ID: {}", empId, e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
 }
-
-
-

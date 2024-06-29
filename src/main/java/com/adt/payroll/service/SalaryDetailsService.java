@@ -1,6 +1,7 @@
 package com.adt.payroll.service;
 
 import com.adt.payroll.dto.AppraisalDetailsDTO;
+import com.adt.payroll.dto.SalaryDTO;
 import com.adt.payroll.model.AppraisalDetails;
 import org.springframework.http.ResponseEntity;
 
@@ -15,5 +16,6 @@ public interface SalaryDetailsService {
 	public ResponseEntity<SalaryDetailsDTO> calculateAndSaveSalaryDetails(SalaryDetailsDTO salaryDetailsDTO);
 	public ResponseEntity<String> addAppraisalDetails(AppraisalDetails appraisalDetails);
 	ResponseEntity<List<AppraisalDetailsDTO>> getEmployeesWithLatestAppraisal();
+	ResponseEntity<List<SalaryDTO>> getEmployeeSalaryById(Integer empId);
 
 }
