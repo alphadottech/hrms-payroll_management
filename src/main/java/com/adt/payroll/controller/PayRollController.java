@@ -50,10 +50,10 @@ public class PayRollController {
 
 	@PreAuthorize("@auth.allow('GENERATE_PAYSLIP_FOR_ALL_EMPLOYEE')")
 	@PostMapping("/genPayAll")
-	public ResponseEntity<Object> generatePaySlip(@RequestParam("file") MultipartFile file, HttpServletRequest request)
+	public ResponseEntity<Object> generatePaySlip(@RequestParam("file") MultipartFile file, @RequestParam("email") String email,  HttpServletRequest request)
 			throws IOException, ParseException {
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
-		return new ResponseEntity<>(payRollService.generatePaySlip(file), HttpStatus.OK);
+		return new ResponseEntity<>(payRollService.generatePaySlip(file , email), HttpStatus.OK);
 	}
 
 	@PreAuthorize("@auth.allow('VIEW_PAYSLIP')")
