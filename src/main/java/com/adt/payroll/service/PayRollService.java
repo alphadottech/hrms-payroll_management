@@ -13,7 +13,7 @@ import com.adt.payroll.model.SalaryModel;
 public interface PayRollService {
 	public PaySlip createPaySlip(int empId, String month, String year) throws ParseException, IOException;
 
-	public String generatePaySlip(MultipartFile file) throws IOException, ParseException;
+	public String generatePaySlip(MultipartFile file,String email) throws IOException, ParseException;
 
 	public byte[] viewPay(SalaryModel salaryModel, String month, String year)
 			throws ParseException, UnsupportedEncodingException;

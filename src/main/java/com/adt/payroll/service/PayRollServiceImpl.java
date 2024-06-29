@@ -17,6 +17,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -116,6 +117,8 @@ public class PayRollServiceImpl implements PayRollService {
 
 	@Autowired
 	private CommonEmailService mailService;
+	
+	MonthlySalaryDetails monthlySalaryDetails =new  MonthlySalaryDetails();
 
 	public PaySlip createPaySlip(int empId, String month, String year) throws ParseException, IOException {
 		log.info("inside method");
@@ -282,7 +285,7 @@ public class PayRollServiceImpl implements PayRollService {
 
 	// Excel Pay Slip
 
-	public String generatePaySlip(MultipartFile file) throws IOException, ParseException {
+	public String generatePaySlip(MultipartFile file ,String email) throws IOException, ParseException {
 		String empId = "", name = "", salary = "", esic = "", pf = "", paidLeave = "", bankName = "",
 				accountNumber = "", gmail = "", designation = "", submitDate = "", status = "", employee_id = "",
 				joiningDate = "";
@@ -424,9 +427,38 @@ public class PayRollServiceImpl implements PayRollService {
 						mailService.sendEmail(name);
 						continue;
 					}
-
-//                    sendEmail(baos, name, gmail, monthYear);
-
+					   
+					SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
+					Calendar cal1 = Calendar.getInstance();
+					String date1 = f.format(cal1.getTime());
+					cal1.add(Calendar.MONTH, -1);
+					SimpleDateFormat monthFormat = new SimpleDateFormat("MMM");
+				    String monthName = monthFormat.format(cal1.getTime()).toUpperCase();
+					double medical=medicalInsurance;
+					double adhoc=adhoc1;
+					double adj =adjustment;	
+					if(email==null||email.isEmpty()) {
+					monthlySalaryDetails.setEmpId(Integer.parseInt(empId));
+					monthlySalaryDetails.setMedicalInsurance(medical);
+					monthlySalaryDetails.getGrossSalary();
+					monthlySalaryDetails.setAdhoc(adhoc);
+					monthlySalaryDetails.setAdjustment(adj);
+					monthlySalaryDetails.setDearnessAllowance(0.0);
+					monthlySalaryDetails.setEmployeeESICAmount(null);
+					monthlySalaryDetails.setEmployeePFAmount(null);
+					monthlySalaryDetails.setCreditedDate(date1);
+					monthlySalaryDetails.setMonth(monthName);
+					monthlySalaryDetails.setTotalWorkingDays(workingDays);
+					monthlySalaryDetails.setPaidLeave(Integer.parseInt(paidLeave));
+					monthlySalaryDetails.setHalfDay(halfDay);
+					monthlySalaryDetails.setPresentDays(present);
+					monthlySalaryDetails.setBonus(0.0);
+					monthlySalaryDetailsRepo.save(monthlySalaryDetails);
+					monthlySalaryDetails=null;
+					}
+					if(email!=null)
+					gmail=email; 
+					
 					mailService.sendEmail(baos, name, gmail, monthYear);
 
 				} catch (Exception e) {
@@ -457,19 +489,15 @@ public class PayRollServiceImpl implements PayRollService {
 		}
 		float esicAmount = 0;
 		double basic = Math.round(grossSalary / 2);
-
 		double hra = Math.round(grossSalary / 2);
 		int yourWorkingDays = present + Integer.parseInt(paidLeave);
-
 		double amountPerDay = grossSalary / totalWorkingDays;
 		double unpaidLeave = totalWorkingDays - present;
+		monthlySalaryDetails.setAbsentDays((int)unpaidLeave);
 		unpaidLeave -= Integer.parseInt(paidLeave);
 		unpaidLeave *= amountPerDay;
-
 		double HalfDays = halfDay * amountPerDay / 2;
-
 		double netAmount = Math.round((yourWorkingDays * amountPerDay) - HalfDays);
-
 		netAmount = Math.round(netAmount + adhoc1);
 		if (netAmount < 0) {
 			netAmount = 0;
@@ -483,14 +511,27 @@ public class PayRollServiceImpl implements PayRollService {
 
 		if (pf.equalsIgnoreCase("yes") && netAmount != 0) {
 			pfAmount = (float) (Math.round(basic * 0.120));
-
 		}
+		double halfDayAmount = ((double) halfDay / 2) * amountPerDay;
+		double grossDeduction = esicAmount + pfAmount + (unpaidLeave - halfDayAmount) + adjustment + medicalInsurance
+				+ tds;
+		double esic1 =esicAmount;
+		double pf1=pfAmount;
+		double td=tds;
 		netAmount -= esicAmount;
 		netAmount -= pfAmount;
 		netAmount = Math.round(netAmount);
 		netAmount -= medicalInsurance;
 		netAmount -= adjustment;
-
+		monthlySalaryDetails.setHouseRentAllowance(hra);
+		monthlySalaryDetails.setBasic(basic);
+		monthlySalaryDetails.setGrossSalary(grossSalary);
+		monthlySalaryDetails.setGrossDeduction(grossDeduction);
+		monthlySalaryDetails.setEmployerESICAmount(esic1);
+		monthlySalaryDetails.setEmployerPFAmount(pf1);
+		monthlySalaryDetails.setUnpaidLeave((int)unpaidLeave);
+		monthlySalaryDetails.setNetSalary(netAmount);
+		monthlySalaryDetails.setTds(td);
 		ByteArrayOutputStream byteArrayOutputStream = DetailedSalarySlip.builder().build()
 				.generateDetailedSalarySlipPDF(empId, name, totalWorkingDays, present, leave, halfDay, salary,
 						paidLeave, date, bankName, accountNumber, designation, joiningDate, adhoc1, payPeriod,
@@ -980,7 +1021,9 @@ public class PayRollServiceImpl implements PayRollService {
 		try {
 			log.info(
 					"PayRollServiceImpl: generatePaySlipForAllEmployees: saveMonthlySalaryDetails info level log message");
-
+			 SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
+			 Calendar cal = Calendar.getInstance();
+			 String date = f.format(cal.getTime());
 			saveMonthlySalaryDetails.setEmpId(salaryDetails.getEmpId());
 			saveMonthlySalaryDetails.setBasic(salaryDetails.getBasic());
 			saveMonthlySalaryDetails.setEmployeeESICAmount(salaryDetails.getEmployeeESICAmount());
@@ -997,8 +1040,7 @@ public class PayRollServiceImpl implements PayRollService {
 			saveMonthlySalaryDetails.setDearnessAllowance(salaryDetails.getDearnessAllowance());
 			saveMonthlySalaryDetails.setGrossDeduction(paySlip.getGrossDeduction());
 			saveMonthlySalaryDetails.setAbsentDeduction(paySlip.getLeaveDeductionAmount());
-			saveMonthlySalaryDetails
-					.setCreditedDate("15-" + paySlipDetails.get(Util.MONTH) + "-" + paySlipDetails.get(Util.YEAR));
+			saveMonthlySalaryDetails.setCreditedDate(date);		
 			saveMonthlySalaryDetails.setMonth(paySlipDetails.get(Util.MONTH));
 			saveMonthlySalaryDetails.setBonus(salaryDetails.getBonus());
 			saveMonthlySalaryDetails.setPresentDays(paySlip.getYouWorkingDays());
