@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.adt.payroll.model.SalaryDetails;
 import com.adt.payroll.model.SalaryModel;
 import com.adt.payroll.service.SalaryService;
 
@@ -26,7 +27,7 @@ public class SalaryController {
 
     @PreAuthorize("@auth.allow('GET_ALL_EMPLOYEE_SALARY')")
     @GetMapping("/getAllEmpSalary")
-    public ResponseEntity<List<SalaryModel>> getAllEmpSalary() throws ParseException {
+    public ResponseEntity<List<SalaryDetails>> getAllEmpSalary() throws ParseException {
         LOGGER.info("Payroll service: salary:  getAllEmpSalary() Info level log msg");
         return new ResponseEntity<>(salaryService.getAllEmpSalary(), HttpStatus.OK);
     }
