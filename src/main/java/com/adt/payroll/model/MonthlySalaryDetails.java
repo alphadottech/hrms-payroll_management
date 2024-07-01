@@ -19,7 +19,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @Table(catalog = "hrms_sit", schema = "payroll_schema", name = "monthly_salary_details")
-public class MonthlySalaryDetails {
+public class
+MonthlySalaryDetails {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

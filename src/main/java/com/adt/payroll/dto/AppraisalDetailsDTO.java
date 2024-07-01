@@ -15,4 +15,10 @@ public class AppraisalDetailsDTO {
     private Double amount;
     private String appraisalDate;
     private Double salary;
+
+//    public void setFirstName(String firstName) {
+//    }
+//
+//    public void setLastName(String lastName) {
+//    }
 }

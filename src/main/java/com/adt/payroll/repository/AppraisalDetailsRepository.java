@@ -1,11 +1,11 @@
 package com.adt.payroll.repository;
 
-import com.adt.payroll.dto.AppraisalDetailsDTO;
 import com.adt.payroll.model.AppraisalDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AppraisalDetailsRepository extends JpaRepository<AppraisalDetails, Integer> {
@@ -44,4 +44,7 @@ public interface AppraisalDetailsRepository extends JpaRepository<AppraisalDetai
             nativeQuery = true)
     List<Object[]> findEmployeesWithoutAppraisal();
 
+   // ResponseEntity<AppraisalDetails> findByUser_Id(Integer id);
+
+    List<AppraisalDetails> findByEmployee_Id(Integer id);
 }
