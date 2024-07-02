@@ -13,7 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -21,22 +23,22 @@ import java.util.stream.Collectors;
 public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,MonthlySalaryService {
     @Autowired
     private AppraisalDetailsRepository appraisalDetailsRepository;
-    
+
     //@Autowired
-  //  private EmployeeRepo employeeRepo;
+    //  private EmployeeRepo employeeRepo;
     @Autowired
     private UserRepo userRepo;
     @Autowired
-   private MonthlySalaryDetailsRepo monthlySalaryDetailsRepo;
+    private MonthlySalaryDetailsRepo monthlySalaryDetailsRepo;
     @Autowired
-    private  RewardDetailsRepository rewardDetailsRepository;
+    private RewardDetailsRepository rewardDetailsRepository;
 
     @Override
-    public ResponseEntity <List<AppraisalDetails>> getAppraisalDetails(Integer id) {
+    public ResponseEntity<List<AppraisalDetails>> getAppraisalDetails(Integer id) {
         Optional<User> user = userRepo.findByEmployeeId(id);
         if (user.isPresent()) {
             List<AppraisalDetails> appraisalDetailsList = appraisalDetailsRepository.findByEmployee_Id(id);
-            appraisalDetailsList.stream().forEach(e->{
+            appraisalDetailsList.stream().forEach(e -> {
                 AppraisalDetailsDTO dto = new AppraisalDetailsDTO();
                 dto.setAppraisalDate(e.getAppraisalDate());
                 dto.setMonth(e.getMonth());
@@ -47,8 +49,8 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
                 dto.setEmpId(e.getEmpId());
                 dto.setVariable(e.getVariable());
                 dto.setSalary(e.getSalary());
-                dto.setName(e.getEmployee().getFirstName()+" "+e.getEmployee().getLastName());
-                    });
+                dto.setName(e.getEmployee().getFirstName() + " " + e.getEmployee().getLastName());
+            });
             if (!appraisalDetailsList.isEmpty()) {
                 return ResponseEntity.ok(appraisalDetailsList);
             } else {
@@ -58,7 +60,8 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
             throw new EntityNotFoundException("User not found for Employee ID: " + id);
         }
     }
-        @Override
+
+    @Override
     public List<Reward> getRewardDetailsByEmployeeId(Integer id) {
         Optional<User> user = userRepo.findByEmployeeId(id);
         if (user.isPresent()) {
@@ -67,6 +70,7 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
             throw new EntityNotFoundException("Employee Not Found");
         }
     }
+
     @Override
     public String saveProjectRewardDetails(Reward reward) {
         if (!PayrollUtility.validateAmount(reward.getAmount())) {
@@ -84,7 +88,9 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
             throw new EntityNotFoundException("Employee not found", exception);
         }
     }
-    public ResponseEntity<List<MonthlySalaryDetails>> getAllMonthlySalaryDetails() {
+
+    public ResponseEntity<Object>
+    getAllMonthlySalaryDetails() {
         try {
             LocalDate currentDate = LocalDate.now();
             LocalDate previousMonthDate = currentDate.minusMonths(1);
@@ -92,20 +98,24 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
             int previousYear = previousMonthDate.getYear();
 
             List<MonthlySalaryDetails> salaryDetails = monthlySalaryDetailsRepo.findByMonth(previousMonth, previousYear);
-            for (MonthlySalaryDetails salaryDetail : salaryDetails) {
-                System.out.println("Salary for " + previousMonth + " " + previousYear + ": " + salaryDetail.getCreditedDate());
+
+            if (salaryDetails.isEmpty()) {
+                String message = "No salary details found for " + previousMonth + " " + previousYear;
+                Map<String, String> message1 = Collections.singletonMap("message", message);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message1);
             }
             for (MonthlySalaryDetails salaryDetail : salaryDetails) {
                 int employeeId = salaryDetail.getEmpId();
+                System.out.println("Salary for " + previousMonth + " " + previousYear + ": " + salaryDetail.getCreditedDate());
                 User user = userRepo.findById(employeeId).orElse(null);
                 if (user != null) {
                     salaryDetail.setEmployee(user);
                 }
             }
-            return new ResponseEntity<>(salaryDetails, HttpStatus.OK);
+            return ResponseEntity.ok(salaryDetails);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

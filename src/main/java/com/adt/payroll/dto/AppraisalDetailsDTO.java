@@ -16,9 +16,4 @@ public class AppraisalDetailsDTO {
     private String appraisalDate;
     private Double salary;
 
-//    public void setFirstName(String firstName) {
-//    }
-//
-//    public void setLastName(String lastName) {
-//    }
 }

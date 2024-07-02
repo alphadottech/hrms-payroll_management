@@ -74,7 +74,6 @@ public class SalaryDetailsController {
 	public List<Reward> getRewardDetailByEmployeeId(@PathVariable Integer id) {
 		return appraisalDetailsService.getRewardDetailsByEmployeeId(id);
 	}
-
 	@PreAuthorize("@auth.allow('SAVE_REWARD_DETAILS')")
 	@PostMapping("/saveRewardDetails")
 	public ResponseEntity<String>saveRewardDetails(@RequestBody Reward reward, HttpServletRequest request){
@@ -89,8 +88,8 @@ public class SalaryDetailsController {
 	}
 	@PreAuthorize("auth.allow('GET_ALL_MONTHLY_SALARY_DETAILS')")
 	@GetMapping("/getAllMonthlySalaryDetails")
-	public ResponseEntity<List<MonthlySalaryDetails>> getAllSalaryDetails() {
-		LOGGER.info("PayrollService: SalaryDetailsController:Getting all employees appraisal details Info level log msg");
+	public ResponseEntity<Object> getAllSalaryDetails() {
+		LOGGER.info("PayrollService: SalaryDetailsController:Getting all Monthly Salary Details Info level log msg");
 		return monthlySalaryService.getAllMonthlySalaryDetails();
 	}
 }

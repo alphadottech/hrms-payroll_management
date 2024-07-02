@@ -6,6 +6,6 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface MonthlySalaryService {
-    ResponseEntity<List<MonthlySalaryDetails>> getAllMonthlySalaryDetails();
+    ResponseEntity<Object> getAllMonthlySalaryDetails();
 }
 

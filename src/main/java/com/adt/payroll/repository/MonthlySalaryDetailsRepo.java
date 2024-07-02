@@ -17,6 +17,8 @@ public interface MonthlySalaryDetailsRepo extends JpaRepository<MonthlySalaryDet
            "AND EXTRACT(YEAR FROM CAST(salary_credited_date AS date)) = :year",
            nativeQuery = true)
    List<MonthlySalaryDetails> findByMonth(@Param("month") String month,@Param("year") int year);
+
+
     @Query(value = "SELECT * FROM payroll_schema.monthly_salary_details WHERE emp_id = :empId", nativeQuery = true)
     List<MonthlySalaryDetails> findSalaryDetailsByEmpId(@Param("empId") Integer empId);
 
