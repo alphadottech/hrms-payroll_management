@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface AppraisalDetailsService {
-    ResponseEntity<AppraisalDetails> getAppraisalDetails(Integer id);
+    ResponseEntity<List<AppraisalDetails>> getAppraisalDetails(Integer id);
 
     List<Reward> getRewardDetailsByEmployeeId(Integer id);
 

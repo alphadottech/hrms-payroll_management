@@ -15,4 +15,5 @@ public class AppraisalDetailsDTO {
     private Double amount;
     private String appraisalDate;
     private Double salary;
+
 }

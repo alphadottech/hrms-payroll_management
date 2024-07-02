@@ -11,6 +11,15 @@ import java.util.List;
 
 @Repository
 public interface MonthlySalaryDetailsRepo extends JpaRepository<MonthlySalaryDetails, Integer> {
+
+   @Query(value = "SELECT * FROM  payroll_schema.monthly_salary_details" +
+           " WHERE salary_month = :month " +
+           "AND EXTRACT(YEAR FROM CAST(salary_credited_date AS date)) = :year",
+           nativeQuery = true)
+   List<MonthlySalaryDetails> findByMonth(@Param("month") String month,@Param("year") int year);
+
+
     @Query(value = "SELECT * FROM payroll_schema.monthly_salary_details WHERE emp_id = :empId", nativeQuery = true)
     List<MonthlySalaryDetails> findSalaryDetailsByEmpId(@Param("empId") Integer empId);
+
 }
