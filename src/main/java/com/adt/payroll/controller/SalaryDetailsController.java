@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -52,9 +53,11 @@ public class SalaryDetailsController {
 
 	@PreAuthorize("@auth.allow('GET_ALL_EMPLOYEE_APPRAISAL_DETAILS')")
 	@GetMapping("/getAllEmployeesWithLatestAppraisal")
-	public ResponseEntity<List<AppraisalDetailsDTO>> getAllEmployeesWithLatestAppraisal() {
+	public ResponseEntity<Page<AppraisalDetailsDTO>> getAllEmployeesWithLatestAppraisal(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size) {
 		LOGGER.info("PayrollService: SalaryDetailsController:Getting all employees appraisal details Info level log msg");
-		return salaryDetailsService.getEmployeesWithLatestAppraisal();
+		return salaryDetailsService.getEmployeesWithLatestAppraisal(page, size);
 	}
 
 	@PreAuthorize("@auth.allow('GET_SALARY_BY_ID')")
