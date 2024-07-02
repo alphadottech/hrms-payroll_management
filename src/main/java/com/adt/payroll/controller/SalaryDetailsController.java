@@ -1,6 +1,7 @@
 package com.adt.payroll.controller;
 
 import com.adt.payroll.dto.AppraisalDetailsDTO;
+import com.adt.payroll.dto.MonthSalaryDTO;
 import com.adt.payroll.dto.SalaryDTO;
 import com.adt.payroll.model.AppraisalDetails;
 import com.adt.payroll.model.MonthlySalaryDetails;
@@ -88,9 +89,13 @@ public class SalaryDetailsController {
 	}
 	@PreAuthorize("auth.allow('GET_ALL_MONTHLY_SALARY_DETAILS')")
 	@GetMapping("/getAllMonthlySalaryDetails")
-	public ResponseEntity<Object> getAllSalaryDetails() {
+	public ResponseEntity<?> getAllSalaryDetails() {
 		LOGGER.info("PayrollService: SalaryDetailsController:Getting all Monthly Salary Details Info level log msg");
-		return monthlySalaryService.getAllMonthlySalaryDetails();
+		List<MonthSalaryDTO> monthSalaryResponse =monthlySalaryService.getAllMonthlySalaryDetails(); 
+		if(!monthSalaryResponse.isEmpty()) {
+			return new ResponseEntity<>(monthSalaryResponse, HttpStatus.OK);
+		}
+		 return new ResponseEntity<>("No salary details found for", HttpStatus.NOT_FOUND);
 	}
 }
 
