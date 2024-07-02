@@ -1,9 +1,12 @@
 package com.adt.payroll.controller;
 
 import com.adt.payroll.dto.AppraisalDetailsDTO;
+import com.adt.payroll.dto.SalaryDTO;
 import com.adt.payroll.model.AppraisalDetails;
+import com.adt.payroll.model.MonthlySalaryDetails;
 import com.adt.payroll.model.Reward;
 import com.adt.payroll.service.AppraisalDetailsService;
+import com.adt.payroll.service.MonthlySalaryService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +32,8 @@ public class SalaryDetailsController {
 
 	@Autowired
 	private AppraisalDetailsService appraisalDetailsService;
+	@Autowired
+	private MonthlySalaryService monthlySalaryService;
 
 	@PreAuthorize("@auth.allow('SAVE_EMPLOYEE_SALARY_DETAILS')")
 	@PostMapping("/saveEmployeeSalaryDetails")
@@ -42,8 +47,7 @@ public class SalaryDetailsController {
 	@PostMapping("/addAppraisalDetails")
 	public ResponseEntity<String> addAppraisalDetails(@RequestBody AppraisalDetails appraisalDetails) {
 		LOGGER.info("PayrollService: SalaryDetailsController:Employee addAppraisalDetails Info level log msg");
-		ResponseEntity<String> responseEntity = salaryDetailsService.addAppraisalDetails(appraisalDetails);
-		return responseEntity;
+		return salaryDetailsService.addAppraisalDetails(appraisalDetails);
 	}
 
 	@PreAuthorize("@auth.allow('GET_ALL_EMPLOYEE_APPRAISAL_DETAILS')")
@@ -52,9 +56,16 @@ public class SalaryDetailsController {
 		LOGGER.info("PayrollService: SalaryDetailsController:Getting all employees appraisal details Info level log msg");
 		return salaryDetailsService.getEmployeesWithLatestAppraisal();
 	}
+
+	@PreAuthorize("@auth.allow('GET_SALARY_BY_ID')")
+	@GetMapping("/getSalaryDetailsById/{empId}")
+	public ResponseEntity<List<SalaryDTO>> getEmployeeSalaryById(@PathVariable Integer empId) {
+		LOGGER.info("PayrollService: SalaryDetailsController:Getting employee salary by id Info level log msg");
+		return salaryDetailsService.getEmployeeSalaryById(empId);
+	}
 	@PreAuthorize("@auth.allow('GET_ALL_APPRAISAL_DETAILS_BY_ID')")
 	@GetMapping("/getAllAppraisalDetailsbyId/{id}")
-	public ResponseEntity<AppraisalDetails> getAppraisalDetailsById(@PathVariable Integer id) {
+	public ResponseEntity<List<AppraisalDetails>> getAppraisalDetailsById(@PathVariable Integer id) {
 		return appraisalDetailsService.getAppraisalDetails(id);
 	}
 
@@ -67,7 +78,6 @@ public class SalaryDetailsController {
 	@PostMapping("/saveRewardDetails")
 	public ResponseEntity<String>saveRewardDetails(@RequestBody Reward reward, HttpServletRequest request){
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
-
 		try {
 			String response = appraisalDetailsService.saveProjectRewardDetails(reward);
 			return new ResponseEntity<>(response, HttpStatus.OK);
@@ -75,6 +85,12 @@ public class SalaryDetailsController {
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 
+	}
+	@PreAuthorize("auth.allow('GET_ALL_MONTHLY_SALARY_DETAILS')")
+	@GetMapping("/getAllMonthlySalaryDetails")
+	public ResponseEntity<Object> getAllSalaryDetails() {
+		LOGGER.info("PayrollService: SalaryDetailsController:Getting all Monthly Salary Details Info level log msg");
+		return monthlySalaryService.getAllMonthlySalaryDetails();
 	}
 }
 

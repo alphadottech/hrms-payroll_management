@@ -1,16 +1,17 @@
 package com.adt.payroll.repository;
 
-import com.adt.payroll.dto.AppraisalDetailsDTO;
 import com.adt.payroll.model.AppraisalDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AppraisalDetailsRepository extends JpaRepository<AppraisalDetails, Integer> {
 
-    @Query(value = "SELECT ad.appr_hist_id AS apprHistId, " +
+    @Query(value = "SELECT DISTINCT ON (ad.emp_id) " +
+            "ad.appr_hist_id AS apprHistId, " +
             "ad.emp_id as employeeId, "+
             "ad.year AS year, " +
             "ad.month AS month, " +
@@ -25,7 +26,7 @@ public interface AppraisalDetailsRepository extends JpaRepository<AppraisalDetai
             "WHERE (ad.emp_id, ad.appraisal_date) IN " +
             "(SELECT ad2.emp_id, MAX(ad2.appraisal_date) " +
             "FROM payroll_schema.appraisal_historical_details ad2 " +
-            "GROUP BY ad2.emp_id)",
+            "GROUP BY ad2.emp_id) ",
             nativeQuery = true)
     List<Object[]> findLatestAppraisalDetails();
 
@@ -44,4 +45,7 @@ public interface AppraisalDetailsRepository extends JpaRepository<AppraisalDetai
             nativeQuery = true)
     List<Object[]> findEmployeesWithoutAppraisal();
 
+   // ResponseEntity<AppraisalDetails> findByUser_Id(Integer id);
+
+    List<AppraisalDetails> findByEmployee_Id(Integer id);
 }
