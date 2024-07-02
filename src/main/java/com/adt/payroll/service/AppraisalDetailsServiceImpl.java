@@ -54,7 +54,7 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
             if (!appraisalDetailsList.isEmpty()) {
                 return ResponseEntity.ok(appraisalDetailsList);
             } else {
-                throw new EntityNotFoundException("No Appraisal Details found for Employee ID: " + id);
+                return ResponseEntity.ok(appraisalDetailsList);
             }
         } else {
             throw new EntityNotFoundException("User not found for Employee ID: " + id);
