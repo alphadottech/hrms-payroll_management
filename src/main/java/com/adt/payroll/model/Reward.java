@@ -21,9 +21,9 @@ public class Reward {
 
     @ManyToOne(fetch = FetchType.EAGER)
 
-    @JoinColumn(name = "EMP_ID", referencedColumnName = "EMPLOYEE_ID", nullable = false)
+    @JoinColumn(name = "empId", referencedColumnName = "EMPLOYEE_ID", nullable = false)
     private User user;
-
-
+    
+    private Integer empId;
 
 }
