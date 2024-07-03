@@ -528,11 +528,12 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 			for (MonthlySalaryDetails salaryDetails : salaryDetailsList) {
 				SalaryDTO salaryDTO = new SalaryDTO();
 				salaryDTO.setAdhoc(salaryDetails.getAdhoc());
-				salaryDTO.setEmployeePFAmount(salaryDetails.getEmployeePFAmount());
-				salaryDTO.setEmployerPFAmount(salaryDetails.getEmployerPFAmount());
-				salaryDTO.setEmployeeESICAmount(salaryDetails.getEmployeeESICAmount());
-				salaryDTO.setEmployerESICAmount(salaryDetails.getEmployerESICAmount());
+				salaryDTO.setEmployeePf(salaryDetails.getEmployeePFAmount());
+				salaryDTO.setEmployerPf(salaryDetails.getEmployerPFAmount());
+				salaryDTO.setEmployeeEsic(salaryDetails.getEmployeeESICAmount());
+				salaryDTO.setEmployeeEsic(salaryDetails.getEmployerESICAmount());
 				salaryDTO.setGrossDeduction(salaryDetails.getGrossDeduction());
+				salaryDTO.setEmpId(salaryDetails.getEmpId());
 
 				salaryDTOList.add(salaryDTO);
 			}

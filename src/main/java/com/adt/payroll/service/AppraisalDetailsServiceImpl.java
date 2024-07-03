@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.adt.payroll.dto.AppraisalDetailsDTO;
-import com.adt.payroll.dto.MonthSalaryDTO;
+import com.adt.payroll.dto.SalaryDTO;
 import com.adt.payroll.model.AppraisalDetails;
 import com.adt.payroll.model.EmpPayrollDetails;
 import com.adt.payroll.model.MonthlySalaryDetails;
@@ -96,16 +96,16 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
     }
 
 	@Override
-	public List<MonthSalaryDTO> getAllMonthlySalaryDetails() {
-		List<MonthSalaryDTO> monthSalaryResponse = new ArrayList();
+	public List<SalaryDTO> getAllMonthlySalaryDetails() {
+		List<SalaryDTO> monthSalaryResponse = new ArrayList();
 		String date = monthlySalaryDetailsRepo.findLatestSalaryCreditedDate();
 		Optional<List<MonthlySalaryDetails>> salaryDetails = monthlySalaryDetailsRepo.findByCreditedDate(date);
 		if (salaryDetails.isEmpty() || !salaryDetails.isPresent()) {
 			return monthSalaryResponse;
 		}
 		for (MonthlySalaryDetails salaryDetail : salaryDetails.get()) {
-			MonthSalaryDTO monthSalaryDTO = new MonthSalaryDTO();
-			monthSalaryDTO.setEmp_id(salaryDetail.getEmpId());
+			SalaryDTO monthSalaryDTO = new SalaryDTO();
+			monthSalaryDTO.setEmpId(salaryDetail.getEmpId());
 			monthSalaryDTO.setEmployeeEsic(salaryDetail.getEmployeeESICAmount());
 			monthSalaryDTO.setEmployerEsic(salaryDetail.getEmployerESICAmount());
 			monthSalaryDTO.setEmployeePf(salaryDetail.getEmployeeESICAmount());
