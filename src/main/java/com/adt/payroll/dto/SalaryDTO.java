@@ -20,4 +20,6 @@ public class SalaryDTO {
     private String bankName;
     private String accountNo;
     private Double netPay;
+    private String month;
+    private String year;
 }
