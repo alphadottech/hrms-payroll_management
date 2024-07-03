@@ -20,10 +20,8 @@ public class Reward {
     private double amount;
 
     @ManyToOne(fetch = FetchType.EAGER)
-
-    @JoinColumn(name = "empId", referencedColumnName = "EMPLOYEE_ID", nullable = false)
-    private User user;
-    
+    @JoinColumn(name = "empId", referencedColumnName = "EMPLOYEE_ID", nullable = false, insertable = false, updatable = false)
+    private User user;  
     private Integer empId;
 
 }
