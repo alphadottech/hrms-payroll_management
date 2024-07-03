@@ -1,5 +1,7 @@
 package com.adt.payroll.model;
 
+import java.sql.Timestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -103,4 +105,7 @@ MonthlySalaryDetails {
 	@JoinColumn(name = "empId", referencedColumnName = "EMPLOYEE_ID", nullable = false, insertable = false, updatable = false)
 	private User employee;
 	private int empId;
+	
+	@Column(name = "updated_When")
+	private Timestamp updatedWhen;
 }

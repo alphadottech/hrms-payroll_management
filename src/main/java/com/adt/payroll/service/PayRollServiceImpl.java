@@ -4,10 +4,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
@@ -284,6 +287,19 @@ public class PayRollServiceImpl implements PayRollService {
 	// Excel Pay Slip
 
 	public String generatePaySlip(MultipartFile file ,String email) throws IOException, ParseException {
+		
+		 Timestamp current = Timestamp.valueOf(LocalDateTime.now()) ;
+		 Timestamp lastUpdateDate= monthlySalaryDetailsRepo.findLatestSalaryUpdatedDate();
+		 
+		 if (lastUpdateDate != null) {
+	            Duration duration = Duration.between(lastUpdateDate.toLocalDateTime(), current.toLocalDateTime());
+	            long minutes = duration.toMinutes();
+
+	            if (minutes < 10) {
+	                return "You have generated the payslip within the last 10 minutes. Please try again after " + (10 - minutes) + " minutes.";
+	            }
+	        }
+		 
 		String empId = "", name = "", salary = "", esic = "", pf = "", paidLeave = "", bankName = "",
 				accountNumber = "", gmail = "", designation = "", submitDate = "", status = "", employee_id = "",
 				joiningDate = "";
@@ -448,6 +464,7 @@ public class PayRollServiceImpl implements PayRollService {
 					monthlySalaryDetails.setHalfDay(halfDay);
 					monthlySalaryDetails.setPresentDays(present);
 					monthlySalaryDetails.setBonus(0.0);
+					monthlySalaryDetails.setUpdatedWhen(Timestamp.valueOf(LocalDateTime.now()));
 					monthlySalaryDetailsRepo.save(monthlySalaryDetails);
 					}
 					if(email!=null&&!email.isEmpty())
