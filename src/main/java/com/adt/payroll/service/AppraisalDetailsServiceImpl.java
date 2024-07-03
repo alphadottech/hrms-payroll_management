@@ -1,23 +1,27 @@
 package com.adt.payroll.service;
 
-import com.adt.payroll.dto.AppraisalDetailsDTO;
-import com.adt.payroll.model.AppraisalDetails;
-import com.adt.payroll.model.MonthlySalaryDetails;
-import com.adt.payroll.model.Reward;
-import com.adt.payroll.model.User;
-import com.adt.payroll.repository.*;
-import jakarta.persistence.EntityNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.adt.payroll.dto.AppraisalDetailsDTO;
+import com.adt.payroll.dto.SalaryDTO;
+import com.adt.payroll.model.AppraisalDetails;
+import com.adt.payroll.model.EmpPayrollDetails;
+import com.adt.payroll.model.MonthlySalaryDetails;
+import com.adt.payroll.model.Reward;
+import com.adt.payroll.model.User;
+import com.adt.payroll.repository.AppraisalDetailsRepository;
+import com.adt.payroll.repository.EmpPayrollDetailsRepo;
+import com.adt.payroll.repository.MonthlySalaryDetailsRepo;
+import com.adt.payroll.repository.RewardDetailsRepository;
+import com.adt.payroll.repository.UserRepo;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,MonthlySalaryService {
@@ -32,6 +36,8 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
     private MonthlySalaryDetailsRepo monthlySalaryDetailsRepo;
     @Autowired
     private RewardDetailsRepository rewardDetailsRepository;
+    @Autowired
+    EmpPayrollDetailsRepo empPayrollDetailsRepo;
 
     @Override
     public ResponseEntity<List<AppraisalDetails>> getAppraisalDetails(Integer id) {
@@ -54,7 +60,7 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
             if (!appraisalDetailsList.isEmpty()) {
                 return ResponseEntity.ok(appraisalDetailsList);
             } else {
-                throw new EntityNotFoundException("No Appraisal Details found for Employee ID: " + id);
+                return ResponseEntity.ok(appraisalDetailsList);
             }
         } else {
             throw new EntityNotFoundException("User not found for Employee ID: " + id);
@@ -80,7 +86,7 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
             throw new EntityNotFoundException("Invalid Reward Type....");
         }
         try {
-            Optional<User> userDetails = userRepo.findById(reward.getUser().getId());
+            Optional<User> userDetails = userRepo.findById(reward.getEmpId());
             reward.setUser(userDetails.get());
             rewardDetailsRepository.save(reward);
             return "Reward details saved successfully";
@@ -89,33 +95,32 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
         }
     }
 
-    public ResponseEntity<Object>
-    getAllMonthlySalaryDetails() {
-        try {
-            LocalDate currentDate = LocalDate.now();
-            LocalDate previousMonthDate = currentDate.minusMonths(1);
-            String previousMonth = previousMonthDate.getMonth().toString();
-            int previousYear = previousMonthDate.getYear();
+	@Override
+	public List<SalaryDTO> getAllMonthlySalaryDetails() {
+		List<SalaryDTO> monthSalaryResponse = new ArrayList();
+		String date = monthlySalaryDetailsRepo.findLatestSalaryCreditedDate();
+		Optional<List<MonthlySalaryDetails>> salaryDetails = monthlySalaryDetailsRepo.findByCreditedDate(date);
+		if (salaryDetails.isEmpty() || !salaryDetails.isPresent()) {
+			return monthSalaryResponse;
+		}
+		for (MonthlySalaryDetails salaryDetail : salaryDetails.get()) {
+			SalaryDTO monthSalaryDTO = new SalaryDTO();
+			monthSalaryDTO.setEmpId(salaryDetail.getEmpId());
+			monthSalaryDTO.setEmployeeEsic(salaryDetail.getEmployeeESICAmount());
+			monthSalaryDTO.setEmployerEsic(salaryDetail.getEmployerESICAmount());
+			monthSalaryDTO.setEmployeePf(salaryDetail.getEmployeeESICAmount());
+			monthSalaryDTO.setEmployerPf(salaryDetail.getEmployerPFAmount());
+			monthSalaryDTO.setMedicalAmount(salaryDetail.getMedicalInsurance());
+			monthSalaryDTO.setNetPay(salaryDetail.getNetSalary());
+			Optional<EmpPayrollDetails> empPayrollDetails = empPayrollDetailsRepo
+					.findByEmployeeId(salaryDetail.getEmpId());
+			monthSalaryDTO.setBankName(empPayrollDetails.get().getBankName());
+			monthSalaryDTO.setAccountNo(empPayrollDetails.get().getAccountNumber());
+			monthSalaryDTO.setEmployeeName(empPayrollDetails.get().getUser().getFirstName() + " "
+					+ empPayrollDetails.get().getUser().getLastName());
+			monthSalaryResponse.add(monthSalaryDTO);
+		}
+		return monthSalaryResponse;
+	}
 
-            List<MonthlySalaryDetails> salaryDetails = monthlySalaryDetailsRepo.findByMonth(previousMonth, previousYear);
-
-            if (salaryDetails.isEmpty()) {
-                String message = "No salary details found for " + previousMonth + " " + previousYear;
-                Map<String, String> message1 = Collections.singletonMap("message", message);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message1);
-            }
-            for (MonthlySalaryDetails salaryDetail : salaryDetails) {
-                int employeeId = salaryDetail.getEmpId();
-                System.out.println("Salary for " + previousMonth + " " + previousYear + ": " + salaryDetail.getCreditedDate());
-                User user = userRepo.findById(employeeId).orElse(null);
-                if (user != null) {
-                    salaryDetail.setEmployee(user);
-                }
-            }
-            return ResponseEntity.ok(salaryDetails);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
 }

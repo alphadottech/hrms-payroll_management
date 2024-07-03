@@ -30,8 +30,9 @@ public interface AppraisalDetailsRepository extends JpaRepository<AppraisalDetai
             nativeQuery = true)
     List<Object[]> findLatestAppraisalDetails();
 
-    @Query(value = "SELECT CONCAT(e.first_name, ' ', e.last_name) AS name, " +
-            "e.employee_id, "+
+    @Query(value = "SELECT DISTINCT ON (e.employee_id) " +
+            "CONCAT(e.first_name, ' ', e.last_name) AS name, " +
+            "e.employee_id, " +
             "ep.joining_date, " +
             "ep.salary, " +
             "ep.variable_amount, " +
@@ -45,7 +46,8 @@ public interface AppraisalDetailsRepository extends JpaRepository<AppraisalDetai
             nativeQuery = true)
     List<Object[]> findEmployeesWithoutAppraisal();
 
-   // ResponseEntity<AppraisalDetails> findByUser_Id(Integer id);
+    // ResponseEntity<AppraisalDetails> findByUser_Id(Integer id);
 
     List<AppraisalDetails> findByEmployee_Id(Integer id);
+
 }
