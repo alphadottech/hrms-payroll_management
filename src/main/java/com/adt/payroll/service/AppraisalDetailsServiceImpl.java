@@ -40,9 +40,10 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
     EmpPayrollDetailsRepo empPayrollDetailsRepo;
 
     @Override
-    public ResponseEntity<List<AppraisalDetails>> getAppraisalDetails(Integer id) {
+    public ResponseEntity<List<AppraisalDetailsDTO>> getAppraisalDetails(Integer id) {
         Optional<User> user = userRepo.findByEmployeeId(id);
         if (user.isPresent()) {
+            List<AppraisalDetailsDTO> appraisalDetailsDTOS =new ArrayList<>();
             List<AppraisalDetails> appraisalDetailsList = appraisalDetailsRepository.findByEmployee_Id(id);
             appraisalDetailsList.stream().forEach(e -> {
                 AppraisalDetailsDTO dto = new AppraisalDetailsDTO();
@@ -56,11 +57,12 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
                 dto.setVariable(e.getVariable());
                 dto.setSalary(e.getSalary());
                 dto.setName(e.getEmployee().getFirstName() + " " + e.getEmployee().getLastName());
+                appraisalDetailsDTOS.add(dto);
             });
             if (!appraisalDetailsList.isEmpty()) {
-                return ResponseEntity.ok(appraisalDetailsList);
+                return ResponseEntity.ok(appraisalDetailsDTOS);
             } else {
-                return ResponseEntity.ok(appraisalDetailsList);
+                return ResponseEntity.ok(appraisalDetailsDTOS);
             }
         } else {
             throw new EntityNotFoundException("User not found for Employee ID: " + id);
