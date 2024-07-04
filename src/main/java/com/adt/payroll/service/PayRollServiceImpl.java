@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,7 +18,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,6 +29,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -284,6 +287,22 @@ public class PayRollServiceImpl implements PayRollService {
 	// Excel Pay Slip
 
 	public String generatePaySlip(MultipartFile file ,String email) throws IOException, ParseException {
+		DateTimeZone istTimeZone = DateTimeZone.forID("Asia/Kolkata");
+        DateTime currentDateTime = new DateTime(istTimeZone);
+        Timestamp currentTimestamp = new Timestamp(currentDateTime.getMillis());
+
+        Timestamp lastUpdatedDate = monthlySalaryDetailsRepo.findLatestSalaryUpdatedDate();
+
+        if (lastUpdatedDate != null) {
+            DateTime lastUpdatedDateTime = new DateTime(lastUpdatedDate.getTime(), istTimeZone);
+
+            Duration duration = new Duration(lastUpdatedDateTime, currentDateTime);
+            long minutes = duration.getStandardMinutes();
+	            if (minutes <= 10) {
+	                return "you have "+minutes+" mins ago generated the payslip. Please try after 10 mins.";
+	            }
+	        }
+		 
 		String empId = "", name = "", salary = "", esic = "", pf = "", paidLeave = "", bankName = "",
 				accountNumber = "", gmail = "", designation = "", submitDate = "", status = "", employee_id = "",
 				joiningDate = "";
@@ -432,6 +451,8 @@ public class PayRollServiceImpl implements PayRollService {
 					cal1.add(Calendar.MONTH, -1);
 					SimpleDateFormat monthFormat = new SimpleDateFormat("MMM");
 				    String monthName = monthFormat.format(cal1.getTime()).toUpperCase();
+				    DateTime current = new DateTime(istTimeZone);
+			       // Timestamp currentTime = new Timestamp(current.getMillis());
 					double medical=medicalInsurance;
 					double adhoc=adhoc1;
 					double adj =adjustment;	
@@ -448,6 +469,8 @@ public class PayRollServiceImpl implements PayRollService {
 					monthlySalaryDetails.setHalfDay(halfDay);
 					monthlySalaryDetails.setPresentDays(present);
 					monthlySalaryDetails.setBonus(0.0);
+					monthlySalaryDetails.setUpdatedWhen(new Timestamp(current.getMillis()));
+					//monthlySalaryDetails.setUpdatedWhen(Timestamp.valueOf(currentZonedDateTime.toLocalDateTime()));
 					monthlySalaryDetailsRepo.save(monthlySalaryDetails);
 					}
 					if(email!=null&&!email.isEmpty())

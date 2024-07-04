@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository;
 
 import com.adt.payroll.model.MonthlySalaryDetails;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -31,5 +33,7 @@ public interface MonthlySalaryDetailsRepo extends JpaRepository<MonthlySalaryDet
 	  @Query(value="SELECT MAX(msd.salary_credited_date) FROM payroll_schema.monthly_salary_details msd",nativeQuery = true)
 	  String findLatestSalaryCreditedDate();
 	 
+	  @Query(value="SELECT MAX(msd.updated_When) FROM payroll_schema.monthly_salary_details msd",nativeQuery = true)
+	  Timestamp findLatestSalaryUpdatedDate();
 
 }
