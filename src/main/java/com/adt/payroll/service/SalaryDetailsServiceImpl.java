@@ -534,6 +534,8 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 				salaryDTO.setEmployeeEsic(salaryDetails.getEmployerESICAmount());
 				salaryDTO.setGrossDeduction(salaryDetails.getGrossDeduction());
 				salaryDTO.setEmpId(salaryDetails.getEmpId());
+				salaryDTO.setMonth(salaryDetails.getMonth());
+				salaryDTO.setYear(salaryDetails.getCreditedDate().substring(salaryDetails.getCreditedDate().length() - 4));
 
 				salaryDTOList.add(salaryDTO);
 			}
