@@ -64,8 +64,9 @@ public class MonthlyScheduler {
     @Scheduled(cron = "0 0 8 * * MON") // Executes on the every Monday at 8 AM
 	public void sendNotificationForTimeSheet() {
 		log.info("Generate weekly time sheet report ");
-		LocalDate endDate = LocalDate.now();
-		LocalDate startDate = endDate.minusDays(8);
+		LocalDate currentDate = LocalDate.now();
+		LocalDate endDate = currentDate.minusDays(1);
+		LocalDate startDate = currentDate.minusDays(7);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		List<TimeSheetModel> timeSheet = timeSheetRepo.findTimeSheetWithNullValues(startDate.format(formatter),
 				endDate.format(formatter));

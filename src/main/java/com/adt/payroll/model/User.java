@@ -53,4 +53,7 @@ public class User{
 	@Column(name = "Gender")
 	private String gender;
 
+	@Column(name = "ADT_ID",nullable = false,unique = true)
+	private String adtId;
+
 }
