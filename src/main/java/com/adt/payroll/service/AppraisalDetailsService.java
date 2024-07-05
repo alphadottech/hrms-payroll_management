@@ -10,7 +10,7 @@ import java.util.List;
 public interface AppraisalDetailsService {
     ResponseEntity<List<AppraisalDetailsDTO>> getAppraisalDetails(Integer id);
 
-    List<Reward> getRewardDetailsByEmployeeId(Integer id);
+    List<AppraisalDetailsDTO> getRewardDetailsByEmployeeId(Integer id);
 
     String saveProjectRewardDetails(Reward reward);
 }
