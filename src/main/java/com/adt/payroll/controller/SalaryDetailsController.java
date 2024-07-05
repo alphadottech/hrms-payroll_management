@@ -1,12 +1,18 @@
 package com.adt.payroll.controller;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -80,7 +86,7 @@ public class SalaryDetailsController {
 
 	@PreAuthorize("@auth.allow('GET_REWARD_DETAILS_BY_ID')")
 	@GetMapping("/getRewardDetails/{id}")
-	public List<Reward> getRewardDetailByEmployeeId(@PathVariable Integer id) {
+	public List<AppraisalDetailsDTO> getRewardDetailByEmployeeId(@PathVariable Integer id) {
 		return appraisalDetailsService.getRewardDetailsByEmployeeId(id);
 	}
 	
@@ -105,6 +111,18 @@ public class SalaryDetailsController {
 			return new ResponseEntity<>(monthSalaryResponse, HttpStatus.OK);
 		}
 		 return new ResponseEntity<>("No salary details found for", HttpStatus.NOT_FOUND);
+	}
+	@PreAuthorize("@auth.allow('GET_ALL_MONTHLY_SALARY_DETAILS_BY_ID_EXPORT_TO_EXCEL')")
+	@GetMapping("/getAllMonthlySalaryDetailsExportToExcelById/{empId}")
+	public ResponseEntity<Resource> getAllMonthlySalaryDetailsExportToExcel(@PathVariable("empId") Integer empId) throws IOException {
+
+		String filename = "alphadot_Monthly_Salary_Details_data.xlsx";
+		ByteArrayInputStream newdata = monthlySalaryService.getExcelData(empId);
+		InputStreamResource file = new InputStreamResource(newdata);
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+				.contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+				.body(file);
 	}
 }
 

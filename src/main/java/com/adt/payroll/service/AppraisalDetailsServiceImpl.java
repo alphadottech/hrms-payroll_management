@@ -1,9 +1,12 @@
 package com.adt.payroll.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.adt.payroll.dto.RewardDetailsDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -70,32 +73,55 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
     }
 
     @Override
-    public List<Reward> getRewardDetailsByEmployeeId(Integer id) {
-        Optional<User> user = userRepo.findByEmployeeId(id);
-        if (user.isPresent()) {
-            return rewardDetailsRepository.findByUser_Id(id);
+    public List<AppraisalDetailsDTO> getRewardDetailsByEmployeeId(Integer id) {
+        Optional<User> userOptional = userRepo.findByEmployeeId(id);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            List<Reward> rewards = rewardDetailsRepository.findByUser_Id(id);
+            List<AppraisalDetailsDTO> appraisalDetailsDTOs = new ArrayList<>();
+            for (Reward reward : rewards) {
+                AppraisalDetailsDTO appraisalDetailsDTO = new AppraisalDetailsDTO();
+                appraisalDetailsDTO.setEmpId(reward.getEmpId());
+                appraisalDetailsDTO.setAmount(reward.getAmount());
+                appraisalDetailsDTO.setAppraisalDate(reward.getEffectiveDate());
+                appraisalDetailsDTO.setRewardType(reward.getRewardType());
+                appraisalDetailsDTO.setName(user.getFirstName()+" "+user.getLastName());
+                appraisalDetailsDTOs.add(appraisalDetailsDTO);
+            }
+            return appraisalDetailsDTOs;
         } else {
             throw new EntityNotFoundException("Employee Not Found");
         }
     }
 
+
     @Override
     public String saveProjectRewardDetails(Reward reward) {
-        if (!PayrollUtility.validateAmount(reward.getAmount())) {
-            throw new EntityNotFoundException("Invalid Amount Details....");
-        }
-        if (!PayrollUtility.validateType(reward.getRewardType())) {
-            throw new EntityNotFoundException("Invalid Reward Type....");
-        }
         try {
+            if (!PayrollUtility.validateAmount(reward.getAmount())) {
+                throw new IllegalArgumentException("Invalid Amount Details....");
+            }
+            if (!PayrollUtility.validateType(reward.getRewardType())) {
+                throw new IllegalArgumentException("Invalid Reward Type....");
+            }
             Optional<User> userDetails = userRepo.findById(reward.getEmpId());
-            reward.setUser(userDetails.get());
-            rewardDetailsRepository.save(reward);
-            return "Reward details saved successfully";
-        } catch (Exception exception) {
-            throw new EntityNotFoundException("Employee not found", exception);
+            if (!userDetails.isPresent()) {
+                throw new EntityNotFoundException("Employee Not Found");
+            }
+            if (reward.getId() != null) {
+                throw new IllegalArgumentException("ID must be null for new rewards");
+            }
+            Reward savedReward = rewardDetailsRepository.save(reward);
+            return "Reward details saved successfully with ID: " + savedReward.getId();
+        } catch (IllegalArgumentException | EntityNotFoundException ex) {
+            ex.printStackTrace();
+            throw new RuntimeException(ex.getMessage());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RuntimeException("Failed to save reward details: " + ex.getMessage());
         }
     }
+
 
 	@Override
 	public List<SalaryDTO> getAllMonthlySalaryDetails() {
@@ -124,5 +150,11 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
 		}
 		return monthSalaryResponse;
 	}
+    public ByteArrayInputStream getExcelData(Integer empId) throws IOException {
+        List<MonthlySalaryDetails> list=monthlySalaryDetailsRepo.findSalaryDetailsByEmpId(empId);
+        Optional<EmpPayrollDetails> list1=empPayrollDetailsRepo.findByEmployeeId(empId);
+        ByteArrayInputStream byteArrayInputStream= MonthlySalaryHelper.dataToExcel(list,list1);
+        return byteArrayInputStream;
+    }
 
 }

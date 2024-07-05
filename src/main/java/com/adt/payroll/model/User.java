@@ -56,4 +56,5 @@ public class User{
 	@Column(name = "ADT_ID",nullable = false,unique = true)
 	private String adtId;
 
+
 }
