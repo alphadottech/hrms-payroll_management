@@ -1,5 +1,6 @@
 package com.adt.payroll.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +15,10 @@ public interface EmpPayrollDetailsRepo extends JpaRepository<EmpPayrollDetails, 
 	
 	@Query(value = "SELECT * FROM payroll_schema.emp_payroll_details where emp_id=?1", nativeQuery = true)
 	Optional<EmpPayrollDetails> findByEmployeeId(int empId);
-	
+
+
+
+
 //    @Query(value = "select * from payroll_schema.emp_payroll_details where emp_id=?1", nativeQuery = true)
 //    Optional<EmpPayrollDetails> findByEmployeeId(Integer empId);
 }

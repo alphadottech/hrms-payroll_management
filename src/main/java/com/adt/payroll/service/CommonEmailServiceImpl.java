@@ -55,6 +55,9 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 	@Value("${spring.mail.username}")
 	private String mailFrom;
 
+	@Value("${spring.mail.cc}")
+	private String ccEmail;
+
 	private Configuration templateConfiguration;
 
 	@Autowired
@@ -376,7 +379,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 			//DataSource source = new ByteArrayDataSource(baos.toByteArray(), "application/octet-stream");
 			mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 			mimeMessageHelper.setFrom(sender);
-			mimeMessageHelper.setTo("teamhr.adt@gmail.com");
+			mimeMessageHelper.setTo(ccEmail);
 			mimeMessageHelper.setText(massage);
 			mimeMessageHelper.setSubject("Salary Slip");
 			//mimeMessageHelper.addAttachment(name + ".pdf", source);
@@ -400,7 +403,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 			//DataSource source = new ByteArrayDataSource(baos.toByteArray(), "application/octet-stream");
 			mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 			mimeMessageHelper.setFrom(sender);
-			mimeMessageHelper.setTo("teamhr.adt@gmail.com");
+			mimeMessageHelper.setTo(ccEmail);
 			mimeMessageHelper.setText(massage);
 			mimeMessageHelper.setSubject("Salary Slip");
 			//mimeMessageHelper.addAttachment(name + ".pdf", source);
@@ -427,7 +430,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 			mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 			mimeMessageHelper.setFrom(sender);
 			mimeMessageHelper.setTo(gmail);
-			mimeMessageHelper.setCc("teamhr.adt@gmail.com");
+			mimeMessageHelper.setCc(ccEmail);
 			mimeMessageHelper.setText(massage);
 			mimeMessageHelper.setSubject("Weekly Time Sheet Report");
 			mimeMessageHelper.addAttachment(name + ".xlsx", source);

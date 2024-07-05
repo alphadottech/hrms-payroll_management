@@ -194,6 +194,7 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
         if(priortime.get().getStatus().equalsIgnoreCase("Pending")) {
         timeSheetService.saveConfirmedDetails(priortime);
         priortime.get().setStatus("Accepted");
+        priortime.get().setUpdatedBy(Auth.updateByEmail);
         priorTimeRepository.save(priortime.get());
         String email = priortime.get().getEmail();
         OnPriorTimeAcceptOrRejectEvent onPriortimeApprovalEvent = new OnPriorTimeAcceptOrRejectEvent(priortime,
@@ -222,8 +223,10 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
      		 Template  template = freemarkerConfig.getTemplate("message.ftl");
      		 Map<String, Object> model = new HashMap<>();
      		 String status="rejected";
-     	if(priortime.get().getStatus().equalsIgnoreCase("Pending")) {
-        priorTimeRepository.save(priortime.get());
+        if (priortime.get().getStatus().equalsIgnoreCase("Pending")) {
+            priortime.get().setStatus("Rejected");
+            priortime.get().setUpdatedBy(Auth.updateByEmail);
+            priorTimeRepository.save(priortime.get());
         OnPriorTimeAcceptOrRejectEvent onPriortimeApprovalEvent = new OnPriorTimeAcceptOrRejectEvent(priortime,
                 "PriorTimesheet Entry", "Rejected");
         applicationEventPublisher.publishEvent(onPriortimeApprovalEvent);
@@ -231,6 +234,9 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
         model.put("Email", "");
         return new ResponseEntity<>(FreeMarkerTemplateUtils.processTemplateIntoString(template, model), HttpStatus.OK);
      	}
+        if(priortime.get().getStatus().equalsIgnoreCase("Accepted")) {
+            status="approved";
+        }
      	 model.put("Message", " priortime request has been already "+status+" by");
 		 model.put("Email",priortime.get().getUpdatedBy());
      return new ResponseEntity<>(FreeMarkerTemplateUtils.processTemplateIntoString(template, model), HttpStatus.OK);

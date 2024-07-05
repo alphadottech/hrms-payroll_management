@@ -41,6 +41,9 @@ public class Auth {
 	
 	public static String apiConstant;
 
+	public boolean isUpdated;
+	public static String updateByEmail;
+
 	public boolean allow(String apiName, Map<String, String> resourceAttributes) {
 		apiConstant=apiName;
 		String token = getToken(request);
@@ -106,6 +109,8 @@ public class Auth {
 	private List<GrantedAuthority> getAuthorities(Claims claims) {
 		String employeeId = String.valueOf(claims.get("id"));
 		empId = employeeId;
+		if(isUpdated)
+	    updateByEmail = String.valueOf(claims.get("sub"));
 		List<GrantedAuthority> authorities = Arrays.stream(claims.get(AUTHORITIES_CLAIM).toString().split(","))
 				.map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 		return authorities;
@@ -130,6 +135,7 @@ public class Auth {
 	private String getTokenByUrl(HttpServletRequest request) {
 		String token = request.getQueryString();
 		token = token.replace("Authorization=", "");
+		isUpdated=true;
 		return token;
 	}
 	

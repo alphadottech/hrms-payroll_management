@@ -1,26 +1,38 @@
 package com.adt.payroll.controller;
 
-import com.adt.payroll.dto.AppraisalDetailsDTO;
-import com.adt.payroll.dto.MonthSalaryDTO;
-import com.adt.payroll.dto.SalaryDTO;
-import com.adt.payroll.model.AppraisalDetails;
-import com.adt.payroll.model.MonthlySalaryDetails;
-import com.adt.payroll.model.Reward;
-import com.adt.payroll.service.AppraisalDetailsService;
-import com.adt.payroll.service.MonthlySalaryService;
-import jakarta.servlet.http.HttpServletRequest;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.adt.payroll.dto.AppraisalDetailsDTO;
+import com.adt.payroll.dto.SalaryDTO;
 import com.adt.payroll.dto.SalaryDetailsDTO;
+import com.adt.payroll.model.AppraisalDetails;
+import com.adt.payroll.model.Reward;
+import com.adt.payroll.service.AppraisalDetailsService;
+import com.adt.payroll.service.MonthlySalaryService;
 import com.adt.payroll.service.SalaryDetailsService;
 
-import java.util.List;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/salarydetails")
@@ -53,9 +65,11 @@ public class SalaryDetailsController {
 
 	@PreAuthorize("@auth.allow('GET_ALL_EMPLOYEE_APPRAISAL_DETAILS')")
 	@GetMapping("/getAllEmployeesWithLatestAppraisal")
-	public ResponseEntity<List<AppraisalDetailsDTO>> getAllEmployeesWithLatestAppraisal() {
+	public ResponseEntity<Page<AppraisalDetailsDTO>> getAllEmployeesWithLatestAppraisal(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size) {
 		LOGGER.info("PayrollService: SalaryDetailsController:Getting all employees appraisal details Info level log msg");
-		return salaryDetailsService.getEmployeesWithLatestAppraisal();
+		return salaryDetailsService.getEmployeesWithLatestAppraisal(page, size);
 	}
 
 	@PreAuthorize("@auth.allow('GET_SALARY_BY_ID')")
@@ -66,15 +80,16 @@ public class SalaryDetailsController {
 	}
 	@PreAuthorize("@auth.allow('GET_ALL_APPRAISAL_DETAILS_BY_ID')")
 	@GetMapping("/getAllAppraisalDetailsbyId/{id}")
-	public ResponseEntity<List<AppraisalDetails>> getAppraisalDetailsById(@PathVariable Integer id) {
+	public ResponseEntity<List<AppraisalDetailsDTO>> getAppraisalDetailsById(@PathVariable Integer id) {
 		return appraisalDetailsService.getAppraisalDetails(id);
 	}
 
 	@PreAuthorize("@auth.allow('GET_REWARD_DETAILS_BY_ID')")
 	@GetMapping("/getRewardDetails/{id}")
-	public List<Reward> getRewardDetailByEmployeeId(@PathVariable Integer id) {
+	public List<AppraisalDetailsDTO> getRewardDetailByEmployeeId(@PathVariable Integer id) {
 		return appraisalDetailsService.getRewardDetailsByEmployeeId(id);
 	}
+	
 	@PreAuthorize("@auth.allow('SAVE_REWARD_DETAILS')")
 	@PostMapping("/saveRewardDetails")
 	public ResponseEntity<String>saveRewardDetails(@RequestBody Reward reward, HttpServletRequest request){
@@ -87,15 +102,27 @@ public class SalaryDetailsController {
 		}
 
 	}
-	@PreAuthorize("auth.allow('GET_ALL_MONTHLY_SALARY_DETAILS')")
+	@PreAuthorize("@auth.allow('GET_ALL_MONTHLY_SALARY_DETAILS')")
 	@GetMapping("/getAllMonthlySalaryDetails")
 	public ResponseEntity<?> getAllSalaryDetails() {
 		LOGGER.info("PayrollService: SalaryDetailsController:Getting all Monthly Salary Details Info level log msg");
-		List<MonthSalaryDTO> monthSalaryResponse =monthlySalaryService.getAllMonthlySalaryDetails(); 
+		List<SalaryDTO> monthSalaryResponse =monthlySalaryService.getAllMonthlySalaryDetails(); 
 		if(!monthSalaryResponse.isEmpty()) {
 			return new ResponseEntity<>(monthSalaryResponse, HttpStatus.OK);
 		}
 		 return new ResponseEntity<>("No salary details found for", HttpStatus.NOT_FOUND);
+	}
+	@PreAuthorize("@auth.allow('GET_ALL_MONTHLY_SALARY_DETAILS_BY_ID_EXPORT_TO_EXCEL')")
+	@GetMapping("/getAllMonthlySalaryDetailsExportToExcelById/{empId}")
+	public ResponseEntity<Resource> getAllMonthlySalaryDetailsExportToExcel(@PathVariable("empId") Integer empId) throws IOException {
+
+		String filename = "alphadot_Monthly_Salary_Details_data.xlsx";
+		ByteArrayInputStream newdata = monthlySalaryService.getExcelData(empId);
+		InputStreamResource file = new InputStreamResource(newdata);
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+				.contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+				.body(file);
 	}
 }
 
