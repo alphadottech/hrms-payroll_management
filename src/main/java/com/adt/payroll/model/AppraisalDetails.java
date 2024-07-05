@@ -35,6 +35,9 @@ public class AppraisalDetails {
     @Column(name = "amount")
     private Double amount;
 
+    @Column(name = "initiated_date")
+    private String initiatedDate;
+
     @Column(name = "appraisal_date")
     private String appraisalDate;
 

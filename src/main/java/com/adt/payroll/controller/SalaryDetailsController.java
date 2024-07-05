@@ -74,7 +74,7 @@ public class SalaryDetailsController {
 	}
 	@PreAuthorize("@auth.allow('GET_ALL_APPRAISAL_DETAILS_BY_ID')")
 	@GetMapping("/getAllAppraisalDetailsbyId/{id}")
-	public ResponseEntity<List<AppraisalDetails>> getAppraisalDetailsById(@PathVariable Integer id) {
+	public ResponseEntity<List<AppraisalDetailsDTO>> getAppraisalDetailsById(@PathVariable Integer id) {
 		return appraisalDetailsService.getAppraisalDetails(id);
 	}
 
