@@ -120,7 +120,7 @@ public class Util {
             + "\r\n"
             +"AlphaDot Technologies";
     
-    public static final String ERR_MESSAGE="The salary slip details for [Name] has been entered incorrectly. [errorMsg] \r\n Kindy fill correct information !! \r\n"
+    public static final String ERR_MESSAGE="The salary slip details for [Name] has been entered incorrectly.\r\n[errorMsg] \r\n"
     		+ "\r\n"
             + "Regards,"
             + "\r\n"
