@@ -7,12 +7,20 @@ import java.util.List;
 import java.util.Optional;
 
 import com.adt.payroll.dto.RewardDetailsDTO;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.adt.payroll.dto.AppraisalDetailsDTO;
 import com.adt.payroll.dto.SalaryDTO;
+import com.adt.payroll.dto.SearchNameDto;
 import com.adt.payroll.model.AppraisalDetails;
 import com.adt.payroll.model.EmpPayrollDetails;
 import com.adt.payroll.model.MonthlySalaryDetails;
@@ -28,11 +36,10 @@ import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,MonthlySalaryService {
+	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
     private AppraisalDetailsRepository appraisalDetailsRepository;
-
-    //@Autowired
-    //  private EmployeeRepo employeeRepo;
     @Autowired
     private UserRepo userRepo;
     @Autowired
@@ -156,5 +163,145 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
         ByteArrayInputStream byteArrayInputStream= MonthlySalaryHelper.dataToExcel(list,list1);
         return byteArrayInputStream;
     }
+    
+    @Override
+	public ResponseEntity<List<SearchNameDto>> getEmployeeNameByCharacter(String nameCharacter) {
+		try {
+			LOGGER.info("getEmployeeNameByCharacter started :");
+			String firstName ="";
+			String lastName ="";
+			if(nameCharacter.contains(" ")) {
+				String [] ar =nameCharacter.split(" ");
+				firstName=ar[0];
+				lastName=ar[1];
+			}else {
+				firstName=nameCharacter;
+			}
+				
+		    List<User> users= userRepo.findByFirstNameAndLastName(firstName, lastName);
 
+			List<SearchNameDto> nameList = new ArrayList();
+			if (!users.isEmpty()) {
+				
+				users.stream().forEach(u -> {
+					SearchNameDto dto = new SearchNameDto();
+					String user = u.getFirstName() + " " + u.getLastName();
+					dto.setEmpId(u.getId());
+					dto.setName(user);
+					nameList.add(dto);
+				});
+			}
+			return new ResponseEntity<List<SearchNameDto>>(nameList, HttpStatus.OK);
+		} catch (Exception e) {
+			LOGGER.info("Getting error while fetching data from db in getEmployeeNameByCharacter: ", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+    
+    @Override
+	public ResponseEntity<String> addAppraisalDetails(AppraisalDetails appraisalDetails) {
+    	LOGGER.info("Adding appraisal details for Employee ID: {}", appraisalDetails.getEmpId());
+		if (appraisalDetails.getEmpId() == null ) {
+			LOGGER.error("Employee Id can not be null.");
+			return new ResponseEntity<>("Employee Id can not be null ", HttpStatus.BAD_REQUEST);
+		}
+
+		if (appraisalDetails.getSalary() == null || appraisalDetails.getSalary() < 0) {
+			LOGGER.error("Salary must be specified and must be non-negative.");
+			return new ResponseEntity<>("Salary must be specified and must be non-negative.", HttpStatus.BAD_REQUEST);
+		}
+		if (appraisalDetails.getAmount() == null || appraisalDetails.getAmount() < 0) {
+			LOGGER.error("Amount must be specified and must be non-negative.");
+			return new ResponseEntity<>("Amount must be specified and must be non-negative.", HttpStatus.BAD_REQUEST);
+		}
+		try {
+			Optional<User> employeeOptional = userRepo.findById(appraisalDetails.getEmpId());
+			if (employeeOptional.isEmpty()) {
+				LOGGER.warn("Employee with ID: " + appraisalDetails.getEmpId() + " not found");
+				return new ResponseEntity<>("Employee with ID: " + appraisalDetails.getEmpId() + " not found",
+						HttpStatus.NOT_FOUND);
+			}
+			AppraisalDetails savedAppraisalDetails = appraisalDetailsRepository.save(appraisalDetails);
+			return new ResponseEntity<>("AppraisalDetails saved successfully with ID: " + savedAppraisalDetails.getAppr_hist_id(),
+					HttpStatus.CREATED);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			LOGGER.error("Failed to save AppraisalDetails for EmpId: " + appraisalDetails.getEmpId());
+			return new ResponseEntity<>("AppraisalDetails for EmpId: " + appraisalDetails.getEmpId() + " could not be saved",
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+
+	@Override
+	public ResponseEntity<Page<AppraisalDetailsDTO>> getEmployeesWithLatestAppraisal(int page, int size) {
+		LOGGER.info("Getting all employees with latest appraisal details");
+
+		List<AppraisalDetailsDTO> appraisalDetailsDTOList = new ArrayList<>();
+
+		try {
+
+			List<Object[]> latestAppraisalResults = appraisalDetailsRepository.findLatestAppraisalDetails();
+			if (latestAppraisalResults != null && !latestAppraisalResults.isEmpty()) {
+				for (Object[] result : latestAppraisalResults) {
+					AppraisalDetailsDTO appraisalDetailsDTO = new AppraisalDetailsDTO();
+					appraisalDetailsDTO.setAppr_hist_id((Integer) result[0]);
+					appraisalDetailsDTO.setEmpId((int) result[1]);
+					appraisalDetailsDTO.setYear(String.valueOf(result[2]));
+					appraisalDetailsDTO.setMonth(String.valueOf(result[3]));
+					appraisalDetailsDTO.setBonus(result[4] != null ? (Double) result[4] : 0.0);
+					appraisalDetailsDTO.setVariable(result[5] != null ? (Double) result[5] : 0.0);
+					appraisalDetailsDTO.setAmount((Double) result[6]);
+					appraisalDetailsDTO.setAppraisalDate(String.valueOf(result[7]));
+					appraisalDetailsDTO.setSalary((Double) result[8]);
+					appraisalDetailsDTO.setName((String) result[9]);
+
+					appraisalDetailsDTOList.add(appraisalDetailsDTO);
+				}
+			} else {
+				LOGGER.warn("No employee with latest appraisal details found");
+			}
+		}
+		catch (Exception e) {
+			LOGGER.error("Failed to retrieve employees with latest appraisal details", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Page.empty());
+		}
+
+
+		try {
+			List<Object[]> employeesWithoutAppraisalResults = appraisalDetailsRepository.findEmployeesWithoutAppraisal();
+			if (employeesWithoutAppraisalResults != null && !employeesWithoutAppraisalResults.isEmpty()) {
+				for (Object[] result : employeesWithoutAppraisalResults) {
+					AppraisalDetailsDTO appraisalDetailsDTO = new AppraisalDetailsDTO();
+					appraisalDetailsDTO.setName((String) result[0]);
+					appraisalDetailsDTO.setEmpId(Integer.parseInt(String.valueOf(result[1])));
+					appraisalDetailsDTO.setAppraisalDate(String.valueOf(result[2]));
+					appraisalDetailsDTO.setSalary((Double) result[3]);
+					appraisalDetailsDTO.setVariable(result[4] != null ? (Double) result[4] : 0.0);
+					appraisalDetailsDTO.setBonus(result[5] != null ? (Double) result[5] : 0.0);
+					appraisalDetailsDTO.setAmount(0.0);
+
+					appraisalDetailsDTOList.add(appraisalDetailsDTO);
+				}
+			} else {
+				LOGGER.warn("No employees without appraisal details found");
+			}
+		}
+		catch (Exception e) {
+			LOGGER.error("Failed to retrieve employees without latest appraisal details", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Page.empty());
+		}
+		if (appraisalDetailsDTOList.isEmpty()) {
+			LOGGER.warn("No employees found");
+			return new ResponseEntity<>(Page.empty(), HttpStatus.OK);
+		}
+
+
+		int start = Math.min((int) PageRequest.of(page, size).getOffset(), appraisalDetailsDTOList.size());
+		int end = Math.min((start + size), appraisalDetailsDTOList.size());
+		Page<AppraisalDetailsDTO> pageResult = new PageImpl<>(appraisalDetailsDTOList.subList(start, end), PageRequest.of(page, size), appraisalDetailsDTOList.size());
+
+		return new ResponseEntity<>(pageResult, HttpStatus.OK);
+	}
 }
