@@ -44,8 +44,6 @@ public class SalaryDetailsController {
 	private SalaryDetailsService salaryDetailsService;
 
 	@Autowired
-	private AppraisalDetailsService appraisalDetailsService;
-	@Autowired
 	private MonthlySalaryService monthlySalaryService;
 
 	@PreAuthorize("@auth.allow('SAVE_EMPLOYEE_SALARY_DETAILS')")
@@ -56,52 +54,13 @@ public class SalaryDetailsController {
 		return salaryDetailsService.calculateAndSaveSalaryDetails(salaryDetailsDTO);
 	}
 
-	@PreAuthorize("@auth.allow('SAVE_APPRAISAL_DETAILS')")
-	@PostMapping("/addAppraisalDetails")
-	public ResponseEntity<String> addAppraisalDetails(@RequestBody AppraisalDetails appraisalDetails) {
-		LOGGER.info("PayrollService: SalaryDetailsController:Employee addAppraisalDetails Info level log msg");
-		return salaryDetailsService.addAppraisalDetails(appraisalDetails);
-	}
-
-	@PreAuthorize("@auth.allow('GET_ALL_EMPLOYEE_APPRAISAL_DETAILS')")
-	@GetMapping("/getAllEmployeesWithLatestAppraisal")
-	public ResponseEntity<Page<AppraisalDetailsDTO>> getAllEmployeesWithLatestAppraisal(
-			@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size) {
-		LOGGER.info("PayrollService: SalaryDetailsController:Getting all employees appraisal details Info level log msg");
-		return salaryDetailsService.getEmployeesWithLatestAppraisal(page, size);
-	}
-
 	@PreAuthorize("@auth.allow('GET_SALARY_BY_ID')")
 	@GetMapping("/getSalaryDetailsById/{empId}")
 	public ResponseEntity<List<SalaryDTO>> getEmployeeSalaryById(@PathVariable Integer empId) {
 		LOGGER.info("PayrollService: SalaryDetailsController:Getting employee salary by id Info level log msg");
 		return salaryDetailsService.getEmployeeSalaryById(empId);
 	}
-	@PreAuthorize("@auth.allow('GET_ALL_APPRAISAL_DETAILS_BY_ID')")
-	@GetMapping("/getAllAppraisalDetailsbyId/{id}")
-	public ResponseEntity<List<AppraisalDetailsDTO>> getAppraisalDetailsById(@PathVariable Integer id) {
-		return appraisalDetailsService.getAppraisalDetails(id);
-	}
-
-	@PreAuthorize("@auth.allow('GET_REWARD_DETAILS_BY_ID')")
-	@GetMapping("/getRewardDetails/{id}")
-	public List<AppraisalDetailsDTO> getRewardDetailByEmployeeId(@PathVariable Integer id) {
-		return appraisalDetailsService.getRewardDetailsByEmployeeId(id);
-	}
 	
-	@PreAuthorize("@auth.allow('SAVE_REWARD_DETAILS')")
-	@PostMapping("/saveRewardDetails")
-	public ResponseEntity<String>saveRewardDetails(@RequestBody Reward reward, HttpServletRequest request){
-		LOGGER.info("API Call From IP: " + request.getRemoteHost());
-		try {
-			String response = appraisalDetailsService.saveProjectRewardDetails(reward);
-			return new ResponseEntity<>(response, HttpStatus.OK);
-		} catch (IllegalArgumentException e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		}
-
-	}
 	@PreAuthorize("@auth.allow('GET_ALL_MONTHLY_SALARY_DETAILS')")
 	@GetMapping("/getAllMonthlySalaryDetails")
 	public ResponseEntity<?> getAllSalaryDetails() {
@@ -112,6 +71,7 @@ public class SalaryDetailsController {
 		}
 		 return new ResponseEntity<>("No salary details found for", HttpStatus.NOT_FOUND);
 	}
+	
 	@PreAuthorize("@auth.allow('GET_ALL_MONTHLY_SALARY_DETAILS_BY_ID_EXPORT_TO_EXCEL')")
 	@GetMapping("/getAllMonthlySalaryDetailsExportToExcelById/{empId}")
 	public ResponseEntity<Resource> getAllMonthlySalaryDetailsExportToExcel(@PathVariable("empId") Integer empId) throws IOException {
