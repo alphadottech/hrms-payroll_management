@@ -117,6 +117,10 @@ public class PayRollServiceImpl implements PayRollService {
 
 	@Autowired
 	Util util;
+	
+	public String invalidValue="";
+	
+	public Integer allFieldeValue;
 
 	@Autowired
 	private CommonEmailService mailService;
@@ -359,10 +363,42 @@ public class PayRollServiceImpl implements PayRollService {
 		List<User> employee = userRepo.findAll();
 		int workingDay = util.getWorkingDays();
 		for (int i = 2; i <= sheet.getLastRowNum(); i++) {
-			System.out.println(sheet.getLastRowNum());
+
 			try {
 				XSSFRow row = sheet.getRow(i);
 				try {
+				
+					
+					if(isNotNull(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.EmployeeNumber))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Name))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.TotalWorkingDays))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.YourWorkingDays))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Leave))),
+					(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.HalfDay)))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.salary))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.PaidLeave))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.BankName))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.AccountNumber))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.DESIGNATION))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Gmail))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.JoiningDate))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Esic))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.PF))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.ADJUSTMENT))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.TDS))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.MEDICAL_INSURANCE))),
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc1))))) {
+						if(allFieldeValue<19) {
+							mailService.sendEmail(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Name))), invalidValue);
+							continue;	
+						}else {
+							continue;
+						}
+						
+					}
+					
+					
+					
 					empId = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.EmployeeNumber)));
 					name = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Name)));
 					workingDays = Integer.parseInt(
@@ -382,7 +418,6 @@ public class PayRollServiceImpl implements PayRollService {
 					designation = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.DESIGNATION)));
 					gmail = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Gmail)));
 					joiningDate = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.JoiningDate)));
-					bankName = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.BankName)));
 					esic = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Esic)));
 					pf = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.PF)));
 
@@ -426,24 +461,21 @@ public class PayRollServiceImpl implements PayRollService {
 							adhoc1 += Integer.parseInt(String.valueOf(expense.get("expense_amount")));
 						}
 					}
+				
 					MonthlySalaryDetails monthlySalaryDetails =new  MonthlySalaryDetails();
+					
+					
 					if (checkEmpDetails(empId, gmail, accountNumber, employee, fName, lName)) {
-						mailService.sendEmail(name);
+						mailService.sendEmail(name,invalidValue);
 						continue;
 
 					}
 					
-					if (isNotNull(empId, name, workingDays, present, date, bankName, accountNumber, designation,
-							joiningDate, leave, halfDay, adhoc1, salary, workingDay, paidLeave)) {
 						baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary, paidLeave, date,
 								bankName, accountNumber, designation, joiningDate, adhoc1, payPeriod, esic, pf,
 								adjustment, medicalInsurance, tds, monthlySalaryDetails);
 
-					} else {
-
-						mailService.sendEmail(name);
-						continue;
-					}
+					
 					   
 					SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
 					Calendar cal1 = Calendar.getInstance();
@@ -485,7 +517,8 @@ public class PayRollServiceImpl implements PayRollService {
 			} catch (Exception e) {
 				break;
 			}
-		}
+			}
+	
 		return "Mail Send Successfully";
 	}
 
@@ -828,32 +861,156 @@ public class PayRollServiceImpl implements PayRollService {
 				EmpPayrollDetails empDetails = empPayrollDetailsRepo.getByEmpId(employee.get().getId());
 				if (empDetails.getAccountNumber().equalsIgnoreCase(accountNumber)) {
 					flag = false;
+					return flag;
 				}
+				invalidValue="please enter currect Account Number";
 				return flag;
+				
 			}
+			invalidValue="please enter correct Email, First name and Last name";	
 		}
 
 		return flag;
 	}
-
-	public boolean isNotNull(String empId, String name, Integer workingDays, Integer present, String date,
-			String bankName, String accountNumber, String designation, String joiningDate, Integer leave,
-			Integer halfDay, Integer adhoc1, String salary, int workingDay, String paidLeave) {
-		int intSalary = Integer.parseInt(salary);
-		int intpaidLeave = Integer.parseInt(paidLeave);
-		if (empId.isEmpty() || empId == null || name.isEmpty() || name == null || workingDays <= 0
-				|| present > workingDays || leave < 0 || halfDay < 0 || workingDays != workingDay || bankName.isEmpty()
-				|| accountNumber.isEmpty() || designation.isEmpty() || designation == null || joiningDate.isEmpty()
-				|| joiningDate == null || (present > 0 && (salary == null || intSalary == 0))
-				|| (present == 0 && (intSalary != 0 || intSalary < 0))
-				|| (workingDays != present + leave + intpaidLeave) || (intpaidLeave < 0)
-				|| (workingDays == present && (leave > 0))
-
-		) {
-			return false;
+	
+	
+	public boolean isNotNull(String empId, String name, String workingDays, String presentWorkingDays, 
+			String leave, String halfDay,String salary,String paidLeave, String bankName, String accountNumber, String designation,String email, String joiningDate,
+			String esic,String pfAmount,String adjustment,String tds,String medicalInsurance,String adhoc) {
+		
+		invalidValue = "] fields are missing or null. Kindy fill correct information !!";
+		
+		allFieldeValue=0;
+		if (empId.isEmpty() || empId == null) {
+			invalidValue = ",employeeId " + invalidValue;
+			allFieldeValue++;
 
 		}
-		return true;
+		if (name.isEmpty() || name == null) {
+			invalidValue = ",name" + invalidValue;
+			allFieldeValue++;
+
+		}
+		if (workingDays.isEmpty() || workingDays == null) {
+
+			invalidValue = ",workingDay" + invalidValue;
+			allFieldeValue++;
+		}
+
+		if (presentWorkingDays.isEmpty() || presentWorkingDays == null) {
+
+			invalidValue = ",presentDay" + invalidValue;
+			allFieldeValue++;
+
+		}
+
+		if (leave.isEmpty() || leave == null) {
+
+			invalidValue = ",leave" + invalidValue;
+			allFieldeValue++;
+
+		}
+		if (halfDay.isEmpty() || halfDay == null) {
+
+			invalidValue = ",halfDay" + invalidValue;
+			allFieldeValue++;
+
+		}
+
+		if (salary.isEmpty() || salary == null) {
+
+			invalidValue = ",salary" + invalidValue;
+			allFieldeValue++;
+
+		}
+		if (paidLeave.isEmpty() || paidLeave == null) {
+
+			invalidValue = ",paidLeave" + invalidValue;
+			allFieldeValue++;
+
+		}
+
+		if (bankName.isEmpty() || bankName == null) {
+
+			invalidValue = ",bankName" + invalidValue;
+			allFieldeValue++;
+
+		}
+		if (accountNumber.isEmpty() || accountNumber == null) {
+
+			invalidValue = ",accountNumber" + invalidValue;
+			allFieldeValue++;
+
+		}
+
+		if (designation.isEmpty() || designation == null) {
+
+			invalidValue = ",designation" + invalidValue;
+			allFieldeValue++;
+
+		}
+		if (email.isEmpty() || email == null) {
+
+			invalidValue = ",email" + invalidValue;
+			allFieldeValue++;
+
+		}
+
+		if (joiningDate.isEmpty() || joiningDate == null) {
+
+			invalidValue = ",joiningDate " + invalidValue;
+			allFieldeValue++;
+
+		}
+
+		if (esic.isEmpty() || esic == null) {
+
+			invalidValue = ",esic " + invalidValue;
+			allFieldeValue++;
+
+		}
+
+		if (pfAmount.isEmpty() || pfAmount == null) {
+
+			invalidValue = ",pfAmount " + invalidValue;
+			allFieldeValue++;
+
+		}
+
+		if (adjustment.isEmpty() || adjustment == null) {
+
+			invalidValue = ",adjustment " + invalidValue;
+			allFieldeValue++;
+
+		}
+
+		if (tds.isEmpty() || tds == null) {
+
+			invalidValue = ",tds " + invalidValue;
+			allFieldeValue++;
+
+		}
+		if (medicalInsurance.isEmpty() || medicalInsurance == null) {
+
+			invalidValue = ",medicalInsurance " + invalidValue;
+			allFieldeValue++;
+
+		}
+
+		if (adhoc.isEmpty() || adhoc == null) {
+
+			invalidValue = ",adhoc " + invalidValue;
+			allFieldeValue++;
+
+		}
+
+		if (!invalidValue.equalsIgnoreCase("] fields are missing or null. Kindy fill correct information !!")) {
+			invalidValue = invalidValue.substring(1);
+			invalidValue = "Given [" + invalidValue;
+			return true;
+		}
+		
+		return false;
 	}
 
 //  generate salary code modification
