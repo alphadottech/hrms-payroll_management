@@ -490,6 +490,7 @@ public class PayRollServiceImpl implements PayRollService {
 					double adhoc=adhoc1;
 					double adj =adjustment;	
 					if(email==null||email.isEmpty()) {
+					log.info("save data in monthlySalaryDetails Table");	
 					monthlySalaryDetails.setEmpId(Integer.parseInt(empId));
 					monthlySalaryDetails.setMedicalInsurance(medical);
 					monthlySalaryDetails.setAdhoc(adhoc);
@@ -506,13 +507,15 @@ public class PayRollServiceImpl implements PayRollService {
 					//monthlySalaryDetails.setUpdatedWhen(Timestamp.valueOf(currentZonedDateTime.toLocalDateTime()));
 					monthlySalaryDetailsRepo.save(monthlySalaryDetails);
 					}
+					log.info(email);
 					if(email!=null&&!email.isEmpty())
 					gmail=email; 
 					
+					log.info("Mail send proceess");
 					mailService.sendEmail(baos, name, gmail, paySlipDetails.get(Util.MONTH)+" "+paySlipDetails.get(Util.YEAR));
-					log.info("Mail send successfully send this email="+gmail);
+					log.info("Mail send successfully");
 				} catch (Exception e) {
-					log.error("Getting error while payslip generation."+ e.getMessage());
+					log.error("Getting error while payslip generation="+ e.getMessage());
 					mailService.sendEmail(name);
 					continue;
 				}
