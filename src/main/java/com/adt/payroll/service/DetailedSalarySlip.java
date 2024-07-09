@@ -42,6 +42,7 @@ public class DetailedSalarySlip {
 			double esicAmount, float pfAmount, double netAmount, double grossSalary, double basic, double hra,
 			double amountPerDay, double unpaidLeave, int adjustment, int medicalInsurance, int tds)
 			throws DocumentException, IOException {
+		log.info("generateDetailedSalarySlipPDF Started");
 		LocalDate currentdate = LocalDate.now();
 		LocalDate earlier = currentdate.minusMonths(1);
 		Document document = new Document(PageSize.A4, 50, 50, 50, 50);
@@ -201,6 +202,7 @@ public class DetailedSalarySlip {
 //                "Amount per day = " + grossSalary + " / total working day for this month =" + Math.round(amountPerDay) + "\n", smallFont));
 
 		document.close();
+		log.info("generateDetailedSalarySlipPDF end");	
 		return outputStream;
 	}
 
