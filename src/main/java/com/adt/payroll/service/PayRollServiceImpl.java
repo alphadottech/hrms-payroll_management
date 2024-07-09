@@ -420,7 +420,7 @@ public class PayRollServiceImpl implements PayRollService {
 					joiningDate = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.JoiningDate)));
 					esic = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Esic)));
 					pf = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.PF)));
-					log.info("line 423"+gmail);
+				
 					try {
 						adjustment = Integer.parseInt(
 								dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.ADJUSTMENT))));
@@ -485,11 +485,10 @@ public class PayRollServiceImpl implements PayRollService {
 					SimpleDateFormat monthFormat = new SimpleDateFormat("MMM");
 				    String monthName = monthFormat.format(cal1.getTime()).toUpperCase();
 				    DateTime current = new DateTime(istTimeZone);
-			       // Timestamp currentTime = new Timestamp(current.getMillis());
 					double medical=medicalInsurance;
 					double adhoc=adhoc1;
 					double adj =adjustment;	
-					log.info(email);
+	
 					if(email==null||email.isEmpty()) {
 					log.info("save data in monthlySalaryDetails Table");	
 					monthlySalaryDetails.setEmpId(Integer.parseInt(empId));
@@ -505,16 +504,13 @@ public class PayRollServiceImpl implements PayRollService {
 					monthlySalaryDetails.setPresentDays(present);
 					monthlySalaryDetails.setBonus(0.0);
 					monthlySalaryDetails.setUpdatedWhen(new Timestamp(current.getMillis()));
-					//monthlySalaryDetails.setUpdatedWhen(Timestamp.valueOf(currentZonedDateTime.toLocalDateTime()));
-					monthlySalaryDetailsRepo.save(monthlySalaryDetails);
-					}
-					log.info(gmail);
-					if(email!=null&&!email.isEmpty())
-					gmail=email; 
 					
-					log.info("Mail send proceess");
+					monthlySalaryDetailsRepo.save(monthlySalaryDetails);
+					}		
+					if(email!=null&&!email.isEmpty()) 
+						gmail=email; 
 					mailService.sendEmail(baos, name, gmail, paySlipDetails.get(Util.MONTH)+" "+paySlipDetails.get(Util.YEAR));
-					log.info("Mail send successfully");
+					log.info("Mail send successfully this email id="+gmail);
 				} catch (Exception e) {
 					log.error("Getting error while payslip generation="+ e.getMessage());
 					mailService.sendEmail(name);
