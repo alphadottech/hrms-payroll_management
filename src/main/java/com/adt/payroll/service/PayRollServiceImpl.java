@@ -293,7 +293,6 @@ public class PayRollServiceImpl implements PayRollService {
 	public String generatePaySlip(MultipartFile file ,String email) throws IOException, ParseException {
 		DateTimeZone istTimeZone = DateTimeZone.forID("Asia/Kolkata");
         DateTime currentDateTime = new DateTime(istTimeZone);
-        Timestamp currentTimestamp = new Timestamp(currentDateTime.getMillis());
 
         Timestamp lastUpdatedDate = monthlySalaryDetailsRepo.findLatestSalaryUpdatedDate();
 
@@ -303,7 +302,7 @@ public class PayRollServiceImpl implements PayRollService {
             Duration duration = new Duration(lastUpdatedDateTime, currentDateTime);
             long minutes = duration.getStandardMinutes();
 	            if (minutes <= 10) {
-	                return "you have "+minutes+" mins ago generated the payslip. Please try after 10 mins.";
+	                return "You have generated the payslip "+minutes+" mins ago. Please try again after 10 mins.";
 	            }
 	        }
 		 
@@ -350,18 +349,19 @@ public class PayRollServiceImpl implements PayRollService {
 		cal.setTime(inputFormat.parse(String.valueOf(earlier.getMonth())));
 
 		String monthDate = String.valueOf(outputFormat.format(cal.getTime()));
-
-		String monthYear = String.valueOf(earlier.getMonth() + " " + earlier.getYear());
-		String firstDayMonth = "01/" + monthDate + "/" + +earlier.getYear();
-		String lastDayOfMonth = (LocalDate.parse(firstDayMonth, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-				.with(TemporalAdjusters.lastDayOfMonth())).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-		String payPeriod = firstDayMonth + " - " + lastDayOfMonth;
+//
+//		String monthYear = String.valueOf(earlier.getMonth() + " " + earlier.getYear());
+//		String firstDayMonth = "01/" + monthDate + "/" + +earlier.getYear();
+//		String lastDayOfMonth = (LocalDate.parse(firstDayMonth, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+//				.with(TemporalAdjusters.lastDayOfMonth())).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+//		String payPeriod = firstDayMonth + " - " + lastDayOfMonth;
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		String date = dtf.format(currentdate);
 		String sql = "select * from employee_schema.employee_expenses";
 		List<Map<String, Object>> tableData = dataExtractor.extractDataFromTable(sql);
 		List<User> employee = userRepo.findAll();
-		int workingDay = util.getWorkingDays();
+		Map<String, String> paySlipDetails = util.getWorkingDaysAndMonth();
+		//int workingDay = util.getWorkingDays();
 		for (int i = 2; i <= sheet.getLastRowNum(); i++) {
 
 			try {
@@ -387,7 +387,7 @@ public class PayRollServiceImpl implements PayRollService {
 					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.ADJUSTMENT))),
 					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.TDS))),
 					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.MEDICAL_INSURANCE))),
-					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc1))))) {
+					dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Adhoc1))), paySlipDetails)) {
 						if(allFieldeValue<19) {
 							mailService.sendEmail(dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Name))), invalidValue);
 							continue;	
@@ -466,16 +466,17 @@ public class PayRollServiceImpl implements PayRollService {
 					
 					
 					if (checkEmpDetails(empId, gmail, accountNumber, employee, fName, lName)) {
+						log.info("Getting error while validating the field", invalidValue);
 						mailService.sendEmail(name,invalidValue);
 						continue;
 
 					}
-					
-						baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary, paidLeave, date,
-								bankName, accountNumber, designation, joiningDate, adhoc1, payPeriod, esic, pf,
-								adjustment, medicalInsurance, tds, monthlySalaryDetails);
+					log.info("Generating Pdf");
+					baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary, paidLeave, date,
+							bankName, accountNumber, designation, joiningDate, adhoc1, paySlipDetails.get(Util.PAY_PERIOD), esic, pf,
+							adjustment, medicalInsurance, tds, monthlySalaryDetails);
 
-					
+					log.info("Pdf generated successfully.");
 					   
 					SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
 					Calendar cal1 = Calendar.getInstance();
@@ -508,9 +509,10 @@ public class PayRollServiceImpl implements PayRollService {
 					if(email!=null&&!email.isEmpty())
 					gmail=email; 
 					
-					mailService.sendEmail(baos, name, gmail, monthYear);
-
+					mailService.sendEmail(baos, name, gmail, paySlipDetails.get(Util.MONTH)+" "+paySlipDetails.get(Util.YEAR));
+					log.info("Mail send successfully to the employee.");
 				} catch (Exception e) {
+					log.info("Getting error while payslip generation.", e.getMessage());
 					mailService.sendEmail(name);
 					continue;
 				}
@@ -849,6 +851,7 @@ public class PayRollServiceImpl implements PayRollService {
 
 	public boolean checkEmpDetails(String empId, String gmail, String accountNumber, List<User> employees, String fname,
 			String lName) {
+		log.info("validating the columns value gmail{},  accountNumber{}, fname{}, lName{}",gmail, accountNumber, fname, lName );
 		int userId = Integer.parseInt(empId);
 		boolean flag = true;
 		Optional<User> employee = employees.stream().filter(user -> user.getId() == userId).findFirst();
@@ -876,7 +879,9 @@ public class PayRollServiceImpl implements PayRollService {
 	
 	public boolean isNotNull(String empId, String name, String workingDays, String presentWorkingDays, 
 			String leave, String halfDay,String salary,String paidLeave, String bankName, String accountNumber, String designation,String email, String joiningDate,
-			String esic,String pfAmount,String adjustment,String tds,String medicalInsurance,String adhoc) {
+			String esic,String pfAmount,String adjustment,String tds,String medicalInsurance,String adhoc, Map<String, String> paySlipDetails) {
+		log.info("Verifying columns ");
+		int	totalDays =Integer.parseInt(paySlipDetails.get(Util.WORKING_DAY));
 		
 		invalidValue = "] fields are missing or null. Kindy fill correct information !!";
 		
@@ -891,97 +896,71 @@ public class PayRollServiceImpl implements PayRollService {
 			allFieldeValue++;
 
 		}
-		if (workingDays.isEmpty() || workingDays == null) {
-
+		if (workingDays.isEmpty() || workingDays == null || Integer.parseInt(workingDays) >totalDays || Integer.parseInt(workingDays) != totalDays) {
 			invalidValue = ",workingDay" + invalidValue;
 			allFieldeValue++;
 		}
 
 		if (presentWorkingDays.isEmpty() || presentWorkingDays == null) {
-
 			invalidValue = ",presentDay" + invalidValue;
 			allFieldeValue++;
 
 		}
 
 		if (leave.isEmpty() || leave == null) {
-
 			invalidValue = ",leave" + invalidValue;
 			allFieldeValue++;
-
 		}
 		if (halfDay.isEmpty() || halfDay == null) {
-
 			invalidValue = ",halfDay" + invalidValue;
 			allFieldeValue++;
-
 		}
 
 		if (salary.isEmpty() || salary == null) {
-
 			invalidValue = ",salary" + invalidValue;
 			allFieldeValue++;
-
 		}
 		if (paidLeave.isEmpty() || paidLeave == null) {
-
 			invalidValue = ",paidLeave" + invalidValue;
 			allFieldeValue++;
-
 		}
 
 		if (bankName.isEmpty() || bankName == null) {
-
 			invalidValue = ",bankName" + invalidValue;
 			allFieldeValue++;
-
 		}
 		if (accountNumber.isEmpty() || accountNumber == null) {
-
 			invalidValue = ",accountNumber" + invalidValue;
 			allFieldeValue++;
-
 		}
 
 		if (designation.isEmpty() || designation == null) {
-
 			invalidValue = ",designation" + invalidValue;
 			allFieldeValue++;
-
 		}
 		if (email.isEmpty() || email == null) {
-
 			invalidValue = ",email" + invalidValue;
 			allFieldeValue++;
-
 		}
 
 		if (joiningDate.isEmpty() || joiningDate == null) {
-
 			invalidValue = ",joiningDate " + invalidValue;
 			allFieldeValue++;
-
 		}
 
 		if (esic.isEmpty() || esic == null) {
-
 			invalidValue = ",esic " + invalidValue;
 			allFieldeValue++;
-
 		}
 
 		if (pfAmount.isEmpty() || pfAmount == null) {
-
 			invalidValue = ",pfAmount " + invalidValue;
 			allFieldeValue++;
-
 		}
 
 		if (adjustment.isEmpty() || adjustment == null) {
-
 			invalidValue = ",adjustment " + invalidValue;
 			allFieldeValue++;
-
 		}
 
 		if (tds.isEmpty() || tds == null) {
@@ -991,25 +970,21 @@ public class PayRollServiceImpl implements PayRollService {
 
 		}
 		if (medicalInsurance.isEmpty() || medicalInsurance == null) {
-
 			invalidValue = ",medicalInsurance " + invalidValue;
 			allFieldeValue++;
-
 		}
 
 		if (adhoc.isEmpty() || adhoc == null) {
-
 			invalidValue = ",adhoc " + invalidValue;
 			allFieldeValue++;
-
 		}
 
 		if (!invalidValue.equalsIgnoreCase("] fields are missing or null. Kindy fill correct information !!")) {
 			invalidValue = invalidValue.substring(1);
 			invalidValue = "Given [" + invalidValue;
+			log.error("Error found ", invalidValue);
 			return true;
 		}
-		
 		return false;
 	}
 
