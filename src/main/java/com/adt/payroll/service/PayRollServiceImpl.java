@@ -420,7 +420,7 @@ public class PayRollServiceImpl implements PayRollService {
 					joiningDate = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.JoiningDate)));
 					esic = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.Esic)));
 					pf = dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.PF)));
-
+					log.info("line 423"+gmail);
 					try {
 						adjustment = Integer.parseInt(
 								dataFormatter.formatCellValue(row.getCell(excelColumnName.get(Util.ADJUSTMENT))));
@@ -489,6 +489,7 @@ public class PayRollServiceImpl implements PayRollService {
 					double medical=medicalInsurance;
 					double adhoc=adhoc1;
 					double adj =adjustment;	
+					log.info(email);
 					if(email==null||email.isEmpty()) {
 					log.info("save data in monthlySalaryDetails Table");	
 					monthlySalaryDetails.setEmpId(Integer.parseInt(empId));
@@ -507,7 +508,7 @@ public class PayRollServiceImpl implements PayRollService {
 					//monthlySalaryDetails.setUpdatedWhen(Timestamp.valueOf(currentZonedDateTime.toLocalDateTime()));
 					monthlySalaryDetailsRepo.save(monthlySalaryDetails);
 					}
-					log.info(email);
+					log.info(gmail);
 					if(email!=null&&!email.isEmpty())
 					gmail=email; 
 					
