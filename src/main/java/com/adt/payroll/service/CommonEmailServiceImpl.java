@@ -204,7 +204,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 	public void sendEmail(ByteArrayOutputStream baos, String name, String gmail, String monthYear) {
 		String massage = Util.msg.replace("[Name]", name).replace("[Your Name]", "AlphaDot Technologies")
 				.replace("[Month, Year]", monthYear);
-
+		log.info("email id send mail"+gmail +"sender email"+sender);
 		MimeMessage mimeMessage = mailSender.createMimeMessage();
 		MimeMessageHelper mimeMessageHelper;
 
@@ -222,7 +222,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 
 			log.info("Mail send Successfully");
 		} catch (MessagingException e) {
-			log.info("Error");
+			log.error("getting error send email="+e.getMessage());
 
 		}
 	}
