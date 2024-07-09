@@ -1,6 +1,11 @@
 package com.adt.payroll.model;
 
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.Locale;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -72,6 +77,9 @@ public class TimeSheetModel {
 
     @Transient
     private String employeeName;
+    
+    @Transient
+    private String dayOfWeek;
 
     public TimeSheetModel(int timeSheetId, int employeeId, String checkOut, String checkIn, String workingHour,
                           String date, String status, String month, String year) {
@@ -97,6 +105,19 @@ public class TimeSheetModel {
         return "TimeSheetModel [timeSheetId=" + timeSheetId + ", employeeId=" + employeeId + ", checkOut=" + checkOut
                 + ", checkIn=" + checkIn + ", workingHour=" + workingHour + ", date=" + date + ", status=" + status
                 + ", month=" + month + ", year=" + year + "]";
+    }
+    
+    public String getDayOfWeek() {
+        if (this.date != null && !this.date.isEmpty()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            LocalDate localDate = LocalDate.parse(this.date, formatter);
+            return localDate.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+        }
+        return null;
+    }
+
+    public void setDayOfWeek(String dayOfWeek) {
+        this.dayOfWeek = dayOfWeek;
     }
 
 

@@ -466,7 +466,7 @@ public class PayRollServiceImpl implements PayRollService {
 					
 					
 					if (checkEmpDetails(empId, gmail, accountNumber, employee, fName, lName)) {
-						log.info("Getting error while validating the field", invalidValue);
+						log.error("Getting error while validating the field="+ invalidValue);
 						mailService.sendEmail(name,invalidValue);
 						continue;
 
@@ -510,13 +510,14 @@ public class PayRollServiceImpl implements PayRollService {
 					gmail=email; 
 					
 					mailService.sendEmail(baos, name, gmail, paySlipDetails.get(Util.MONTH)+" "+paySlipDetails.get(Util.YEAR));
-					log.info("Mail send successfully to the employee.");
+					log.info("Mail send successfully send this email="+gmail);
 				} catch (Exception e) {
-					log.info("Getting error while payslip generation.", e.getMessage());
+					log.error("Getting error while payslip generation."+ e.getMessage());
 					mailService.sendEmail(name);
 					continue;
 				}
 			} catch (Exception e) {
+				log.error("Getting error while payslip generation."+ e.getMessage());
 				break;
 			}
 			}
@@ -982,7 +983,8 @@ public class PayRollServiceImpl implements PayRollService {
 		if (!invalidValue.equalsIgnoreCase("] fields are missing or null. Kindy fill correct information !!")) {
 			invalidValue = invalidValue.substring(1);
 			invalidValue = "Given [" + invalidValue;
-			log.error("Error found ", invalidValue);
+			if(allFieldeValue<19)
+			log.error("Error found="+ invalidValue);
 			return true;
 		}
 		return false;

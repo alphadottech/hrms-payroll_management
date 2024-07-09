@@ -430,16 +430,19 @@ public class TimeSheetServiceImpl implements TimeSheetService {
     @Override
     public List<TimeSheetModel> allEmpAttendence(LocalDate fromDate, LocalDate toDate) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        String startDate = String.valueOf(dateTimeFormatter.format(fromDate));
-        String endDate = String.valueOf(dateTimeFormatter.format(toDate));
+        String startDate = dateTimeFormatter.format(fromDate);
+        String endDate = dateTimeFormatter.format(toDate);
         List<TimeSheetModel> list = timeSheetRepo.findAllWithinSpecifiedDateRange(startDate, endDate).stream()
-                .filter(e -> !e.equals(null)).map(e -> {
+                .filter(e -> e != null)
+                .map(e -> {
                     Optional<User> t = userRepo.findById(e.getEmployeeId());
                     if (t.isPresent()) {
                         e.setEmployeeName(t.get().getFirstName() + " " + t.get().getLastName());
                     } else {
                         e.setEmployeeName("NOT AVAILABLE");
                     }
+                    // Set the day of the week
+                    e.setDayOfWeek(e.getDayOfWeek());
                     return e;
                 }).collect(Collectors.toList());
         return list;
