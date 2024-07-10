@@ -948,7 +948,15 @@ public class PayRollServiceImpl implements PayRollService {
 					&& employee.get().getFirstName().trim().equalsIgnoreCase(fname)
 					&& lname.trim().trim().equalsIgnoreCase(lName)) {
 				EmpPayrollDetails empDetails = empPayrollDetailsRepo.getByEmpId(employee.get().getId());
-				if (empDetails.getAccountNumber().equalsIgnoreCase(accountNumber)) {
+				String aNo=	empDetails.getAccountNumber();
+				for (int i = 0; i < aNo.length(); i++) {
+					if (aNo.startsWith("0")) {
+						aNo = aNo.substring(1);
+					} else {
+						break;
+					}
+				}
+				if (aNo.equalsIgnoreCase(accountNumber)) {
 					flag = false;
 					return flag;
 				}
