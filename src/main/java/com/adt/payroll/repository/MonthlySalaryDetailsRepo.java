@@ -16,24 +16,22 @@ import java.util.Optional;
 @Repository
 public interface MonthlySalaryDetailsRepo extends JpaRepository<MonthlySalaryDetails, Integer> {
 
-   @Query(value = "SELECT * FROM  payroll_schema.monthly_salary_details" +
-           " WHERE salary_month = :month " +
-           "AND EXTRACT(YEAR FROM CAST(salary_credited_date AS date)) = :year",
-           nativeQuery = true)
-   List<MonthlySalaryDetails> findByMonth(@Param("month") String month,@Param("year") int year);
-    
-   Optional<List<MonthlySalaryDetails>> findByCreditedDate(String date);
-  
+	@Query(value = "SELECT * FROM  payroll_schema.monthly_salary_details" + " WHERE salary_month = :month "
+			+ "AND EXTRACT(YEAR FROM CAST(salary_credited_date AS date)) = :year", nativeQuery = true)
+	List<MonthlySalaryDetails> findByMonth(@Param("month") String month, @Param("year") int year);
 
+	Optional<List<MonthlySalaryDetails>> findByCreditedDate(String date);
 
-    @Query(value = "SELECT * FROM payroll_schema.monthly_salary_details WHERE emp_id = :empId", nativeQuery = true)
-    List<MonthlySalaryDetails> findSalaryDetailsByEmpId(@Param("empId") Integer empId);
-    
-	
-	  @Query(value="SELECT MAX(msd.salary_credited_date) FROM payroll_schema.monthly_salary_details msd",nativeQuery = true)
-	  String findLatestSalaryCreditedDate();
-	 
-	  @Query(value="SELECT MAX(msd.updated_When) FROM payroll_schema.monthly_salary_details msd",nativeQuery = true)
-	  Timestamp findLatestSalaryUpdatedDate();
+	@Query(value = "SELECT * FROM payroll_schema.monthly_salary_details WHERE emp_id = :empId", nativeQuery = true)
+	List<MonthlySalaryDetails> findSalaryDetailsByEmpId(@Param("empId") Integer empId);
+
+	@Query(value = "SELECT MAX(msd.salary_credited_date) FROM payroll_schema.monthly_salary_details msd", nativeQuery = true)
+	String findLatestSalaryCreditedDate();
+
+	@Query(value = "SELECT MAX(msd.updated_When) FROM payroll_schema.monthly_salary_details msd", nativeQuery = true)
+	Timestamp findLatestSalaryUpdatedDate();
+
+	@Query(value = "select * from payroll_schema.monthly_salary_details where emp_id=?1 and salary_month=?2", nativeQuery = true)
+	List<MonthlySalaryDetails> findByEmpIdAndMonthAndYear(int empId, String month);
 
 }

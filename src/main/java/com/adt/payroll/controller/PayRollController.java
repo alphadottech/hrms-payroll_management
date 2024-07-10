@@ -2,7 +2,6 @@ package com.adt.payroll.controller;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Base64;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.slf4j.Logger;
@@ -14,14 +13,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.adt.payroll.dto.SalaryDetailsDTO;
+import com.adt.payroll.dto.ViewPaySlipDto;
 import com.adt.payroll.model.PaySlip;
-import com.adt.payroll.model.SalaryModel;
 import com.adt.payroll.repository.TimeSheetRepo;
 import com.adt.payroll.service.PayRollService;
 
@@ -50,23 +48,39 @@ public class PayRollController {
 
 	@PreAuthorize("@auth.allow('GENERATE_PAYSLIP_FOR_ALL_EMPLOYEE')")
 	@PostMapping("/genPayAll")
-	public ResponseEntity<Object> generatePaySlip(@RequestParam("file") MultipartFile file,  @RequestParam(name="email",required = false) String email,  HttpServletRequest request)
+	public ResponseEntity<Object> generatePaySlip(@RequestParam("file") MultipartFile file,
+			@RequestParam(name = "email", required = false) String email, HttpServletRequest request)
 			throws IOException, ParseException {
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
-		return new ResponseEntity<>(payRollService.generatePaySlip(file , email), HttpStatus.OK);
+		return new ResponseEntity<>(payRollService.generatePaySlip(file, email), HttpStatus.OK);
 	}
 
 	@PreAuthorize("@auth.allow('VIEW_PAYSLIP')")
-	@PostMapping("/viewPay")
+	@GetMapping("/viewPay")
 	public ResponseEntity<Object> viewPay(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody SalaryModel salaryModel, @RequestParam("month") String month,
-			@RequestParam("year") String year) throws ParseException, IOException {
+			@RequestParam("empId") int empId, @RequestParam("month") String month, @RequestParam("year") String year)
+			throws ParseException, IOException {
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
-		response.setContentType("application/pdf");
-		byte[] payPdf = payRollService.viewPay(salaryModel, month, year);
-		String base64String = Base64.getEncoder().encodeToString(payPdf);
-		return new ResponseEntity<>(base64String, HttpStatus.OK);
+		try {
+			ViewPaySlipDto viewPaySlipDto = payRollService.viewPay(empId, month, year);
+			return new ResponseEntity<>(viewPaySlipDto, HttpStatus.OK);
+		} catch (Exception e) {
+			LOGGER.error("Error occurred: ", e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
+
+//	@PreAuthorize("@auth.allow('VIEW_PAYSLIP')")
+//	@PostMapping("/viewPay")
+//	public ResponseEntity<Object> viewPay(HttpServletRequest request, HttpServletResponse response,
+//			@RequestBody SalaryModel salaryModel, @RequestParam("month") String month,
+//			@RequestParam("year") String year) throws ParseException, IOException {
+//		LOGGER.info("API Call From IP: " + request.getRemoteHost());
+//		response.setContentType("application/pdf");
+//		byte[] payPdf = payRollService.viewPay(salaryModel, month, year);
+//		String base64String = Base64.getEncoder().encodeToString(payPdf);
+//		return new ResponseEntity<>(base64String, HttpStatus.OK);
+//	}
 
 	@PreAuthorize("@auth.allow('UPDATE_NET_AMOUNT_IN_EXCEL')")
 	@PostMapping("/calculateNetAmtPayable")
