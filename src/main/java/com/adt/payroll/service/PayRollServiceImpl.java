@@ -534,11 +534,12 @@ public class PayRollServiceImpl implements PayRollService {
 		double grossSalary = Double.parseDouble(salary);
 		double employerPf = (double) (Math.round(((grossSalary / 2) * 0.13)));
 		double employeeESICAmount = 0;
-		float employerESICAmount = 0;
+		double employerESICAmount = 0;
 
 		if (esic.equalsIgnoreCase("Yes") && pf.equalsIgnoreCase("Yes")) {
-			employeeESICAmount = Double.valueOf(Math.round(grossSalary * (0.0325)));
-			employerESICAmount = (float) (Math.round(grossSalary * (0.0075)));
+			
+			employerESICAmount = Double.valueOf(Math.round(grossSalary * (0.0325)));
+			employeeESICAmount = Double.valueOf (Math.round(grossSalary * (0.0075)));
 			grossSalary = Math.round(
 					grossSalary - employerPf - (employeeESICAmount + employerESICAmount) + (grossSalary * 0.01617));
 		} else if (esic.equalsIgnoreCase("No") && pf.equalsIgnoreCase("Yes")) {
@@ -562,10 +563,10 @@ public class PayRollServiceImpl implements PayRollService {
 			adhoc1 = 0;
 		}
 
-//		if (esic.equalsIgnoreCase("yes") && netAmount != 0) {
-//			employerESICAmount = (float) (Math.round(grossSalary * (0.0075)));
-//
-//		}
+		if (esic.equalsIgnoreCase("yes") && netAmount != 0) {
+			employeeESICAmount = (double) (Math.round(grossSalary * (0.0075)));
+
+		}
 
 		if (pf.equalsIgnoreCase("yes") && netAmount != 0) {
 			pfAmount = (float) (Math.round(basic * 0.120));
@@ -687,171 +688,7 @@ public class PayRollServiceImpl implements PayRollService {
 		}
 	}
 
-//	@Override
-//	public byte[] viewPay(SalaryModel salaryModel, String month, String year)
-//			throws ParseException, UnsupportedEncodingException {
-//		log.info("inside method");
-//		int empId = salaryModel.getEmpId();
-//		List<PayRecord> payRecordList = payRecordRepo.findByEmpId(empId);
-//
-//		for (PayRecord payRecord : payRecordList) {
-//			if (payRecord != null) {
-//				if (payRecord.getEmpId() == empId && payRecord.getMonth().equalsIgnoreCase(month)
-//						&& payRecord.getYear().equalsIgnoreCase(year))
-//					return payRecord.getPdf();
-//			}
-//		}
-//
-//		String submitDate = "", status = "", employee_id = "";
-//		String monthYear = month + " " + year;
-//		int yourWorkingDays = 0, leaves = 0, workDays = 0, saturday = Util.SaturdyaValue, adhoc = 0;
-//		LocalDate currentdate = LocalDate.now();
-//
-//		String sql = "select * from employee_schema.employee_expenses";
-//		List<Map<String, Object>> tableData = dataExtractor.extractDataFromTable(sql);
-//
-//		PayRecord payRecord = new PayRecord();
-//		payRecord.setEmpId(empId);
-//		payRecord.setMonth(month);
-//		payRecord.setEmpName(salaryModel.getEmpName());
-//		payRecord.setYear(year);
-//
-//		List<String> holidays = Arrays.asList(holiday);
-//		List<String> lists = new ArrayList<>();
-//
-//		SimpleDateFormat inputFormat = new SimpleDateFormat("MMMM");
-//		SimpleDateFormat outputFormat = new SimpleDateFormat("MM"); // 01-12
-//
-//		Calendar cal = Calendar.getInstance();
-//		cal.setTime(inputFormat.parse(month));
-//
-//		Optional<User> user = Optional.ofNullable(userRepo.findById(empId)
-//				.orElseThrow(() -> new EntityNotFoundException("employee not found :" + empId)));
-//		String name = salaryModel.getEmpName();
-//		List<TimeSheetModel> timeSheetModel = timeSheetRepo.search(empId, month.toUpperCase(), year);
-//
-//		yourWorkingDays = timeSheetModel.stream()
-//				.filter(x -> x.getWorkingHour() != null && x.getStatus().equalsIgnoreCase(Util.StatusPresent))
-//				.collect(Collectors.toList()).size();
-//		leaves = timeSheetModel.stream().filter(
-//				x -> x.getWorkingHour() == null && (x.getCheckIn() == null && x.getStatus().equalsIgnoreCase("Leave")))
-//				.collect(Collectors.toList()).size();
-//
-//		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-//		String monthDate = String.valueOf(outputFormat.format(cal.getTime()));
-//
-//		String firstDayMonth = "01/" + monthDate + "/" + year;
-//		String lastDayOfMonth = (LocalDate.parse(firstDayMonth, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-//				.with(TemporalAdjusters.lastDayOfMonth())).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-//
-//		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-//		Date startDate = formatter.parse(firstDayMonth);
-//		Date endDate = formatter.parse(lastDayOfMonth);
-//
-//		Calendar start = Calendar.getInstance();
-//		start.setTime(startDate);
-//		Calendar end = Calendar.getInstance();
-//		end.setTime(endDate);
-//
-//		LocalDate localDate = null;
-//		while (!start.after(end)) {
-//			localDate = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-//			if (start.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY)
-//				lists.add(localDate.toString());
-//
-//			start.add(Calendar.DATE, 1);
-//		}
-//
-//		lists.removeAll(holidays);
-//		workDays = lists.size();
-//
-//		for (Map<String, Object> expense : tableData) {
-//			submitDate = String.valueOf(expense.get("payment_date")).substring(3, 5);
-//			status = String.valueOf(expense.get("status"));
-//			employee_id = String.valueOf(expense.get("employee_id"));
-//			if (submitDate.equals(monthDate) && status.equals("Accepted")
-//					&& employee_id.equalsIgnoreCase(String.valueOf(empId))) {
-//				adhoc += Integer.parseInt(String.valueOf(expense.get("expense_amount")));
-//			}
-//		}
-//
-//		float grossSalary = salaryModel.getSalary();
-//		int totalWorkingDays = workDays - saturday;
-//		float amountPerDay = grossSalary / totalWorkingDays;
-//		float leavePerDay = leaves * amountPerDay;
-//		float netAmount = (yourWorkingDays * amountPerDay);
-//		netAmount += adhoc;
-//
-//		ImageModel img = new ImageModel();
-//
-//		ImageData datas = ImageDataFactory.create(imgRepo.search());
-//		log.info("image path set");
-//		Image alpha = new Image(datas);
-//		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//		PdfWriter pdfWriter = new PdfWriter(baos);
-//		PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-//		Document document = new Document(pdfDocument);
-//
-//		pdfDocument.setDefaultPageSize(PageSize.A4);
-//		float col = 250f;
-//		float columnWidth[] = { col, col };
-//		Table table = new Table(columnWidth);
-//		table.setBackgroundColor(new DeviceRgb(63, 169, 219)).setFontColor(Color.WHITE);
-//		table.addCell(new Cell().add("Pay Slip").setTextAlignment(TextAlignment.CENTER)
-//				.setVerticalAlignment(VerticalAlignment.MIDDLE).setMarginTop(30f).setMarginBottom(30f).setFontSize(30f)
-//				.setBorder(Border.NO_BORDER));
-//		table.addCell(new Cell().add(Util.ADDRESS).setTextAlignment(TextAlignment.RIGHT).setMarginTop(30f)
-//				.setMarginBottom(30f).setBorder(Border.NO_BORDER).setMarginRight(10f));
-//		float colWidth[] = { 125, 150, 125, 100 };
-//		Table employeeTable = new Table(colWidth);
-//		employeeTable.addCell(new Cell(0, 4).add(
-//				Util.EmployeeInformation + "                                                                          "
-//						+ "Date : " + dtf.format(currentdate))
-//				.setBorder(Border.NO_BORDER));
-//		employeeTable.addCell(new Cell().add(Util.EmployeeNumber).setBorder(Border.NO_BORDER));
-//		employeeTable.addCell(new Cell().add(String.valueOf(empId)).setBorder(Border.NO_BORDER));
-//		employeeTable.addCell(new Cell().add(Util.JoiningDate).setBorder(Border.NO_BORDER));
-//		employeeTable.addCell(new Cell().add(salaryModel.getJoinDate()).setBorder(Border.NO_BORDER));
-//		employeeTable.addCell(new Cell().add(Util.Name).setBorder(Border.NO_BORDER));
-//		employeeTable.addCell(new Cell().add(salaryModel.getEmpName()).setBorder(Border.NO_BORDER));
-//		employeeTable.addCell(new Cell().add(Util.BankName).setBorder(Border.NO_BORDER));
-//		employeeTable.addCell(new Cell().add(salaryModel.getBankName()).setBorder(Border.NO_BORDER));
-//		employeeTable.addCell(new Cell().add(Util.JobTitle).setBorder(Border.NO_BORDER));
-//		employeeTable.addCell(new Cell().add(salaryModel.getRole()).setBorder(Border.NO_BORDER));
-//		employeeTable.addCell(new Cell().add(Util.AccountNumber).setBorder(Border.NO_BORDER));
-//		employeeTable.addCell(new Cell().add(salaryModel.getAccountNumber()).setBorder(Border.NO_BORDER));
-//
-//		Table itemInfo = new Table(columnWidth);
-//		itemInfo.addCell(new Cell().add(Util.PayPeriods));
-//		itemInfo.addCell(new Cell().add(firstDayMonth + " - " + lastDayOfMonth));
-//		itemInfo.addCell(new Cell().add(Util.YourWorkingDays));
-//		itemInfo.addCell(new Cell().add(String.valueOf(yourWorkingDays)));
-//		itemInfo.addCell(new Cell().add(Util.TotalWorkingDays));
-//		itemInfo.addCell(new Cell().add(String.valueOf(totalWorkingDays)));
-//		itemInfo.addCell(new Cell().add("Adhoc Amount"));
-//		itemInfo.addCell(new Cell().add(String.valueOf(adhoc)));
-//		itemInfo.addCell(new Cell().add(Util.NumberOfLeavesTaken));
-//		itemInfo.addCell(new Cell().add(String.valueOf(leaves)));
-//		itemInfo.addCell(new Cell().add(Util.GrossSalary));
-//		itemInfo.addCell(new Cell().add(String.valueOf(grossSalary)));
-//		itemInfo.addCell(new Cell().add(Util.NetAmountPayable));
-//		itemInfo.addCell(new Cell().add(String.valueOf(netAmount)));
-//		document.add(alpha);
-//
-//		document.add(table);
-//		document.add(new Paragraph("\n"));
-//		document.add(employeeTable);
-//		document.add(itemInfo);
-//		document.add(
-//				new Paragraph("\n(Note - This is a computer generated statement and does not require a signature.)")
-//						.setTextAlignment(TextAlignment.CENTER));
-//		document.close();
-//		log.warn("Successfully");
-//		payRecord.setPdf(baos.toByteArray());
-//		payRecordRepo.save(payRecord);
-//
-//		return baos.toByteArray();
-//	}
+
 
 	@Override
 	public String updateNetAmountInExcel(MultipartFile file) throws IOException {
@@ -936,7 +773,7 @@ public class PayRollServiceImpl implements PayRollService {
 
 	public boolean checkEmpDetails(String empId, String gmail, String accountNumber, List<User> employees, String fname,
 			String lName) {
-		log.info("validating the columns value gmail{},  accountNumber{}, fname{}, lName{}", gmail, accountNumber,
+		log.info("validating the columns value Gmail {},  AccountNumber{}, FirstName {}, LastName {}", gmail, accountNumber,
 				fname, lName);
 		int userId = Integer.parseInt(empId);
 		boolean flag = true;
