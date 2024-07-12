@@ -119,6 +119,8 @@ public class PayRollServiceImpl implements PayRollService {
 	public String invalidValue = "";
 
 	public Integer allFieldeValue;
+	
+	public String adtID="";
 
 	@Autowired
 	private CommonEmailService mailService;
@@ -469,7 +471,7 @@ public class PayRollServiceImpl implements PayRollService {
 
 					}
 					log.info("Generating Pdf");
-					baos = createPdf(empId, name, workingDays, present, leave, halfDay, salary, paidLeave, date,
+					baos = createPdf(adtID, name, workingDays, present, leave, halfDay, salary, paidLeave, date,
 							bankName, accountNumber, designation, joiningDate, adhoc1,
 							paySlipDetails.get(Util.PAY_PERIOD), esic, pf, adjustment, medicalInsurance, tds,
 							monthlySalaryDetails);
@@ -775,6 +777,7 @@ public class PayRollServiceImpl implements PayRollService {
 			String lName) {
 		log.info("validating the columns value Gmail {},  AccountNumber{}, FirstName {}, LastName {}", gmail, accountNumber,
 				fname, lName);
+		adtID="";
 		int userId = Integer.parseInt(empId);
 		boolean flag = true;
 		Optional<User> employee = employees.stream().filter(user -> user.getId() == userId).findFirst();
@@ -795,6 +798,7 @@ public class PayRollServiceImpl implements PayRollService {
 				}
 				if (aNo.equalsIgnoreCase(accountNumber)) {
 					flag = false;
+					adtID=employee.get().getAdtId();
 					return flag;
 				}
 				invalidValue = "please enter currect Account Number";
