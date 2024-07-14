@@ -1,65 +1,35 @@
-# Step 1: Build custom JRE image
-FROM amazoncorretto:17.0.3-alpine as corretto-jdk
-
-# Install binutils needed for strip-debug
-RUN apk add --no-cache binutils
-
-# Set environment variables
-ENV JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto
-
-# Build custom JRE with required modules
-RUN /usr/lib/jvm/java-17-amazon-corretto/bin/jlink \
-    --verbose \
-    --add-modules java.base,java.management,java.naming,java.net.http,java.security.jgss,java.security.sasl,java.sql,jdk.httpserver,jdk.unsupported \
-    --strip-debug \
-    --no-man-pages \
-    --no-header-files \
-    --compress=2 \
-    --output /jre
-
-# Step 2: Install OpenJDK and prepare tools for analysis
-RUN apk add --no-cache openjdk17-jdk
-
-# Step 3: Analyze application JAR and determine required modules
-FROM corretto-jdk as analyzer
-
-# Copy the application JAR file
-COPY ./target/payroll-0.0.1-SNAPSHOT.jar /app/app.jar
-
-# Extract module dependencies from the JAR using jdeps
-RUN /usr/lib/jvm/java-17-amazon-corretto/bin/jdeps --list-deps /app/app.jar | grep -v "java.base" | sort | uniq > /tmp/modules.txt
-
-# Step 4: Build application image
-FROM alpine:latest
-
-# Copy custom JRE from the build stage
-COPY --from=corretto-jdk /jre /jre
-
-# Copy module dependencies file from analyzer stage
-COPY --from=analyzer /tmp/modules.txt /tmp/modules.txt
-
-# Set environment variables
-ENV JAVA_HOME=/jre
-ENV PATH="${JAVA_HOME}/bin:${PATH}"
-
-# Add a non-root user for running the application
-RUN adduser -D -u 1000 appuser
-
-# Create application directory and set permissions
-RUN mkdir /app && \
-    chown appuser /app
-
-# Switch to the non-root user
-USER appuser
-
-# Copy the application JAR file
-COPY --chown=appuser:appuser ./target/payroll-0.0.1-SNAPSHOT.jar /app/app.jar
+# Use a smaller base image
+FROM alpine:latest AS builder
 
 # Set the working directory
-WORKDIR /app
+WORKDIR /usr/app
 
-# Expose the port that the application listens on
-#EXPOSE 8080
+# Download and extract OpenJDK 17
+RUN wget -q -O openjdk.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.10%2B7/OpenJDK17U-jre_x64_alpine-linux_hotspot_17.0.10_7.tar.gz \
+    && tar -xzf openjdk.tar.gz \
+    && mv jdk-17.0.10+7-jre* /usr/lib/java-17-openjdk \
+    && rm openjdk.tar.gz
 
-# Command to run the application
-ENTRYPOINT [ "/jre/bin/java", "-jar", "app.jar" ]
+# Set JAVA_HOME environment variable
+ENV JAVA_HOME /usr/lib/java-17-openjdk
+
+# Add Java to PATH
+ENV PATH $JAVA_HOME/bin:$PATH
+
+# Copy the JAR file
+ARG JAR_FILE=./target/payroll-0.0.1-SNAPSHOT.jar
+COPY ${JAR_FILE} /usr/app/payroll.jar
+
+# Final image
+FROM alpine:latest
+ENV TZ="Asia/Kolkata"
+
+# Set the working directory
+WORKDIR /usr/app
+
+# Copy Java and JAR file from the builder image
+COPY --from=builder /usr/lib/java-17-openjdk /usr/lib/java-17-openjdk
+COPY --from=builder /usr/app/payroll.jar /usr/app/payroll.jar
+
+# Set the entry point
+ENTRYPOINT ["/usr/lib/java-17-openjdk/bin/java", "-jar", "/usr/app/payroll.jar"]
