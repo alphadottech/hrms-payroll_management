@@ -13,15 +13,19 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.adt.payroll.dto.SalaryDTO;
 import com.adt.payroll.dto.SalaryDetailsDTO;
 import com.adt.payroll.dto.ViewPaySlipDto;
+import com.adt.payroll.model.MonthlySalaryDetails;
 import com.adt.payroll.model.PaySlip;
 import com.adt.payroll.repository.TimeSheetRepo;
 import com.adt.payroll.service.PayRollService;
+import com.itextpdf.text.DocumentException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -107,5 +111,22 @@ public class PayRollController {
 						+ request.getRemoteHost());
 		return ResponseEntity.ok(payRollService.getEmployeePayrollSalaryDetailsByEmpId(empId));
 	}
+	
+	@PreAuthorize("@auth.allow('VERIFY_VALUES')")
+	@PostMapping("/validateData/{empId}")
+	public ResponseEntity<Object> validatedAmount(@PathVariable("empId") Integer empId,  @RequestBody SalaryDTO dto) throws IOException, ParseException {
 
+		LOGGER.info("PayrollService: SalaryDetailsController:Getting all Monthly Salary Details Info level log msg");
+		ResponseEntity<Object> monthSalaryResponse =payRollService.validateAmount(empId, dto); 	
+		 return monthSalaryResponse;
+	}
+	
+	@PreAuthorize("@auth.allow('REGENERATE_PAYSLIP')")
+	@PostMapping("/regeneratePayslip/{empId}")
+	public ResponseEntity<String> regenerateEmployeePayslip(@PathVariable("empId") Integer empId,  @RequestBody MonthlySalaryDetails dto) throws IOException, DocumentException {
+
+		LOGGER.info("PayrollService: SalaryDetailsController:Getting all Monthly Salary Details Info level log msg");
+		String monthSalaryResponse =payRollService.regenerateEmployeePayslip(empId, dto); 	
+		 return new ResponseEntity<>(monthSalaryResponse, HttpStatus.OK);
+	}
 }
