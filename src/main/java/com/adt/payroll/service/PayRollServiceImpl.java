@@ -995,17 +995,14 @@ public class PayRollServiceImpl implements PayRollService {
 									double grossSalaryDifference = Math.abs(calculatedGross - empGrossSalaryAmount);
 
 									if (grossSalaryDifference > 100) {
-										log.info(
-												"GrossSalaryAmount {} different btw calculatedGross {} &  empGrossSalaryAmount {} respectively"
-														+ "/-, Please check & correct Amount for the employee ",
-												grossSalaryDifference, calculatedGross, empGrossSalaryAmount,
-												salaryDetails.getEmpId());
-										mailService.sendEmail(name,
-												"GrossSalaryAmount different " + grossSalaryDifference
-														+ " of calculatedGross and fetched empGrossSalaryAmount "
-														+ calculatedGross + " , " + empGrossSalaryAmount
-														+ "Please check & correct Amount for the employee "
-														+ salaryDetails.getEmpId());
+										log.info("Gross salary calculation is not correct.");
+										mailService.sendEmail(name, "The gross salary difference amount is: "
+												+ grossSalaryDifference
+												+ " ,while the gross salary amount retrived from database is: "
+												+ empGrossSalaryAmount
+												+ " and the calculated & validated gross salary amount is: "
+												+ calculatedGross
+												+ " ,please check entered salary details & enter the correct gross salary amount for the mentioned employee");
 										continue;
 									}
 
@@ -1060,7 +1057,7 @@ public class PayRollServiceImpl implements PayRollService {
 									log.info("baos:---createPDF");
 
 								} else {
-									mailService.sendEmail(name);
+									mailService.sendEmail(name, "Check salary details for mentioned Employee.");
 									continue;
 								}
 								if (emailInput.isEmpty()) {
@@ -1076,13 +1073,14 @@ public class PayRollServiceImpl implements PayRollService {
 
 						} catch (Exception e) {
 							e.printStackTrace();
-							mailService.sendEmail(name);
+							mailService.sendEmail(name, "Error while generating payslip.");
 							log.info("e.printStackTrace()---" + e.getMessage());
 							continue;
 						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
+					mailService.sendEmail(name, "Kindly Check the salary details for mentioned Employee.");
 					log.info("e.printStackTrace()----" + e.getMessage());
 					break;
 				}
@@ -1233,18 +1231,32 @@ public class PayRollServiceImpl implements PayRollService {
 		String msg = "";
 		if (isESIC) {
 			if (Math.abs(employerESICAmount - salaryDetails.getEmployerESICAmount()) > 100) {
-				msg = "Employer Esic amount different exceeds the difference limit of eSICAmount & fetched employerESICAmount "
-						+ Math.abs(employerESICAmount - salaryDetails.getEmployerESICAmount());
+
+				msg = "employer ESIC amount difference is: "
+						+ Math.round(employerESICAmount - salaryDetails.getEmployerESICAmount())
+						+ " ,while the employer ESIC amount retrived from database is: "
+						+ salaryDetails.getEmployerESICAmount()
+						+ " & the calculated & validated employer ESIC amount is: " + employerESICAmount
+						+ " ,please check entered salary details & enter the correct employer ESIC amount for the mentioned employee";
 			}
 
 			if (Math.abs(employeeESICAmount - salaryDetails.getEmployeeESICAmount()) > 100) {
-				msg = "Employee Esic amount different exceeds the difference limit."
-						+ Math.abs(employeeESICAmount - salaryDetails.getEmployeeESICAmount());
+
+				msg = "employee ESIC amount difference is: "
+						+ Math.round(employeeESICAmount - salaryDetails.getEmployeeESICAmount())
+						+ " ,while the employee ESIC amount retrived from database is: "
+						+ salaryDetails.getEmployeeESICAmount()
+						+ " & the calculated & validated employee ESIC amount is: " + employeeESICAmount
+						+ " ,please check entered salary details & enter the correct employee ESIC amount for the mentioned employee";
 			}
 		}
 		if (Math.abs(employerPFAmount - salaryDetails.getEmployerPFAmount()) > 100) {
-			msg = "Employer pf amount different exceeds the difference limit."
-					+ Math.abs(employerPFAmount - salaryDetails.getEmployerPFAmount());
+
+			msg = "employer PF amount difference is: "
+					+ Math.round(employerPFAmount - salaryDetails.getEmployerPFAmount())
+					+ ",while the employer PF amount retrived from database is: " + salaryDetails.getEmployerPFAmount()
+					+ " & the calculated & validated employer PF amount is: " + employerPFAmount
+					+ " ,please check entered salary details & enter the correct employer PF amount for the mentioned employee";
 		}
 
 		if (msg.isEmpty()) {
@@ -1274,8 +1286,10 @@ public class PayRollServiceImpl implements PayRollService {
 		double basic = calculatedGross / 2;
 		double empCalcutedPFAmount = basic * 0.12;
 		if (Math.abs(empCalcutedPFAmount - employeePFAmount) > 100) {
-			return "Employee pf amount different exceeds the difference limit."
-					+ Math.abs(empCalcutedPFAmount - employeePFAmount);
+			return "employee PF amount difference is: " + Math.round(empCalcutedPFAmount - employeePFAmount)
+			+ " ,while the employee PF amount retrived from database is: " + employeePFAmount
+			+ " and the calculated & validated employee PF amount is: " + empCalcutedPFAmount
+			+ " ,please check entered salary details & enter the correct employee PF amount for the mentioned employee";
 		}
 		return "";
 	}
