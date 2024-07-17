@@ -99,7 +99,8 @@ MonthlySalaryDetails {
 	private User employee;
 	private int empId;
 
-
+	@Column(name = "is_active")
+	private boolean isActive;
 
 	@Column(name = "updated_When")
 	private Timestamp updatedWhen;
