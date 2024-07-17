@@ -114,19 +114,19 @@ public class PayRollController {
 	
 	@PreAuthorize("@auth.allow('VERIFY_VALUES')")
 	@PostMapping("/validateData/{empId}")
-	public ResponseEntity<Object> validatedAmount(@PathVariable("empId") Integer empId,  @RequestBody SalaryDTO dto) throws IOException, ParseException {
+	public ResponseEntity<Object> validatedAmount(@RequestBody SalaryDTO dto) throws IOException, ParseException {
 
 		LOGGER.info("PayrollService: SalaryDetailsController:Getting all Monthly Salary Details Info level log msg");
-		ResponseEntity<Object> monthSalaryResponse =payRollService.validateAmount(empId, dto); 	
+		ResponseEntity<Object> monthSalaryResponse =payRollService.validateAmount(dto.getEmpId(), dto);
 		 return monthSalaryResponse;
 	}
 	
 	@PreAuthorize("@auth.allow('REGENERATE_PAYSLIP')")
 	@PostMapping("/regeneratePayslip/{empId}")
-	public ResponseEntity<String> regenerateEmployeePayslip(@PathVariable("empId") Integer empId,  @RequestBody MonthlySalaryDetails dto) throws IOException, DocumentException {
+	public ResponseEntity<String> regenerateEmployeePayslip(@RequestBody MonthlySalaryDetails dto) throws IOException, DocumentException {
 
 		LOGGER.info("PayrollService: SalaryDetailsController:Getting all Monthly Salary Details Info level log msg");
-		String monthSalaryResponse =payRollService.regenerateEmployeePayslip(empId, dto); 	
+		String monthSalaryResponse =payRollService.regenerateEmployeePayslip(dto.getEmpId(), dto);
 		 return new ResponseEntity<>(monthSalaryResponse, HttpStatus.OK);
 	}
 }
