@@ -113,7 +113,7 @@ public class PayRollController {
 	}
 	
 	@PreAuthorize("@auth.allow('VERIFY_VALUES')")
-	@PostMapping("/validateData/{empId}")
+	@PostMapping("/validateData")
 	public ResponseEntity<Object> validatedAmount(@RequestBody SalaryDTO dto) throws IOException, ParseException {
 
 		LOGGER.info("PayrollService: SalaryDetailsController:Getting all Monthly Salary Details Info level log msg");
@@ -122,7 +122,7 @@ public class PayRollController {
 	}
 	
 	@PreAuthorize("@auth.allow('REGENERATE_PAYSLIP')")
-	@PostMapping("/regeneratePayslip/{empId}")
+	@PostMapping("/regeneratePayslip")
 	public ResponseEntity<String> regenerateEmployeePayslip(@RequestBody MonthlySalaryDetails dto) throws IOException, DocumentException {
 
 		LOGGER.info("PayrollService: SalaryDetailsController:Getting all Monthly Salary Details Info level log msg");
