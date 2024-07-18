@@ -22,10 +22,10 @@ public interface MonthlySalaryDetailsRepo extends JpaRepository<MonthlySalaryDet
 
 	Optional<List<MonthlySalaryDetails>> findByCreditedDate(String date);
 
-	@Query(value = "SELECT * FROM payroll_schema.monthly_salary_details WHERE emp_id = :empId", nativeQuery = true)
+	@Query(value = "SELECT * FROM payroll_schema.monthly_salary_details WHERE emp_id = :empId AND is_active = true", nativeQuery = true)
 	List<MonthlySalaryDetails> findSalaryDetailsByEmpId(@Param("empId") Integer empId);
 
-	@Query(value = "SELECT MAX(msd.salary_credited_date) FROM payroll_schema.monthly_salary_details msd", nativeQuery = true)
+	@Query(value = "SELECT MAX(msd.salary_credited_date) FROM payroll_schema.monthly_salary_details msd AND is_active = true", nativeQuery = true)
 	String findLatestSalaryCreditedDate();
 
 	@Query(value = "SELECT MAX(msd.updated_When) FROM payroll_schema.monthly_salary_details msd", nativeQuery = true)
@@ -34,11 +34,17 @@ public interface MonthlySalaryDetailsRepo extends JpaRepository<MonthlySalaryDet
 	@Query(value = "select * from payroll_schema.monthly_salary_details where emp_id=?1 and salary_month=?2", nativeQuery = true)
 	List<MonthlySalaryDetails> findByEmpIdAndMonthAndYear(int empId, String month);
 	
-	@Query(value = "SELECT * FROM  payroll_schema.monthly_salary_details" +
-	           " WHERE  emp_id = :empId AND salary_month = :month " +
-	           "AND EXTRACT(YEAR FROM CAST(salary_credited_date AS date)) = :year AND is_active=true",
-	           nativeQuery = true)
-	MonthlySalaryDetails findSalaryByEmpidMonth(@Param("empId") Integer empId, @Param("month") String month,@Param("year") int year);
+//	@Query(value = "SELECT * FROM  payroll_schema.monthly_salary_details" +
+//	           " WHERE  emp_id = :empId AND salary_month = :month " +
+//	           "AND EXTRACT(YEAR FROM CAST(salary_credited_date AS date)) = :year AND is_active=true",
+//	           nativeQuery = true)
+//	MonthlySalaryDetails findSalaryByEmpidMonth(@Param("empId") Integer empId, @Param("month") String month,@Param("year") int year);
+
+	@Query(value = "SELECT * FROM payroll_schema.monthly_salary_details " +
+			"WHERE emp_id = :empId AND salary_month = :month " +
+			"AND EXTRACT(YEAR FROM TO_DATE(salary_credited_date, 'DD-MM-YYYY')) = :year AND is_active = true",
+			nativeQuery = true)
+	MonthlySalaryDetails findSalaryByEmpidMonth(@Param("empId") Integer empId, @Param("month") String month, @Param("year") int year);
 
 
 }

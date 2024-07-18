@@ -153,6 +153,8 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
 			monthSalaryDTO.setAccountNo(empPayrollDetails.get().getAccountNumber());
 			monthSalaryDTO.setEmployeeName(empPayrollDetails.get().getUser().getFirstName() + " "
 					+ empPayrollDetails.get().getUser().getLastName());
+			monthSalaryDTO.setMonth(salaryDetail.getMonth());
+			monthSalaryDTO.setYear(salaryDetail.getCreditedDate().substring(salaryDetail.getCreditedDate().length() - 4));
 			monthSalaryResponse.add(monthSalaryDTO);
 		}
 		return monthSalaryResponse;
