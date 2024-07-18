@@ -60,4 +60,7 @@ public class ExpenseItems {
     @JoinColumn(name = "employee_id", referencedColumnName = "EMPLOYEE_ID" ,nullable = false, insertable = false, updatable = false)
     private User employee;
     private Integer employee_id;
+    
+    @Column(name="status", nullable = false)
+    private String status;
 }

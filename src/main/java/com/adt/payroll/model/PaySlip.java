@@ -22,7 +22,7 @@ public class PaySlip {
 	private Float amountDeductedForLeaves;
 	private Float grossSalary;
 	private Float netAmountPayable;
-	private Integer adhoc;
+	private double adhoc;
 	private double grossDeduction;
 	private Integer paidLeave;
 	private Integer unpaidLeave;
@@ -30,6 +30,7 @@ public class PaySlip {
 	private double leaveDeductionAmount;
 	private double netSalaryAmount;
 	private double salary;
+	private double adjustment;
 
 	public PaySlip(Integer empId, String name, String jobTitle, String presentDate, String bankName,
 			String accountNumber, String payPeriods, Integer youWorkingDays, Integer totalWorkingDays,

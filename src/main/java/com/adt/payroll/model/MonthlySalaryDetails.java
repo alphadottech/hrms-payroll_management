@@ -104,6 +104,7 @@ MonthlySalaryDetails {
 
 	@Column(name = "updated_When")
 	private Timestamp updatedWhen;
-
-
+	
+	@Column(name = "comments")
+	private String comment;
 }

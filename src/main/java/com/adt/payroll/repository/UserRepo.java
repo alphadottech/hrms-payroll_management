@@ -18,5 +18,7 @@ public interface UserRepo extends JpaRepository<User, Integer> {
 			+ "WHERE LOWER(e.first_name) LIKE CONCAT(LOWER(:firstName), '%') "
 			+ "AND (e.last_name IS NOT NULL AND LOWER(e.last_name) LIKE CONCAT(LOWER(:lastName), '%'))", nativeQuery = true)
 	List<User> findByFirstNameAndLastName(@Param("firstName") String firstName, @Param("lastName") String lastName);
+	
+    List<User> findAllByIsActive(boolean isActive);
 
 }
