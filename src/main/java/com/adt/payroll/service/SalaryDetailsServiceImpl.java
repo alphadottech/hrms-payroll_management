@@ -250,37 +250,39 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 				response.setHouseRentAllowance(salary - actualBasic);
 			}
 			double employerPFAmount = actualBasic * 0.13;
-
-			double employerESICAmount = grossSalaryAmount * 0.0075;
+			
+			double employeeESICAmount = grossSalaryAmount * 0.0075;
 			// employer pf and esic portion calculation 12% and 3.25% respectively
-			double employeeESICAmount = grossSalaryAmount * 0.0325;
+			double employerESICAmount = grossSalaryAmount * 0.0325;
 			response.setEmployerPFAmount(employerPFAmount);
 			if (isEsic) {
-				response.setEmployeeESICAmount(employeeESICAmount);
+				
 				response.setEmployerESICAmount(employerESICAmount);
 //				grossSalaryAmount = Math.round(grossSalaryAmount - employerPFAmount
 //						- (employeeESICAmount + employerESICAmount) + (grossSalaryAmount * 0.01617));
 				grossSalaryAmount = Math.round(
 						grossSalaryAmount - employerPFAmount - employerESICAmount + (grossSalaryAmount * 0.01617));
+				employeeESICAmount=Math.round(grossSalaryAmount*0.0075);
+				response.setEmployeeESICAmount(employeeESICAmount);
 
 			} else {
 
 				grossSalaryAmount = Math.round(grossSalaryAmount - employerPFAmount + (grossSalaryAmount * 0.01617));
 			}
 			response.setGrossSalary(grossSalaryAmount);
-
+			
 			if (dto.getBasic() == 15000) {
 				basic = dto.getBasic();
 			} else {
 				basic = grossSalaryAmount / 2;
 			}
 
-			double empCalcutedPFAmount = basic * 0.12;
+			double empCalcutedPFAmount =Math.round( basic * 0.12);
 			response.setEmployeePFAmount(empCalcutedPFAmount);
 			//gross-> basic and hra saved
 			response.setBasic(basic);
 			response.setHouseRentAllowance(grossSalaryAmount - basic);
-
+			
 			response.setOnlyBasic(false);
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
