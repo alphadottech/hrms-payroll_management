@@ -1,6 +1,8 @@
 package com.adt.payroll.repository;
 
+import java.lang.StackWalker.Option;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +14,6 @@ public interface ExpenseManagementRepo extends JpaRepository<ExpenseItems, Integ
 	
 	@Query(value = "SELECT * FROM expense_schema.expense_management e WHERE e.employee_id = :empId AND EXTRACT(MONTH FROM payment_date) = :month " 
 	+"AND EXTRACT(YEAR FROM payment_date) = :year and status='Approved' ", nativeQuery = true)
-	ExpenseItems findExpenseDetailsByEmpId(@Param("empId") Integer empId, @Param("month") Integer month, @Param("year") Integer year);
+	Optional<ExpenseItems> findExpenseDetailsByEmpId(@Param("empId") Integer empId, @Param("month") Integer month, @Param("year") Integer year);
 
 }

@@ -943,37 +943,42 @@ public class PayRollServiceImpl implements PayRollService {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		// int officeTotalWorkingDay = util.getWorkingDays();
 		Map<String, String> paySlipDetails = util.getWorkingDaysAndMonth();
-		List<SalaryDetails> salaryDetailsList = salaryDetailsRepo.findAll();
+	//	List<SalaryDetails> salaryDetailsList = salaryDetailsRepo.findAll();
+		List<User> employeeList= userRepo.findAllByIsActive(true);
 		String name = null;
 		PaySlip paySlip = null;
+		
+		double adjustment=0;
 		Map<ByteArrayOutputStream, String> payslip = new HashMap<>();
-		if ((!salaryDetailsList.isEmpty()) || (salaryDetailsList.size() > 0)) {
+		if ((!employeeList.isEmpty()) || (employeeList.size() > 0)) {
 
-			for (SalaryDetails salaryDetails : salaryDetailsList) {
+			for (User employee : employeeList) {
 				try {
-					if (salaryDetails.getEmpId() != 0) {
+					if (employee.getId() != 0) {
 						try {
-							if (userRepo.existsById(salaryDetails.getEmpId())) {
-								paySlip = new PaySlip();
-								Optional<User> userOptional = userRepo.findByEmployeeId(salaryDetails.getEmpId());
-								Optional<EmpPayrollDetails> empPayrollDetailsOptional = empPayrollDetailsRepo
-										.findByEmployeeId(salaryDetails.getEmpId());
-								if (!empPayrollDetailsOptional.isPresent()) {
-									log.info(
-											"Employee payroll details are not present. Please enter the employee record "
-													+ salaryDetails.getEmpId());
-									continue;
-								}
-								String fName = userOptional.get().getFirstName();
-								String lName = userOptional.get().getLastName();
-								name = fName + " " + lName;
-								String gmail = userOptional.get().getEmail();
+							String fName = employee.getFirstName();
+							String lName = employee.getLastName();
+							name = fName + " " + lName;
+							String adtId= employee.getAdtId()!=null?employee.getAdtId():"";
+							Optional<EmpPayrollDetails> empPayrollDetailsOptional = empPayrollDetailsRepo
+									.findByEmployeeId(employee.getId());
+							if (!empPayrollDetailsOptional.isPresent()) {
+								log.info(
+										"Employee payroll details are not present. Please enter the employee record "
+												+ employee.getId());
+								mailService.sendEmail(name, "Employee payroll details are not present. kindly enter the data.");
+								continue;
+							}
+							Optional<SalaryDetails> salaryDetails = salaryDetailsRepo.findByEmployeeId(employee.getId());
+							if (salaryDetails.isPresent()) {
+								paySlip = new PaySlip();	
+								String gmail = employee.getEmail();
 
 								// null checks
-								if (isNotNull(salaryDetails.getEmpId(), name, userOptional.get().getEmail(),
-										salaryDetails.getBasic(), salaryDetails.getGrossSalary(),
-										salaryDetails.getHouseRentAllowance(), salaryDetails.getEmployerPFAmount(),
-										salaryDetails.getEmployeePFAmount(),
+								if (isNotNull(salaryDetails.get().getEmpId(), name, employee.getEmail(),
+										salaryDetails.get().getBasic(), salaryDetails.get().getGrossSalary(),
+										salaryDetails.get().getHouseRentAllowance(), salaryDetails.get().getEmployerPFAmount(),
+										salaryDetails.get().getEmployeePFAmount(),
 										empPayrollDetailsOptional.get().getAccountNumber(),
 										empPayrollDetailsOptional.get().getBankName(),
 										empPayrollDetailsOptional.get().getDesignation(),
@@ -987,12 +992,12 @@ public class PayRollServiceImpl implements PayRollService {
 									}
 
 									double calculatedGross = grossSalaryCalculation(empPayrollDetailsOptional.get(),
-											salaryDetails.getBasic(), salaryDetails, isESIC, name);
+											salaryDetails.get().getBasic(), salaryDetails.get(), isESIC, name);
 									if (calculatedGross == -1) {
 										continue;
 									}
-									double empGrossSalaryAmount = salaryDetails.getGrossSalary();
-									double grossSalaryDifference = Math.abs(calculatedGross - empGrossSalaryAmount);
+									double empGrossSalaryAmount = salaryDetails.get().getGrossSalary();
+									double grossSalaryDifference = Math.round(calculatedGross - empGrossSalaryAmount);
 
 									if (grossSalaryDifference > 100) {
 										log.info("Gross salary calculation is not correct.");
@@ -1005,35 +1010,46 @@ public class PayRollServiceImpl implements PayRollService {
 												+ " ,please check entered salary details & enter the correct gross salary amount for the mentioned employee");
 										continue;
 									}
-
+								
 									double totalLeaveDeduction = calculateAndUpdateEmployeeTotalLeaves(
-											salaryDetails.getEmpId(), empGrossSalaryAmount,
+											salaryDetails.get().getEmpId(), empGrossSalaryAmount,
 											paySlipDetails.get(Util.MONTH), paySlipDetails.get(Util.YEAR),
-											Integer.parseInt(paySlipDetails.get(Util.WORKING_DAY)), paySlip);
+											Integer.parseInt(paySlipDetails.get(Util.WORKING_DAY)), paySlip, name);
 
 									if (totalLeaveDeduction == -1) {
 										log.info("Employees leave balance record is not exist. please enter the data.",
-												salaryDetails.getEmpId());
+												salaryDetails.get().getEmpId());
 										continue;
 									}
-
+									Double grossEarning = empGrossSalaryAmount;
+									Double grossDeductionCal = salaryDetails.get().getEmployeeESICAmount()
+											+ salaryDetails.get().getEmployeePFAmount() + paySlip.getLeaveDeductionAmount()
+											+ salaryDetails.get().getMedicalInsurance();
+									double grossDeduction=grossDeductionCal;
+//									double grossDeduction = Math.round(grossDeductionCal) <= Math.round(grossEarning)
+//											? Math.round(grossDeductionCal)
+//											: Math.round(grossEarning);
+									
+//									double empNetSalaryAmount = Math
+//											.round(empGrossSalaryAmount - (salaryDetails.get().getEmployeeESICAmount()
+//													+ salaryDetails.get().getEmployeePFAmount()
+//													+ salaryDetails.get().getMedicalInsurance()));
+									
 									double empNetSalaryAmount = Math
-											.round(empGrossSalaryAmount - (salaryDetails.getEmployeeESICAmount()
-													+ salaryDetails.getEmployeePFAmount()
-													+ salaryDetails.getMedicalInsurance()));
-									// empNetSalaryAmount = Math.round(empNetSalaryAmount + adhoc);
-									empNetSalaryAmount = Math.round(empNetSalaryAmount - totalLeaveDeduction);
-
+											.round(grossEarning - grossDeductionCal);
 									if (empNetSalaryAmount < 0) {
 										empNetSalaryAmount = 0;
 									}
-									Double grossEarning = salaryDetails.getGrossSalary();
-									Double grossDeductionCal = salaryDetails.getEmployeeESICAmount()
-											+ salaryDetails.getEmployeePFAmount() + paySlip.getLeaveDeductionAmount()
-											+ salaryDetails.getMedicalInsurance();
-									double grossDeduction = Math.round(grossDeductionCal) <= Math.round(grossEarning)
-											? Math.round(grossDeductionCal)
-											: Math.round(grossEarning);
+							
+									Month month = Month.valueOf(paySlipDetails.get(util.MONTH).toUpperCase());
+									Optional<ExpenseItems> items = expenseManagementRepo.findExpenseDetailsByEmpId(employee.getId(), month.getValue(), Integer.valueOf(paySlipDetails.get(util.YEAR)));
+									double adhoc=0;
+									if (items.isPresent()) {
+										if (items.get().getStatus().equalsIgnoreCase("Approved")) {
+											adhoc = Double.valueOf(items.get().getAmount());
+											empNetSalaryAmount = Math.round(empNetSalaryAmount + adhoc);
+										}
+									}
 
 									paySlip.setGrossSalary(grossEarning.floatValue());
 									paySlip.setAccountNumber(empPayrollDetailsOptional.get().getAccountNumber());
@@ -1044,11 +1060,13 @@ public class PayRollServiceImpl implements PayRollService {
 									paySlip.setPayPeriods(paySlipDetails.get(Util.PAY_PERIOD));
 									paySlip.setNetSalaryAmount(empNetSalaryAmount);
 									paySlip.setSalary(empPayrollDetailsOptional.get().getSalary());
+									paySlip.setAdhoc(adhoc);
 									paySlip.setGrossDeduction(grossDeduction);
+									//paySlip.setAdjustment(adjustment);
 
-									baos = DetailedSalarySlip.builder().build().generateDetailedSalarySlipPDF(
-											salaryDetails, paySlip, empPayrollDetailsOptional.get().getJoinDate(),
-											paySlipDetails.get(Util.MONTH), 0);
+									baos = DetailedSalarySlip.builder().build().generateDetailedSalarySlipPDF(adtId,
+											salaryDetails.get(), paySlip, empPayrollDetailsOptional.get().getJoinDate(),
+											paySlipDetails.get(Util.MONTH), adjustment);
 
 									if (!emailInput.isEmpty() && !emailInput.isBlank()) {
 										payslip.put(baos, name);
@@ -1066,9 +1084,12 @@ public class PayRollServiceImpl implements PayRollService {
 
 									MonthlySalaryDetails saveMonthlySalaryDetails = new MonthlySalaryDetails();
 
-									saveMonthlySalaryDetails(saveMonthlySalaryDetails, salaryDetails, paySlipDetails,
+									saveMonthlySalaryDetails(saveMonthlySalaryDetails, salaryDetails.get(), paySlipDetails,
 											paySlip);
 								}
+							}else {
+								mailService.sendEmail(name, "Salary details are not exist for the employee. Kindly enter salary details.");
+								continue;
 							}
 
 						} catch (Exception e) {
@@ -1127,7 +1148,7 @@ public class PayRollServiceImpl implements PayRollService {
 			saveMonthlySalaryDetails.setHalfDay(paySlip.getHalfday());
 			saveMonthlySalaryDetails.setPaidLeave(paySlip.getPaidLeave());
 			saveMonthlySalaryDetails.setUnpaidLeave(paySlip.getUnpaidLeave());
-
+			saveMonthlySalaryDetails.setActive(true);
 			monthlySalaryDetailsRepo.save(saveMonthlySalaryDetails);
 
 		} catch (Exception e) {
@@ -1156,7 +1177,7 @@ public class PayRollServiceImpl implements PayRollService {
 
 	// Leave and leave deduction calculation
 	private double calculateAndUpdateEmployeeTotalLeaves(int empId, double empGrossSalary, String month, String year,
-			int officeTotalWorkingDay, PaySlip paySlip) throws ParseException, IOException {
+			int officeTotalWorkingDay, PaySlip paySlip, String name) throws ParseException, IOException {
 
 		double absentDeductionAmt = 0, halfDayAmount = 0, halfDayAmountDeduct = 0, totalLeaveDeduction = 0;
 		try {
@@ -1165,15 +1186,20 @@ public class PayRollServiceImpl implements PayRollService {
 			int empPaidLeave = 0;
 			int empUnpaidLeave = 0;
 			int empTotalWorkingDay = timeSheetRepo.findEmpTotalWorkingDayCount(empId, month, year);
-
 			int empHalfDay = timeSheetRepo.findEmpTotalHalfDayCount(empId, month, year);
 			if (empHalfDay > 0) {
 				empTotalWorkingDay = empTotalWorkingDay + empHalfDay;
 			}
+			if(empTotalWorkingDay>officeTotalWorkingDay) {
+				mailService.sendEmail(name, "Discrepancy found: Employee working days are greater than office working days.Kindly check the time sheet for mentioned employee.");
+				return -1;
+			}
+					
 			int empLeave = officeTotalWorkingDay - empTotalWorkingDay;
 
 			Optional<LeaveBalance> leaveBalanceOptional = leaveBalanceRepo.findByEmployeeId(empId);
 			if (!leaveBalanceOptional.isPresent()) {
+				mailService.sendEmail(name, "Leave balance is not Exist for the employee.");
 				return -1;
 			}
 
@@ -1193,16 +1219,18 @@ public class PayRollServiceImpl implements PayRollService {
 				leaveBal = 0;
 				empUnpaidLeave = empRemainingLeave;
 
-				absentDeductionAmt = amountPerDay * empUnpaidLeave;
+				absentDeductionAmt = Math.round(amountPerDay * empUnpaidLeave);
 			}
 
 			if (empHalfDay > 0) {
 				halfDayAmount = (amountPerDay / 2);
-				halfDayAmountDeduct = empHalfDay * halfDayAmount;
+				halfDayAmountDeduct = Math.round(empHalfDay * halfDayAmount);
 			}
+			
 			// update Allleaves in db-----------
-			leaveBalanceRepo.updateAllLeavesByEmpId(empId, leaveBal, empPaidLeave, empUnpaidLeave, empHalfDay);
-			totalLeaveDeduction = halfDayAmountDeduct + absentDeductionAmt;
+		//	leaveBalanceRepo.updateAllLeavesByEmpId(empId, leaveBal, empPaidLeave, empUnpaidLeave, empHalfDay);
+			leaveBalanceRepo.updateLeaveBalByEmpId(empId, leaveBal);
+			totalLeaveDeduction = Math.round(halfDayAmountDeduct + absentDeductionAmt);
 			paySlip.setNumberOfLeavesTaken(empLeave);
 			paySlip.setYouWorkingDays(empTotalWorkingDay);
 			paySlip.setPaidLeave(empPaidLeave);
@@ -1212,6 +1240,7 @@ public class PayRollServiceImpl implements PayRollService {
 			return totalLeaveDeduction;
 		} catch (Exception e) {
 			log.error("Error occured while calculating leave & leave deduction " + e.getMessage());
+			mailService.sendEmail(name, "Kindly check Leave balance details for the employee.");
 			return -1;
 		}
 	}
@@ -1222,15 +1251,13 @@ public class PayRollServiceImpl implements PayRollService {
 		double salary = empPayrollDetails.getSalary();
 		double actualBasic = salary / 2;
 		double grossSalaryAmount = salary;
-		// employer pf and esic portion calculation 13% and 0.75% respectively
-		double employerPFAmount = actualBasic * 0.13;
-		double employerESICAmount = grossSalaryAmount * 0.0075;
-
-		// employer pf and esic portion calculation 12% and 3.25% respectively
-		double employeeESICAmount = grossSalaryAmount * 0.0325;
+		// employer pf and esic portion calculation 13% and 3.25% respectively
+		double employerPFAmount = Math.round(actualBasic * 0.13);
+		double employerESICAmount = Math.round(grossSalaryAmount * 0.0325);
+		double employeeESICAmount = Math.round(grossSalaryAmount * 0.0075);
 		String msg = "";
 		if (isESIC) {
-			if (Math.abs(employerESICAmount - salaryDetails.getEmployerESICAmount()) > 100) {
+			if (Math.round(employerESICAmount - salaryDetails.getEmployerESICAmount()) > 100) {
 
 				msg = "employer ESIC amount difference is: "
 						+ Math.round(employerESICAmount - salaryDetails.getEmployerESICAmount())
@@ -1238,19 +1265,9 @@ public class PayRollServiceImpl implements PayRollService {
 						+ salaryDetails.getEmployerESICAmount()
 						+ " & the calculated & validated employer ESIC amount is: " + employerESICAmount
 						+ " ,please check entered salary details & enter the correct employer ESIC amount for the mentioned employee";
-			}
-
-			if (Math.abs(employeeESICAmount - salaryDetails.getEmployeeESICAmount()) > 100) {
-
-				msg = "employee ESIC amount difference is: "
-						+ Math.round(employeeESICAmount - salaryDetails.getEmployeeESICAmount())
-						+ " ,while the employee ESIC amount retrived from database is: "
-						+ salaryDetails.getEmployeeESICAmount()
-						+ " & the calculated & validated employee ESIC amount is: " + employeeESICAmount
-						+ " ,please check entered salary details & enter the correct employee ESIC amount for the mentioned employee";
-			}
+			}	
 		}
-		if (Math.abs(employerPFAmount - salaryDetails.getEmployerPFAmount()) > 100) {
+		if (Math.round(employerPFAmount - salaryDetails.getEmployerPFAmount()) > 100) {
 
 			msg = "employer PF amount difference is: "
 					+ Math.round(employerPFAmount - salaryDetails.getEmployerPFAmount())
@@ -1258,12 +1275,23 @@ public class PayRollServiceImpl implements PayRollService {
 					+ " & the calculated & validated employer PF amount is: " + employerPFAmount
 					+ " ,please check entered salary details & enter the correct employer PF amount for the mentioned employee";
 		}
-
+		
+		//calculating gross salary of an employee (deduction of employer portion)		
 		if (msg.isEmpty()) {
 			if (isESIC) {
 				grossSalaryAmount = Math.round(grossSalaryAmount - employerPFAmount
 						- (employeeESICAmount + employerESICAmount) + (grossSalaryAmount * 0.01617));
+				// calculating employee esic
+				employeeESICAmount=Math.round(grossSalaryAmount * 0.0075);
+				if (Math.round(employeeESICAmount - salaryDetails.getEmployeeESICAmount()) > 100) {
 
+					msg = "employee ESIC amount difference is: "
+							+ Math.round(employeeESICAmount - salaryDetails.getEmployeeESICAmount())
+							+ " ,while the employee ESIC amount retrived from database is: "
+							+ salaryDetails.getEmployeeESICAmount()
+							+ " & the calculated & validated employee ESIC amount is: " + employeeESICAmount
+							+ " ,please check entered salary details & enter the correct employee ESIC amount for the mentioned employee";
+				}
 			} else {
 				if (fixedBasic <= 15000) {
 					grossSalaryAmount = Math
@@ -1273,6 +1301,8 @@ public class PayRollServiceImpl implements PayRollService {
 							.round(grossSalaryAmount - employerPFAmount + (grossSalaryAmount * 0.01617));
 				}
 			}
+			
+			
 			msg = validateEmployeePF(grossSalaryAmount, salaryDetails.getEmployeePFAmount());
 		}
 		if (!msg.isEmpty()) {
@@ -1284,8 +1314,8 @@ public class PayRollServiceImpl implements PayRollService {
 
 	private String validateEmployeePF(double calculatedGross, double employeePFAmount) {
 		double basic = calculatedGross / 2;
-		double empCalcutedPFAmount = basic * 0.12;
-		if (Math.abs(empCalcutedPFAmount - employeePFAmount) > 100) {
+		double empCalcutedPFAmount = Math.round(basic * 0.12);
+		if (Math.round(empCalcutedPFAmount - employeePFAmount) > 100) {
 			return "employee PF amount difference is: " + Math.round(empCalcutedPFAmount - employeePFAmount)
 			+ " ,while the employee PF amount retrived from database is: " + employeePFAmount
 			+ " and the calculated & validated employee PF amount is: " + empCalcutedPFAmount
@@ -1338,7 +1368,7 @@ public class PayRollServiceImpl implements PayRollService {
 		double grossAmount= salaryDetails.getGrossSalary();
 		
 		if(dto.getBonus() !=0) {
-			grossAmount=grossAmount+dto.getBonus();
+			
 		}
 		if(salaryDetails.getBasic() > dto.getBasic() || salaryDetails.getBasic() < dto.getBasic())
 			return new ResponseEntity<>(Util.Basic+Util.PAYSLIP_VALIDATION_MSG+salaryDetails.getBasic(), HttpStatus.OK);
@@ -1397,15 +1427,24 @@ public class PayRollServiceImpl implements PayRollService {
 		if(absentDeductionAmt < dto.getAbsentDeduction())
 			return new ResponseEntity<>(Util.ABSENT_DEDUCTION+Util.PAYSLIP_VALIDATION_MSG+absentDeductionAmt, HttpStatus.OK);
 		
-		double netSalary = Math.round(dto.getBasic()+dto.getHra()+dto.getEmployerEsic()+dto.getEmployeeEsic()+dto.getEmployeePf()+dto.getEmployerPf()+dto.getAbsentDeduction());
+		double netSalary = Math.round(dto.getBasic()+dto.getHra()-(dto.getEmployeeEsic()+dto.getEmployeePf()+dto.getAbsentDeduction()+dto.getAjdustment()));
 		Month month = Month.valueOf(dto.getMonth().toUpperCase());
-		ExpenseItems items = expenseManagementRepo.findExpenseDetailsByEmpId(empid, month.getValue(), Integer.valueOf(dto.getYear()));
-		
-		if(items.getAmount()< dto.getAdhoc())
-			return new ResponseEntity<>(Util.Adhoc+Util.PAYSLIP_VALIDATION_MSG+items.getAmount(), HttpStatus.OK);
-		
-		if(dto.getAdhoc() !=0 || dto.getAjdustment() !=0) {
-			netSalary=dto.getAdhoc()+dto.getAjdustment();
+		//ExpenseItems items = expenseManagementRepo.findExpenseDetailsByEmpId(empid, month.getValue(), Integer.valueOf(dto.getYear()));
+		Optional<ExpenseItems> items = expenseManagementRepo.findExpenseDetailsByEmpId(empid, month.getValue(), Integer.valueOf(dto.getYear()));
+		if (items.isPresent()) {
+			if (items.get().getStatus().equalsIgnoreCase("Approved")) {
+				if(items.get().getAmount()< dto.getAdhoc())
+					return new ResponseEntity<>(Util.Adhoc+Util.PAYSLIP_VALIDATION_MSG+items.get().getAmount(), HttpStatus.OK);
+				
+				if(dto.getAdhoc() !=0 || dto.getAjdustment() !=0) {
+					netSalary=netSalary+dto.getAdhoc();
+				}
+
+			}
+		}
+		if(dto.getBonus()!=0) {
+			grossAmount=grossAmount+dto.getBonus();
+			netSalary=netSalary+dto.getBonus();
 		}
 		netSalary = Math.round(netSalary);
 		regeneratedSalary.setBasic(dto.getBasic());
