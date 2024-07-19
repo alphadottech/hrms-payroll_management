@@ -65,13 +65,9 @@ public class SalaryDetailsController {
 	@GetMapping("/getAllMonthlySalaryDetails")
 	public ResponseEntity<?> getAllSalaryDetails() {
 		LOGGER.info("PayrollService: SalaryDetailsController:Getting all Monthly Salary Details Info level log msg");
-		List<SalaryDTO> monthSalaryResponse =monthlySalaryService.getAllMonthlySalaryDetails(); 
-		if(!monthSalaryResponse.isEmpty()) {
-			return new ResponseEntity<>(monthSalaryResponse, HttpStatus.OK);
-		}
-		 return new ResponseEntity<>("No salary details found for", HttpStatus.NOT_FOUND);
+		return monthlySalaryService.getAllMonthlySalaryDetails();
 	}
-	
+
 	@PreAuthorize("@auth.allow('GET_ALL_MONTHLY_SALARY_DETAILS_BY_ID_EXPORT_TO_EXCEL')")
 	@GetMapping("/getAllMonthlySalaryDetailsExportToExcelById/{empId}")
 	public ResponseEntity<Resource> getAllMonthlySalaryDetailsExportToExcel(@PathVariable("empId") Integer empId) throws IOException {
