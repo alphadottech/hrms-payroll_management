@@ -25,7 +25,7 @@ public interface MonthlySalaryDetailsRepo extends JpaRepository<MonthlySalaryDet
 	@Query(value = "SELECT * FROM payroll_schema.monthly_salary_details WHERE emp_id = :empId AND is_active = true", nativeQuery = true)
 	List<MonthlySalaryDetails> findSalaryDetailsByEmpId(@Param("empId") Integer empId);
 
-	@Query(value = "SELECT MAX(msd.salary_credited_date) FROM payroll_schema.monthly_salary_details msd AND is_active = true", nativeQuery = true)
+	@Query(value = "SELECT MAX(msd.salary_credited_date) FROM payroll_schema.monthly_salary_details msd where msd.is_active = true", nativeQuery = true)
 	String findLatestSalaryCreditedDate();
 
 	@Query(value = "SELECT MAX(msd.updated_When) FROM payroll_schema.monthly_salary_details msd", nativeQuery = true)
