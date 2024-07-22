@@ -426,12 +426,19 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 				salaryDTO.setEmployeePf(salaryDetails.getEmployeePFAmount());
 				salaryDTO.setEmployerPf(salaryDetails.getEmployerPFAmount());
 				salaryDTO.setEmployeeEsic(salaryDetails.getEmployeeESICAmount());
-				salaryDTO.setEmployeeEsic(salaryDetails.getEmployerESICAmount());
+				salaryDTO.setEmployerEsic(salaryDetails.getEmployerESICAmount());
 				salaryDTO.setGrossDeduction(salaryDetails.getGrossDeduction());
 				salaryDTO.setEmpId(salaryDetails.getEmpId());
 				salaryDTO.setMonth(salaryDetails.getMonth());
 				salaryDTO.setYear(salaryDetails.getCreditedDate().substring(salaryDetails.getCreditedDate().length() - 4));
-
+				salaryDTO.setAbsentDeduction(salaryDetails.getAbsentDeduction());
+				salaryDTO.setAjdustment(salaryDetails.getAdjustment());
+				salaryDTO.setBasic(salaryDetails.getBasic());
+				salaryDTO.setGrossSalary(salaryDetails.getGrossSalary());
+				salaryDTO.setHra(salaryDetails.getHouseRentAllowance());
+				salaryDTO.setMedicalAmount(salaryDetails.getMedicalInsurance());
+				salaryDTO.setNetPay(salaryDetails.getNetSalary());
+				salaryDTO.setBonus(salaryDetails.getBonus());
 				salaryDTOList.add(salaryDTO);
 			}
 
