@@ -370,7 +370,7 @@ public class DetailedSalarySlip {
 				String.valueOf(salaryDetails.getEmployeeESICAmount()), "PF Deduction",
 				String.valueOf(salaryDetails.getEmployeePFAmount()), "Adjustment", String.valueOf(adjustment),
 				"Absent Deduction", String.valueOf(Math.round(paySlip.getLeaveDeductionAmount())), "Medical Insurance",
-				String.valueOf(salaryDetails.getMedicalInsurance()));
+				String.valueOf(salaryDetails.getMedicalInsurance()!=null?salaryDetails.getMedicalInsurance():0));
 		PdfPCell deductionsCell = new PdfPCell(deductionsTable);
 		double grossDeduction = paySlip.getGrossDeduction();
 		mainTable.addCell(deductionsCell);
@@ -391,7 +391,7 @@ public class DetailedSalarySlip {
 		Font smallFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
 
 		document.close();
-		log.info("generateDetailedSalarySlipPDF e");
+		log.info("generateDetailedSalarySlipPDF end");
 		return outputStream;
 	}
 }
