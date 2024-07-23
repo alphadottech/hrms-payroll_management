@@ -391,7 +391,7 @@ public class DetailedSalarySlip {
 		Font smallFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
 
 		document.close();
-		log.info("generateDetailedSalarySlipPDF-outputStream:---" + outputStream);
+		log.info("generateDetailedSalarySlipPDF e");
 		return outputStream;
 	}
 }
