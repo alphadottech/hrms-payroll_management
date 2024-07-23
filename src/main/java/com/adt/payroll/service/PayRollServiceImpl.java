@@ -1369,25 +1369,25 @@ public class PayRollServiceImpl implements PayRollService {
 
 
 		if(salaryDetails.getBasic() < dto.getBasic())
-			return new ResponseEntity<>(Util.Basic+Util.PAYSLIP_VALIDATION_MSG+salaryDetails.getBasic(), HttpStatus.OK);
+			return new ResponseEntity<>(Util.Basic+Util.PAYSLIP_VALIDATION_MSG.replace("[value]", salaryDetails.getBasic().toString())+dto.getBasic(), HttpStatus.NOT_ACCEPTABLE);
 
 		if(salaryDetails.getHouseRentAllowance()< dto.getHra())
-			return new ResponseEntity<>(Util.Hra+Util.PAYSLIP_VALIDATION_MSG+salaryDetails.getBasic(), HttpStatus.OK);
+			return new ResponseEntity<>(Util.Hra+Util.PAYSLIP_VALIDATION_MSG.replace("[value]",salaryDetails.getHouseRentAllowance().toString())+dto.getHra(), HttpStatus.OK);
 
 		if(salaryDetails.getEmployeeESICAmount() < dto.getEmployeeEsic())
-			return new ResponseEntity<>(Util.Esic+Util.PAYSLIP_VALIDATION_MSG+salaryDetails.getEmployeeESICAmount(), HttpStatus.OK);
+			return new ResponseEntity<>(Util.Esic+Util.PAYSLIP_VALIDATION_MSG.replace("[value]",salaryDetails.getEmployeeESICAmount().toString())+dto.getEmployeeEsic(), HttpStatus.OK);
 
 		if(salaryDetails.getEmployerESICAmount() < dto.getEmployerEsic())
-			return new ResponseEntity<>(Util.Esic+Util.PAYSLIP_VALIDATION_MSG+salaryDetails.getEmployerESICAmount(), HttpStatus.OK);
+			return new ResponseEntity<>(Util.Esic+Util.PAYSLIP_VALIDATION_MSG.replace("[value]",salaryDetails.getEmployerESICAmount().toString())+dto.getEmployerEsic(), HttpStatus.OK);
 
 		if(salaryDetails.getEmployerPFAmount() < dto.getEmployerPf())
-			return new ResponseEntity<>(Util.PF+Util.PAYSLIP_VALIDATION_MSG+salaryDetails.getEmployerPFAmount(), HttpStatus.OK);
+			return new ResponseEntity<>(Util.PF+Util.PAYSLIP_VALIDATION_MSG.replace("[value]",salaryDetails.getEmployerPFAmount().toString())+dto.getEmployerPf(), HttpStatus.BAD_REQUEST);
 
 		if(salaryDetails.getEmployeePFAmount() < dto.getEmployeePf())
-			return new ResponseEntity<>(Util.PF+Util.PAYSLIP_VALIDATION_MSG+salaryDetails.getEmployeePFAmount(), HttpStatus.OK);
+			return new ResponseEntity<>(Util.PF+Util.PAYSLIP_VALIDATION_MSG.replace("[value]",salaryDetails.getEmployeePFAmount().toString())+dto.getEmployeePf(), HttpStatus.OK);
 
-		if( salaryDetails.getBonus() !=null && salaryDetails.getBonus() < dto.getBonus())
-			return new ResponseEntity<>(Util.BONUS+Util.PAYSLIP_VALIDATION_MSG+salaryDetails.getBonus(), HttpStatus.OK);
+//		if( salaryDetails.getBonus() !=null && salaryDetails.getBonus() < dto.getBonus())
+//			return new ResponseEntity<>(Util.BONUS+Util.PAYSLIP_VALIDATION_MSG.replace("[value]",salaryDetails.getBonus().toString())+salaryDetails.getBonus(), HttpStatus.OK);
 
 		int empTotalWorkingDay = timeSheetRepo.findEmpTotalWorkingDayCount(empid, dto.getMonth(), dto.getYear());
 
@@ -1408,6 +1408,7 @@ public class PayRollServiceImpl implements PayRollService {
 			leaveBal = empRemainingLeave;
 			regeneratedSalary.setPaidLeave(empLeave);
 		} else if (empLeave > leaveBal) {
+			leaveBal=1;
 			empRemainingLeave = empLeave - leaveBal;
 			absentDeductionAmt = amountPerDay * empRemainingLeave;
 			regeneratedSalary.setPaidLeave(leaveBal);
@@ -1423,8 +1424,11 @@ public class PayRollServiceImpl implements PayRollService {
 
 		if (absentDeductionAmt < dto.getAbsentDeduction())
 			return new ResponseEntity<>(Util.ABSENT_DEDUCTION + Util.PAYSLIP_VALIDATION_MSG + absentDeductionAmt, HttpStatus.OK);
-		double grossDeduction =dto.getEmployeeEsic() + dto.getEmployeePf() + dto.getAbsentDeduction() + dto.getAjdustment();
-		double netSalary = Math.round(dto.getBasic() + dto.getHra() - grossDeduction);
+		double grossDeduction =dto.getEmployeeEsic() + dto.getEmployeePf() + absentDeductionAmt + dto.getAjdustment();
+		double netSalary = Math.round(salaryDetails.getGrossSalary() - grossDeduction);
+		if(netSalary<0) {
+			netSalary=0;
+		}
 		Month month = Month.valueOf(dto.getMonth().toUpperCase());
 		//ExpenseItems items = expenseManagementRepo.findExpenseDetailsByEmpId(empid, month.getValue(), Integer.valueOf(dto.getYear()));
 		Optional<ExpenseItems> items = expenseManagementRepo.findExpenseDetailsByEmpId(empid, month.getValue(), Integer.valueOf(dto.getYear()));
@@ -1433,22 +1437,38 @@ public class PayRollServiceImpl implements PayRollService {
 				if (items.get().getAmount() < dto.getAdhoc())
 					return new ResponseEntity<>(Util.Adhoc + Util.PAYSLIP_VALIDATION_MSG + items.get().getAmount(), HttpStatus.OK);
 
-				if (dto.getAdhoc() != 0 || dto.getAjdustment() != 0) {
+				if (dto.getAdhoc() != 0) {
 					netSalary = netSalary + dto.getAdhoc();
 				}
-
 			}
 		}
 
 		if (dto.getBonus() != 0) {
-			grossAmount += dto.getBonus();
-			netSalary += dto.getBonus();
+		//	grossAmount += dto.getBonus();
+			netSalary += dto.getBonus();		
+		}
+		if (dto.getAdhoc() != 0) {
+			//grossAmount += dto.getBonus();
+			ExpenseItems adhoc = new ExpenseItems();
+			Optional<User> user =userRepo.findByEmployeeId(dto.getEmpId());	
+			adhoc.setPaidBy(user.get().getFirstName()+" "+user.get().getLastName());
+			adhoc.setAmount(dto.getAdhoc());
+			adhoc.setPaymentDate(LocalDate.now());
+			adhoc.setPaymentMode("online");
+			adhoc.setCategory("");
+			adhoc.setCreatedBy("");
+			adhoc.setDescription("");
+			adhoc.setComments("adhoc amount added.");
+
+			adhoc.setStatus("Approved");
+			netSalary += dto.getAdhoc();
+			expenseManagementRepo.save(adhoc);
 		}
 
 		netSalary = Math.round(netSalary);
 		regeneratedSalary.setBasic(dto.getBasic());
 		regeneratedSalary.setHouseRentAllowance(dto.getHra());
-		regeneratedSalary.setAbsentDeduction(dto.getAbsentDeduction());
+		regeneratedSalary.setAbsentDeduction(absentDeductionAmt);
 		regeneratedSalary.setAdjustment(dto.getAjdustment());
 		regeneratedSalary.setAdhoc(dto.getAdhoc());
 		regeneratedSalary.setEmployeeESICAmount(dto.getEmployeeEsic());
@@ -1461,7 +1481,8 @@ public class PayRollServiceImpl implements PayRollService {
 		regeneratedSalary.setMedicalInsurance(dto.getMedicalAmount() != null ? dto.getMedicalAmount() : 0.0);
 		regeneratedSalary.setMonth(dto.getMonth());
 		regeneratedSalary.setNetSalary(netSalary);
-		regeneratedSalary.setGrossSalary(dto.getGrossSalary() != null ? dto.getGrossSalary() : 0.0);
+		regeneratedSalary.setComment(dto.getComment());
+		regeneratedSalary.setGrossSalary(salaryDetails.getGrossSalary());
 		SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
 		Calendar cal = Calendar.getInstance();
 		String date = f.format(cal.getTime());
@@ -1486,6 +1507,7 @@ public class PayRollServiceImpl implements PayRollService {
 			MonthlySalaryDetails existingSalary = monthlySalaryDetailsRepo.findSalaryByEmpidMonth(empid, dto.getMonth(), date.getYear());
 			if (existingSalary != null) {
 				existingSalary.setActive(false);
+				existingSalary.setComment(dto.getComment());				
 				monthlySalaryDetailsRepo.save(existingSalary);
 			}
 

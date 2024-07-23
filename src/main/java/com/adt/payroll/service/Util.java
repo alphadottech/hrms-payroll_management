@@ -84,7 +84,7 @@ public class Util {
     public static final String JoiningDate = "Joining Date";
     public static final String BONUS = "Bonus";
     public static final String ABSENT_DEDUCTION = "Absent deduction";
-    public static final String PAYSLIP_VALIDATION_MSG =" Fields Expected value is ";
+    public static final String PAYSLIP_VALIDATION_MSG =": Expected value [value] does not matched with given input ";
 
 
     public static String months[] = {"JANUARY", "FEBRUARY", "MARCH", "APRIL",
