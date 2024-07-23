@@ -197,6 +197,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
                 timeSheetRepo.save(timeSheetModel);
                 return " you have Check out with latitude: " + latitude + " and longitude: " + longitude + ", which are not within office covered distance";
             }
+            timeSheetModel.setEarlyCheckOutStatus(false);
             timeSheetModel.setCheckOutLatitude(String.valueOf(latitude));
             timeSheetModel.setCheckOutLongitude(String.valueOf(longitude));
             timeSheetModel.setCheckOutDistance(String.valueOf(distance));
@@ -775,6 +776,71 @@ public String checkInCheckOutForContractBasedEmployee(String workingHours, Strin
 		
 	}
 	return "TimeSheet data already present for the selected date";
+
+}
+
+@Override
+public String earlyCheckOut(double latitude, double longitude, int empId,String reason, String reasonType) throws ParseException {
+	   double distance = calculateDistance(latitude, longitude, COMPANY_LATITUDE, COMPANY_LONGITUDE); 
+	   CurrentDateTime currentDateTime = util.getDateTime();
+       Optional<TimeSheetModel> timeSheetModelOptional = timeSheetRepo.findByEmployeeIdAndDate(empId,
+               currentDateTime.getCurrentDate());
+       if (timeSheetModelOptional.isPresent()) {
+           TimeSheetModel timeSheetModel = timeSheetModelOptional.get();
+           if (timeSheetModel.getCheckOut() != null) {
+               return "You Are Already Check Out";
+           }
+           timeSheetModel.setCheckOut(currentDateTime.getCurrentTime());
+           SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+           Date date1 = simpleDateFormat.parse(currentDateTime.getCurrentTime());
+           Date date2 = simpleDateFormat.parse(timeSheetModel.getCheckIn());
+           long differenceInMilliSeconds = Math.abs(date2.getTime() - date1.getTime());
+           long differenceInHours = (differenceInMilliSeconds / (60 * 60 * 1000)) % 24;
+           long differenceInMinutes = (differenceInMilliSeconds / (60 * 1000)) % 60;
+           long differenceInSeconds = (differenceInMilliSeconds / 1000) % 60;
+           timeSheetModel
+                   .setWorkingHour(differenceInHours + ":" + differenceInMinutes + ":" + differenceInSeconds);
+           if (timeSheetModel.getLeaveInterval() != null && !timeSheetModel.getLeaveInterval().isEmpty()) {
+               if (!timeSheetModel.getIntervalStatus()) {
+                   return "Please Resume Your Break";
+               }
+               String poseResumeInterval = timeSheetModel.getLeaveInterval();
+               String arr[] = poseResumeInterval.split(":");
+               long inOutDiff = TimeUnit.HOURS.toMillis(differenceInHours)
+                       + TimeUnit.MINUTES.toMillis(differenceInMinutes)
+                       + TimeUnit.SECONDS.toMillis(differenceInSeconds);
+
+               long poseResumeDiff = TimeUnit.HOURS.toMillis(Integer.parseInt(arr[0]))
+                       + TimeUnit.MINUTES.toMillis(Integer.parseInt(arr[1]))
+                       + TimeUnit.SECONDS.toMillis(Integer.parseInt(arr[2]));
+
+               long workingMilisecond = inOutDiff - poseResumeDiff;
+               long hours = TimeUnit.MILLISECONDS.toHours(workingMilisecond);
+               long minutes = TimeUnit.MILLISECONDS.toMinutes(workingMilisecond) % 60;
+               long seconds = TimeUnit.MILLISECONDS.toSeconds(workingMilisecond) % 60;
+               String formattedTime = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+               timeSheetModel.setWorkingHour(formattedTime);
+           }
+           timeSheetModel.setStatus("Present");
+           timeSheetModel.setIntervalStatus(false);
+
+           if (distance >= MAX_DISTANCE_THRESHOLD) {
+               timeSheetModel.setCheckOutLatitude(String.valueOf(latitude));
+               timeSheetModel.setCheckOutLongitude(String.valueOf(longitude));
+               timeSheetModel.setCheckOutDistance(String.valueOf(distance));
+               timeSheetRepo.save(timeSheetModel);
+               return " you have Check out with latitude: " + latitude + " and longitude: " + longitude + ", which are not within office covered distance";
+           }
+           timeSheetModel.setReasonType(reasonType);
+           timeSheetModel.setReason(reason);
+           timeSheetModel.setEarlyCheckOutStatus(true);
+           timeSheetModel.setCheckOutLatitude(String.valueOf(latitude));
+           timeSheetModel.setCheckOutLongitude(String.valueOf(longitude));
+           timeSheetModel.setCheckOutDistance(String.valueOf(distance));
+           timeSheetRepo.save(timeSheetModel);
+           return "you have Check out with latitude: " + latitude + " and longitude: " + longitude;
+       }
+       return "You Are Not Check in";
 
 }
    

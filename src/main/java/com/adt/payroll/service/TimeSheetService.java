@@ -66,4 +66,7 @@ List<TimesheetDTO> empAttendence(int empId, LocalDate fromDate, LocalDate toDate
 	public  String reSendPriorTimeRequest(int priortimeId);
 	
 	public String checkInCheckOutForContractBasedEmployee(String hours, String date,double latitude,double longitude,int empId);
+    
+	public String earlyCheckOut(double latitude, double longitude, int empId,String reason, String reasonType) throws ParseException; 
 }
+
