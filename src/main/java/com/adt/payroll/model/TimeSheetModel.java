@@ -73,7 +73,15 @@ public class TimeSheetModel {
 
     @Column(name = "checkOutDistance")
     private String checkOutDistance;
-
+    
+    @Column(name = "reason")
+    private String reason;
+    
+    @Column(name = "earlyCheckOutStatus")
+    private Boolean earlyCheckOutStatus;
+    
+    @Column(name = "reasonType")
+    private String reasonType;
 
     @Transient
     private String employeeName;
@@ -82,7 +90,7 @@ public class TimeSheetModel {
     private String dayOfWeek;
 
     public TimeSheetModel(int timeSheetId, int employeeId, String checkOut, String checkIn, String workingHour,
-                          String date, String status, String month, String year) {
+                          String date, String status, String month, String year,String reason,Boolean earlyCheckOutStatus, String reasonType) {
         super();
         this.timeSheetId = timeSheetId;
         this.employeeId = employeeId;
@@ -93,6 +101,9 @@ public class TimeSheetModel {
         this.status = status;
         this.month = month;
         this.year = year;
+        this.reason=reason;
+        this.earlyCheckOutStatus=earlyCheckOutStatus;
+        this.reasonType=reasonType;
     }
 
     public TimeSheetModel() {
@@ -104,7 +115,7 @@ public class TimeSheetModel {
     public String toString() {
         return "TimeSheetModel [timeSheetId=" + timeSheetId + ", employeeId=" + employeeId + ", checkOut=" + checkOut
                 + ", checkIn=" + checkIn + ", workingHour=" + workingHour + ", date=" + date + ", status=" + status
-                + ", month=" + month + ", year=" + year + "]";
+                + ", month=" + month + ", year=" + year + ", reason=" + reason + ", earlyCheckOutStatus=" + earlyCheckOutStatus + ", reasonType=" + reasonType + "]";
     }
     
     public String getDayOfWeek() {
