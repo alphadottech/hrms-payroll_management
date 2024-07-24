@@ -367,7 +367,7 @@ public class DetailedSalarySlip {
 		// Add Deductions Table
 
 		PdfPTable deductionsTable = createParallelTable("Deductions", "Esic Deduction",
-				String.valueOf(salaryDetails.getEmployeeESICAmount()), "PF Deduction",
+				String.valueOf(salaryDetails.getEmployeeESICAmount()!=null?salaryDetails.getEmployeeESICAmount():0), "PF Deduction",
 				String.valueOf(salaryDetails.getEmployeePFAmount()), "Adjustment", String.valueOf(adjustment),
 				"Absent Deduction", String.valueOf(Math.round(paySlip.getLeaveDeductionAmount())), "Medical Insurance",
 				String.valueOf(salaryDetails.getMedicalInsurance()!=null?salaryDetails.getMedicalInsurance():0));

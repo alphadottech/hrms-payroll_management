@@ -21,4 +21,6 @@ public interface UserRepo extends JpaRepository<User, Integer> {
 	
     List<User> findAllByIsActive(boolean isActive);
 
+    @Query(value = "SELECT * FROM user_schema._employee where email=?1", nativeQuery = true)
+	Optional<User> findByEmail(String emailId);
 }

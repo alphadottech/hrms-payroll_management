@@ -29,31 +29,31 @@ public class ExpenseItems {
     @Column(columnDefinition = "serial")
     private int id;
 
-    @Column(name="amount", nullable = false)
-    private int amount;
+    @Column(name="amount")
+    private double amount;
 
-    @Column(name="description", nullable = false)
+    @Column(name="description")
     private String description;
 
-    @Column(name="payment_mode", nullable = false)
+    @Column(name="payment_mode")
     private String paymentMode;
 
-    @Column(name="payment_date", nullable = false)
+    @Column(name="payment_date")
     private LocalDate paymentDate;
 
-    @Column(name="created_by", nullable = false)
+    @Column(name="created_by")
     private String createdBy;
 
-    @Column(name="category", nullable = false)
+    @Column(name="category")
     private String category;
 
-    @Column(name="GST", nullable = false)
+    @Column(name="GST")
     private boolean gst;
 
-    @Column(name="paid_by", nullable = false)
+    @Column(name="paid_by")
     private String paidBy;
 
-    @Column(name="comments", nullable = false)
+    @Column(name="comments")
     private String comments;
     
     @ManyToOne
@@ -61,6 +61,6 @@ public class ExpenseItems {
     private User employee;
     private Integer employee_id;
     
-    @Column(name="status", nullable = false)
+    @Column(name="status")
     private String status;
 }
