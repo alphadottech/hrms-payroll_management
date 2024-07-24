@@ -982,7 +982,7 @@ public class PayRollServiceImpl implements PayRollService {
 								double salary = empPayrollDetailsOptional.get().getSalary()!=null?empPayrollDetailsOptional.get().getSalary():0;
 
 								// null checks
-								if (isNotNull(salaryDetails.get().getEmpId(), name, employee.getEmail(),
+								if (nullValidation(adtId, name, employee.getEmail(),
 										basic, grossAmount,hra,	empPayrollDetailsOptional.get().getAccountNumber(),
 										empPayrollDetailsOptional.get().getBankName(),
 										empPayrollDetailsOptional.get().getDesignation(),
@@ -1084,7 +1084,6 @@ public class PayRollServiceImpl implements PayRollService {
 									log.info("baos:---createPDF");
 
 								} else {
-									mailService.sendEmail(name, "Check salary details for mentioned Employee.");
 									continue;
 								}
 								if (emailInput.isEmpty()) {
@@ -1168,20 +1167,55 @@ public class PayRollServiceImpl implements PayRollService {
 							+ e.getMessage());
 		}
 	}
-
+	
 	// null checks for values
-	private boolean isNotNull(int employee_id, String name, String gmail, double basic, double grossSalary, double hRA,
-			String accountNumber, String bankName, String designation, String joiningDate, int officeTotalWorkingDay) {
+		private boolean nullValidation(String empAdtId, String name, String gmail, double basic, double grossSalary, double hRA,
+				String accountNumber, String bankName, String designation, String joiningDate, int officeTotalWorkingDay) {
+			log.info(" nullValidation : Validating fields value :");
+			String msg="";
+			StringBuilder msgBuilder= new StringBuilder(msg);
+			if (empAdtId.isEmpty() || empAdtId== null) {
+				msgBuilder.append("Employee Adt id can't be empty. \n");
+			} 
+			if(name.isEmpty() || name == null) {
+				msgBuilder.append("Employee name can't be empty. \n");
+			}  
+			if(officeTotalWorkingDay < 0 ) {
+				msgBuilder.append("Office working days can't be empty. \n");
+			}
+			if(bankName.isEmpty() || bankName == null) {
+				msgBuilder.append("Bank name can't be empty. \n");
+			} 
+			
+			if(accountNumber == null || accountNumber.isEmpty()) {
+				msgBuilder.append("Account Number can't be empty. \n");
 
-		if (employee_id == 0 || name.isEmpty() || name == null || officeTotalWorkingDay < 0 || bankName.isEmpty()
-				|| bankName == null || accountNumber == null || accountNumber.isEmpty() || designation.isEmpty()
-				|| designation == null || joiningDate.isEmpty() || joiningDate == null || basic <= 0
-				|| (gmail.isEmpty() || gmail == null) || grossSalary <= 0 || hRA <= 0) {
-			log.info("Salary values are null.");
-			return false;
+			} 
+			if(designation.isEmpty() || designation == null) {
+				msgBuilder.append("Designation can't be empty. \n");
+			} 
+			if(joiningDate.isEmpty() || joiningDate == null) {
+				msgBuilder.append("Joining Date can't be empty. \n");
+			} 
+			if(basic <= 0) {
+				msgBuilder.append("Basic can't be empty. \n");
+			}
+			if(gmail.isEmpty() || gmail == null){
+				msgBuilder.append("Gmail Id can't be empty. \n");
+			}
+			 if(grossSalary <= 0 ) {
+				msgBuilder.append("Gross salary can't be empty. \n");
+			 }
+			if(hRA <= 0) {
+				msgBuilder.append("HRA can't be empty. \n");
+			}
+			
+			if(!msgBuilder.toString().equalsIgnoreCase(msg)) {
+				mailService.sendEmail(name, msgBuilder.toString());
+				return false;
+			}
+			return true;
 		}
-		return true;
-	}
 
 	// Leave and leave deduction calculation
 	private double calculateAndUpdateEmployeeTotalLeaves(int empId, double empGrossSalary, String month, String year,
@@ -1304,7 +1338,7 @@ public class PayRollServiceImpl implements PayRollService {
 							+ " ,please check entered salary details & enter the correct employee ESIC amount for the mentioned employee";
 				}
 			} else {
-				if (fixedBasic <= 15000) {
+				if (fixedBasic == 15000) {
 					grossSalaryAmount = Math
 							.round(grossSalaryAmount - (fixedBasic * 0.13) + (grossSalaryAmount * 0.01617));
 				} else {
