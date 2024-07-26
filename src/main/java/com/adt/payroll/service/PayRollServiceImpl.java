@@ -1077,6 +1077,7 @@ public class PayRollServiceImpl implements PayRollService {
 											paySlipDetails.get(Util.MONTH), adjustment);
 
 									if (!emailInput.isEmpty() && !emailInput.isBlank()) {
+										log.info("Adding payslip");
 										payslip.put(baos, name);
 									}
 
@@ -1086,6 +1087,7 @@ public class PayRollServiceImpl implements PayRollService {
 									continue;
 								}
 								if (emailInput.isEmpty()) {
+									log.info("Sending mail to employee ", gmail);
 									mailService.sendEmail(baos, name, gmail,
 											paySlipDetails.get(Util.MONTH) + " " + paySlipDetails.get(Util.YEAR));
 
@@ -1115,6 +1117,7 @@ public class PayRollServiceImpl implements PayRollService {
 			}
 
 			if (!emailInput.isEmpty() && !emailInput.isBlank()) {
+				log.info("All Payslip sending to the mentioned mail ", emailInput);
 				 Optional<User> receiverName= userRepo.findByEmail(emailInput);
 				mailService.sendEmail(payslip, receiverName.get().getFirstName()+" "+receiverName.get().getLastName(), emailInput,
 						paySlipDetails.get(Util.MONTH) + " " + paySlipDetails.get(Util.YEAR));
