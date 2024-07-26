@@ -491,7 +491,6 @@ public class PayRollServiceImpl implements PayRollService {
 
 					SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
 					Calendar cal1 = Calendar.getInstance();
-					String date1 = f.format(cal1.getTime());
 					cal1.add(Calendar.MONTH, -1);
 					SimpleDateFormat monthFormat = new SimpleDateFormat("MMM");
 					String monthName = monthFormat.format(cal1.getTime()).toUpperCase();
@@ -507,7 +506,7 @@ public class PayRollServiceImpl implements PayRollService {
 						monthlySalaryDetails.setAdhoc(adhoc);
 						monthlySalaryDetails.setAdjustment(adj);
 						monthlySalaryDetails.setDearnessAllowance(0.0);
-						monthlySalaryDetails.setCreditedDate(date1);
+						monthlySalaryDetails.setCreditedDate(util.getCreatedDate(15));
 						monthlySalaryDetails.setMonth(monthName);
 						monthlySalaryDetails.setTotalWorkingDays(workingDays);
 						monthlySalaryDetails.setPaidLeave(Integer.parseInt(paidLeave));
@@ -1129,9 +1128,7 @@ public class PayRollServiceImpl implements PayRollService {
 		try {
 			log.info(
 					"PayRollServiceImpl: generatePaySlipForAllEmployees: saveMonthlySalaryDetails info level log message");
-			SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
-			Calendar cal = Calendar.getInstance();
-			String date = f.format(cal.getTime());
+	
 			saveMonthlySalaryDetails.setEmpId(salaryDetails.getEmpId());
 			saveMonthlySalaryDetails.setBasic(salaryDetails.getBasic());
 			saveMonthlySalaryDetails.setEmployeeESICAmount(salaryDetails.getEmployeeESICAmount());
@@ -1148,7 +1145,7 @@ public class PayRollServiceImpl implements PayRollService {
 			saveMonthlySalaryDetails.setDearnessAllowance(salaryDetails.getDearnessAllowance());
 			saveMonthlySalaryDetails.setGrossDeduction(paySlip.getGrossDeduction());
 			saveMonthlySalaryDetails.setAbsentDeduction(paySlip.getLeaveDeductionAmount());
-			saveMonthlySalaryDetails.setCreditedDate(date);
+			saveMonthlySalaryDetails.setCreditedDate(util.getCreatedDate(15));
 			saveMonthlySalaryDetails.setMonth(paySlipDetails.get(Util.MONTH));
 			saveMonthlySalaryDetails.setBonus(salaryDetails.getBonus());
 			saveMonthlySalaryDetails.setPresentDays(paySlip.getYouWorkingDays());
@@ -1158,6 +1155,10 @@ public class PayRollServiceImpl implements PayRollService {
 			saveMonthlySalaryDetails.setPaidLeave(paySlip.getPaidLeave());
 			saveMonthlySalaryDetails.setUnpaidLeave(paySlip.getUnpaidLeave());
 			saveMonthlySalaryDetails.setActive(true);
+			DateTimeZone istTimeZone = DateTimeZone.forID("Asia/Kolkata");
+			DateTime current = new DateTime(istTimeZone);
+			saveMonthlySalaryDetails.setUpdatedWhen(new Timestamp(current.getMillis()));
+;
 			monthlySalaryDetailsRepo.save(saveMonthlySalaryDetails);
 
 		} catch (Exception e) {
@@ -1528,10 +1529,7 @@ public class PayRollServiceImpl implements PayRollService {
 		regeneratedSalary.setNetSalary(netSalary);
 		regeneratedSalary.setComment(dto.getComment());
 		regeneratedSalary.setGrossSalary(salaryDetails.getGrossSalary());
-		SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
-		Calendar cal = Calendar.getInstance();
-		String date = f.format(cal.getTime());
-		regeneratedSalary.setCreditedDate(date);
+		regeneratedSalary.setCreditedDate(util.getCreatedDate(15));
 		regeneratedSalary.setAbsentDays(empLeave);
 		regeneratedSalary.setHalfDay(empHalfDay);
 		regeneratedSalary.setPresentDays(empTotalWorkingDay);
