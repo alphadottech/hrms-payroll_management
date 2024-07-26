@@ -97,7 +97,7 @@ public class PayRollController {
 	@PreAuthorize("@auth.allow('GENERATE_PAYSLIP_FOR_ALL_EMPLOYEE_FROM_DB')")
 	@GetMapping("/generatePaySlipForAll")
 	public ResponseEntity<Object> generatePaySlipForAllEmployees(HttpServletRequest request,
-			@RequestParam("emailInput") String emailInput) throws IOException, ParseException {
+			@RequestParam(name="emailInput", required = false) String emailInput) throws IOException, ParseException {
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		return new ResponseEntity<>(payRollService.generatePaySlipForAllEmployees(emailInput), HttpStatus.OK);
 	}
