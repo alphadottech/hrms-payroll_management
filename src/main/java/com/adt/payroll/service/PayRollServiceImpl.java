@@ -994,7 +994,7 @@ public class PayRollServiceImpl implements PayRollService {
 										continue;
 									}
 									boolean isESIC = false;
-									if (salary <= 21000) {
+									if (salary < 21000) {
 										isESIC = true;
 									}
 
