@@ -298,5 +298,10 @@ public class Util {
 		return paySlipDetails;
 	}
 	
-
+	public String getCreatedDate(int day) {
+		SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.DAY_OF_MONTH, day);
+		return f.format(cal.getTime());
+	}
 }
