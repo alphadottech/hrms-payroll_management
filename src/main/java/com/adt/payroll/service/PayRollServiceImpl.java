@@ -1076,7 +1076,7 @@ public class PayRollServiceImpl implements PayRollService {
 											salaryDetails.get(), paySlip, empPayrollDetailsOptional.get().getJoinDate(),
 											paySlipDetails.get(Util.MONTH), adjustment);
 
-									if (emailInput != null && !emailInput.isEmpty()) {
+									if (emailInput != null) {
 										log.info("Adding payslip");
 										payslip.put(baos, name);
 									}
