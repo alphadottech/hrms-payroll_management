@@ -29,10 +29,10 @@ public class LeaveBalance {
 	private Integer  halfDay;
 
 	@Column(name = "paid_leave")
-	private Integer  paidLeave;
+	private Integer  paidLeave=0;
 	
 	@Column(name = "unpaid_leave")
-	private Integer  unpaidLeave;
+	private Integer  unpaidLeave=0;
 
 	
 }

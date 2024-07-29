@@ -40,7 +40,11 @@ import com.adt.payroll.dto.EmployeeExpenseDTO;
 import com.adt.payroll.dto.TimesheetDTO;
 import com.adt.payroll.event.OnPriorTimeDetailsSavedEvent;
 import com.adt.payroll.exception.NoDataFoundException;
+import com.adt.payroll.service.Helper;
 import com.adt.payroll.model.EmployeeExpense;
+import com.adt.payroll.model.LeaveModel;
+import com.adt.payroll.model.LeaveRequestModel;
+import com.adt.payroll.model.OnLeaveRequestSaveEvent;
 import com.adt.payroll.model.Priortime;
 import com.adt.payroll.model.TimeSheetModel;
 import com.adt.payroll.model.User;
@@ -51,7 +55,29 @@ import com.adt.payroll.repository.PriorTimeRepository;
 import com.adt.payroll.repository.TimeSheetRepo;
 import com.adt.payroll.repository.UserRepo;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.*;
+import java.text.DateFormat;
+import java.text.DateFormatSymbols;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class TimeSheetServiceImpl implements TimeSheetService {
@@ -76,6 +102,10 @@ public class TimeSheetServiceImpl implements TimeSheetService {
     
     @Autowired
     ApplicationEventPublisher applicationEventPublisher;
+
+    public void updateDaysForPresentStatus() {
+        timeSheetRepo.updateDaysForPresentEntries();
+    }
 
     @Value("${Expenses_Invoice_Path}")
     private String invoicePath;
@@ -120,6 +150,11 @@ public class TimeSheetServiceImpl implements TimeSheetService {
             timeSheetModel.setCheckIn(currentDateTime.getCurrentTime());
             timeSheetModel.setYear(String.valueOf(currentDateTime.getYear()));
             timeSheetModel.setIntervalStatus(true);
+
+            LocalDate date = LocalDate.parse(currentDateTime.getCurrentDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            DayOfWeek dayOfWeek = date.getDayOfWeek();
+            timeSheetModel.setDay(dayOfWeek.getDisplayName(
+                    TextStyle.FULL, Locale.ENGLISH));
 
             if (distance >= MAX_DISTANCE_THRESHOLD) {
                 timeSheetModel.setCheckInLatitude(String.valueOf(latitude));
@@ -334,7 +369,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 			temp--;
 		}
         }catch(Exception e) {
-        	LOGGER.error(e.getMessage());	
+        	LOGGER.error(e.getMessage());
         }
         LOGGER.info("getAllDataSuccessfully return"+list);
         return list;
@@ -773,7 +808,7 @@ public String checkInCheckOutForContractBasedEmployee(String workingHours, Strin
 		timeSheetRepo.save(timeSheetData);
 		 return "TimeSheet data has been submitted successfully";
 	}else {
-		
+
 	}
 	return "TimeSheet data already present for the selected date";
 
@@ -781,7 +816,7 @@ public String checkInCheckOutForContractBasedEmployee(String workingHours, Strin
 
 @Override
 public String earlyCheckOut(double latitude, double longitude, int empId,String reason, String reasonType) throws ParseException {
-	   double distance = calculateDistance(latitude, longitude, COMPANY_LATITUDE, COMPANY_LONGITUDE); 
+	   double distance = calculateDistance(latitude, longitude, COMPANY_LATITUDE, COMPANY_LONGITUDE);
 	   CurrentDateTime currentDateTime = util.getDateTime();
        Optional<TimeSheetModel> timeSheetModelOptional = timeSheetRepo.findByEmployeeIdAndDate(empId,
                currentDateTime.getCurrentDate());
@@ -843,7 +878,7 @@ public String earlyCheckOut(double latitude, double longitude, int empId,String 
        return "You Are Not Check in";
 
 }
-   
+
 
 
 }
