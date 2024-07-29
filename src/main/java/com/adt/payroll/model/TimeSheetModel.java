@@ -73,24 +73,29 @@ public class TimeSheetModel {
 
     @Column(name = "checkOutDistance")
     private String checkOutDistance;
-    
+
     @Column(name = "reason")
     private String reason;
-    
+
     @Column(name = "earlyCheckOutStatus")
     private Boolean earlyCheckOutStatus;
-    
+
     @Column(name = "reasonType")
     private String reasonType;
 
+    @Column(name = "day")
+    private String day;
+
+
     @Transient
     private String employeeName;
-    
+
     @Transient
     private String dayOfWeek;
 
     public TimeSheetModel(int timeSheetId, int employeeId, String checkOut, String checkIn, String workingHour,
-                          String date, String status, String month, String year,String reason,Boolean earlyCheckOutStatus, String reasonType) {
+                          String date, String status, String month, String year, String reason, Boolean earlyCheckOutStatus, String reasonType, String day) {
+
         super();
         this.timeSheetId = timeSheetId;
         this.employeeId = employeeId;
@@ -101,9 +106,10 @@ public class TimeSheetModel {
         this.status = status;
         this.month = month;
         this.year = year;
-        this.reason=reason;
-        this.earlyCheckOutStatus=earlyCheckOutStatus;
-        this.reasonType=reasonType;
+        this.reason = reason;
+        this.earlyCheckOutStatus = earlyCheckOutStatus;
+        this.reasonType = reasonType;
+        this.day = day;
     }
 
     public TimeSheetModel() {
@@ -115,9 +121,9 @@ public class TimeSheetModel {
     public String toString() {
         return "TimeSheetModel [timeSheetId=" + timeSheetId + ", employeeId=" + employeeId + ", checkOut=" + checkOut
                 + ", checkIn=" + checkIn + ", workingHour=" + workingHour + ", date=" + date + ", status=" + status
-                + ", month=" + month + ", year=" + year + ", reason=" + reason + ", earlyCheckOutStatus=" + earlyCheckOutStatus + ", reasonType=" + reasonType + "]";
+                + ", month=" + month + ", year=" + year + ", reason=" + reason + ", earlyCheckOutStatus=" + earlyCheckOutStatus + ", reasonType=" + reasonType + ", day='" + day + "]";
     }
-    
+
     public String getDayOfWeek() {
         if (this.date != null && !this.date.isEmpty()) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
