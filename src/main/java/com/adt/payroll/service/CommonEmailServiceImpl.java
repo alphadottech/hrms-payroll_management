@@ -409,7 +409,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 			//mimeMessageHelper.addAttachment(name + ".pdf", source);
 			mailSender.send(mimeMessage);
 
-			log.info("Mail send to the team hr Successfully");
+			log.info("Mail send to the team hr Successfully" + name);
 		} catch (MessagingException e) {
 			log.info("Error", e.getMessage());
 		}

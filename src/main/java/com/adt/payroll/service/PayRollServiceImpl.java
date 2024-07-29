@@ -1087,7 +1087,7 @@ public class PayRollServiceImpl implements PayRollService {
 									continue;
 								}
 								if (emailInput == null) {
-									log.info("Sending mail to employee ", gmail);
+									log.info("Sending mail to employee ", +employee.getId());
 									mailService.sendEmail(baos, name, gmail,
 											paySlipDetails.get(Util.MONTH) + " " + paySlipDetails.get(Util.YEAR));
 
@@ -1130,7 +1130,7 @@ public class PayRollServiceImpl implements PayRollService {
 			Map<String, String> paySlipDetails, PaySlip paySlip) {
 		try {
 			log.info(
-					"PayRollServiceImpl: generatePaySlipForAllEmployees: saveMonthlySalaryDetails info level log message");
+					"PayRollServiceImpl: generatePaySlipForAllEmployees: saveMonthlySalaryDetails info level log message"+ salaryDetails.getEmpId());
 	
 			saveMonthlySalaryDetails.setEmpId(salaryDetails.getEmpId());
 			saveMonthlySalaryDetails.setBasic(salaryDetails.getBasic());
