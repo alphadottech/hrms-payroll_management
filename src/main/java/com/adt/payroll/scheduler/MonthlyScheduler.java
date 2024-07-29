@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
@@ -69,7 +70,7 @@ public class MonthlyScheduler {
 
 	}
 
-	// @Scheduled(cron = "0 */2 * * * *")
+	//@Scheduled(cron = "0 */2 * * * *")
 	@Scheduled(cron = "0 0 8 * * MON") // Executes on the every Monday at 8 AM
 	public void sendNotificationForTimeSheet() {
 		log.info("Generate weekly time sheet report ");
@@ -79,9 +80,24 @@ public class MonthlyScheduler {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		List<TimeSheetModel> timeSheet = timeSheetRepo.findTimeSheetWithNullValues(startDate.format(formatter),
 				endDate.format(formatter));
+		LocalDateTime fixedWorkingHour = LocalDateTime.now().withHour(9).withMinute(30).withSecond(0).withNano(0);
+
 		if (!timeSheet.isEmpty() && timeSheet.size() > 0) {
-			Map<Integer, List<TimeSheetModel>> employeeTimeSheetDetails = timeSheet.stream()
-					.collect(Collectors.groupingBy(TimeSheetModel::getEmployeeId));
+			Map<Integer, List<TimeSheetModel>> employeeTimeSheetDetails = timeSheet.stream().filter(ts -> {
+				LocalDateTime empWorkingHours = null;
+				if (ts.getWorkingHour() != null && !ts.getWorkingHour().isEmpty()) {
+					String[] arrayOfHours = ts.getWorkingHour().split(":");
+					int hour = Integer.parseInt(arrayOfHours[0]);
+					int minute = Integer.parseInt(arrayOfHours[1]);
+					empWorkingHours = LocalDateTime.now().withHour(hour).withMinute(minute).withSecond(0).withNano(0);
+					boolean isBefore = empWorkingHours.isBefore(fixedWorkingHour);
+					return isBefore;
+				} else {
+					return true;
+				}
+
+			}).collect(Collectors.groupingBy(TimeSheetModel::getEmployeeId));
+
 			employeeTimeSheetDetails.forEach((i, e) -> {
 				try {
 					Optional<User> user = Optional.ofNullable(userRepo.findById(i)
@@ -90,6 +106,7 @@ public class MonthlyScheduler {
 					mailService.sendEmailForTimeSheet(employeeReport,
 							user.get().getFirstName() + " " + user.get().getLastName(), user.get().getEmail(),
 							startDate.format(formatter) + " to " + endDate.format(formatter));
+
 				} catch (IOException ex) {
 					log.error("Error while generating timesheet report.", ex.getMessage());
 				}
@@ -102,7 +119,7 @@ public class MonthlyScheduler {
 		Sheet sheet = workbook.createSheet("TimeSheet Report");
 
 		Row headerRow = sheet.createRow(0);
-		String[] headers = {"ID", "Check-In", "Check-Out", "Working Hour", "Date"};
+		String[] headers = {"ID", "Check-In", "Check-Out", "Working Hour", "Date", "Day"};
 		for (int i = 0; i < headers.length; i++) {
 			Cell cell = headerRow.createCell(i);
 			cell.setCellValue(headers[i]);
@@ -117,6 +134,7 @@ public class MonthlyScheduler {
 			row.createCell(3)
 					.setCellValue(timeSheetModel.getWorkingHour() != null ? timeSheetModel.getWorkingHour() : "NULL");
 			row.createCell(4).setCellValue(timeSheetModel.getDate() != null ? timeSheetModel.getDate() : "NULL");
+			row.createCell(5).setCellValue(timeSheetModel.getDay() != null ? timeSheetModel.getDay() : "NULL");
 		}
 
 		try (ByteArrayOutputStream fileOut = new ByteArrayOutputStream()) {
