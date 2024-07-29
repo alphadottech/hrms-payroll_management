@@ -129,35 +129,50 @@ public class AppraisalDetailsServiceImpl implements AppraisalDetailsService,Mont
         }
     }
 
-
 	@Override
-	public List<SalaryDTO> getAllMonthlySalaryDetails() {
-		List<SalaryDTO> monthSalaryResponse = new ArrayList();
-		String date = monthlySalaryDetailsRepo.findLatestSalaryCreditedDate();
-		Optional<List<MonthlySalaryDetails>> salaryDetails = monthlySalaryDetailsRepo.findByCreditedDate(date);
-		if (salaryDetails.isEmpty() || !salaryDetails.isPresent()) {
-			return monthSalaryResponse;
+	public ResponseEntity<List<SalaryDTO>> getAllMonthlySalaryDetails() {
+		List<SalaryDTO> monthSalaryResponse = new ArrayList<>();
+		try {
+			String date = monthlySalaryDetailsRepo.findLatestSalaryCreditedDate();
+			Optional<List<MonthlySalaryDetails>> salaryDetails = monthlySalaryDetailsRepo.findByCreditedDate(date);
+
+			if (salaryDetails.isEmpty()) {
+				return new ResponseEntity<>(monthSalaryResponse, HttpStatus.NOT_FOUND);
+			}
+
+			for (MonthlySalaryDetails salaryDetail : salaryDetails.get()) {
+				SalaryDTO monthSalaryDTO = new SalaryDTO();
+				monthSalaryDTO.setEmpId(salaryDetail.getEmpId());
+				monthSalaryDTO.setEmployeeEsic(salaryDetail.getEmployeeESICAmount());
+				monthSalaryDTO.setEmployerEsic(salaryDetail.getEmployerESICAmount());
+				monthSalaryDTO.setEmployeePf(salaryDetail.getEmployeeESICAmount());
+				monthSalaryDTO.setEmployerPf(salaryDetail.getEmployerPFAmount());
+				monthSalaryDTO.setMedicalAmount(salaryDetail.getMedicalInsurance());
+				monthSalaryDTO.setNetPay(salaryDetail.getNetSalary());
+
+				Optional<EmpPayrollDetails> empPayrollDetails = empPayrollDetailsRepo.findByEmployeeId(salaryDetail.getEmpId());
+
+				if (empPayrollDetails.isPresent()) {
+					monthSalaryDTO.setBankName(empPayrollDetails.get().getBankName());
+					monthSalaryDTO.setAccountNo(empPayrollDetails.get().getAccountNumber());
+					monthSalaryDTO.setEmployeeName(empPayrollDetails.get().getUser().getFirstName() + " "
+							+ empPayrollDetails.get().getUser().getLastName());
+				}
+
+				monthSalaryDTO.setMonth(salaryDetail.getMonth());
+				monthSalaryDTO.setYear(salaryDetail.getCreditedDate().substring(salaryDetail.getCreditedDate().length() - 4));
+				monthSalaryResponse.add(monthSalaryDTO);
+			}
+
+			return new ResponseEntity<>(monthSalaryResponse, HttpStatus.OK);
+
+		} catch (Exception e) {
+			LOGGER.error("An error occurred while retrieving monthly salary details: " + e.getMessage());
+			return new ResponseEntity<>(monthSalaryResponse, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		for (MonthlySalaryDetails salaryDetail : salaryDetails.get()) {
-			SalaryDTO monthSalaryDTO = new SalaryDTO();
-			monthSalaryDTO.setEmpId(salaryDetail.getEmpId());
-			monthSalaryDTO.setEmployeeEsic(salaryDetail.getEmployeeESICAmount());
-			monthSalaryDTO.setEmployerEsic(salaryDetail.getEmployerESICAmount());
-			monthSalaryDTO.setEmployeePf(salaryDetail.getEmployeeESICAmount());
-			monthSalaryDTO.setEmployerPf(salaryDetail.getEmployerPFAmount());
-			monthSalaryDTO.setMedicalAmount(salaryDetail.getMedicalInsurance());
-			monthSalaryDTO.setNetPay(salaryDetail.getNetSalary());
-			Optional<EmpPayrollDetails> empPayrollDetails = empPayrollDetailsRepo
-					.findByEmployeeId(salaryDetail.getEmpId());
-			monthSalaryDTO.setBankName(empPayrollDetails.get().getBankName());
-			monthSalaryDTO.setAccountNo(empPayrollDetails.get().getAccountNumber());
-			monthSalaryDTO.setEmployeeName(empPayrollDetails.get().getUser().getFirstName() + " "
-					+ empPayrollDetails.get().getUser().getLastName());
-			monthSalaryResponse.add(monthSalaryDTO);
-		}
-		return monthSalaryResponse;
 	}
-    public ByteArrayInputStream getExcelData(Integer empId) throws IOException {
+
+	public ByteArrayInputStream getExcelData(Integer empId) throws IOException {
         List<MonthlySalaryDetails> list=monthlySalaryDetailsRepo.findSalaryDetailsByEmpId(empId);
         Optional<EmpPayrollDetails> list1=empPayrollDetailsRepo.findByEmployeeId(empId);
         ByteArrayInputStream byteArrayInputStream= MonthlySalaryHelper.dataToExcel(list,list1);

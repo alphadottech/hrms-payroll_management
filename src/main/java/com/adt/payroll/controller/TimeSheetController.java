@@ -77,8 +77,7 @@ public class TimeSheetController {
 
     @Autowired
     TimeSheetRepo timeSheetRepo;
-   
-
+    
     @Autowired
     PriorTimeRepository priorTimeRepository;
     
@@ -334,7 +333,15 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
 	   LOGGER.info("Payroll service: leave:  RejectLeaveRequest Info level log msg");   
 	  return new ResponseEntity<>(timeSheetService.reSendPriorTimeRequest(priortimeId), HttpStatus.OK); 
 	  }
-	 
+	  
+	  
+	  @PutMapping("/earlyCheckOut/{empId}") 
+	  public ResponseEntity<String>earlyCheckOut(@RequestParam("Latitude") double latitude, @RequestParam("Longitude")
+	  double longitude,@PathVariable int empId,@RequestParam("reason") String reason,@RequestParam("type") String type) throws ParseException{   	 
+		  return new ResponseEntity<>(timeSheetService.earlyCheckOut(latitude,longitude,empId,reason,type), HttpStatus.OK);  
+	  }
+	  
+	  
 
 
 }

@@ -82,6 +82,10 @@ public class Util {
     public static final String HalfDay = "Half Day";
     public static final String JobTitle = "Job Title";
     public static final String JoiningDate = "Joining Date";
+    public static final String BONUS = "Bonus";
+    public static final String ABSENT_DEDUCTION = "Absent deduction";
+    public static final String PAYSLIP_VALIDATION_MSG =": Expected value [value] does not matched with given input ";
+
 
     public static String months[] = {"JANUARY", "FEBRUARY", "MARCH", "APRIL",
             "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER",
@@ -294,5 +298,10 @@ public class Util {
 		return paySlipDetails;
 	}
 	
-
+	public String getCreatedDate(int day) {
+		SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.DAY_OF_MONTH, day);
+		return f.format(cal.getTime());
+	}
 }

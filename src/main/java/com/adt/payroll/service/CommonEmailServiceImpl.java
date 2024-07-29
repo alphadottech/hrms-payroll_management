@@ -202,6 +202,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 	//*** START:- To create payslip and then send mail ***
 	@Override
 	public void sendEmail(ByteArrayOutputStream baos, String name, String gmail, String monthYear) {
+		log.info("sendEmail started");
 		String massage = Util.msg.replace("[Name]", name).replace("[Your Name]", "AlphaDot Technologies")
 				.replace("[Month, Year]", monthYear);
 		MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -216,12 +217,12 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 			mimeMessageHelper.setText(massage);
 			mimeMessageHelper.setSubject("Salary Slip" + "-" + monthYear);
 			mimeMessageHelper.addAttachment(name + ".pdf", source);
-
+			log.info("sendEmail end");
 			mailSender.send(mimeMessage);
 
 			log.info("Mail send Successfully");
 		} catch (MessagingException e) {
-			log.error("getting error send email="+e.getMessage());
+			log.error("getting error while send email="+e.getMessage());
 
 		}
 	}
@@ -464,7 +465,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 				try {
 					mimeMessageHelper.addAttachment(m.getValue() + ".pdf", source);
 				} catch (MessagingException e) {
-					// TODO Auto-generated catch block
+					log.error("Error getting while send mail", e.getMessage());
 					e.printStackTrace();
 				}
 			} );

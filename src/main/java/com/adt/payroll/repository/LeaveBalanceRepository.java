@@ -22,6 +22,10 @@ public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, Inte
 	@Query(value = "UPDATE payroll_schema.leave_balance SET leave_balance=?2, paid_leave=?3, unpaid_leave=?4, half_day=?5 WHERE emp_id =?1", nativeQuery = true)
 	public void updateAllLeavesByEmpId( int empId,int leaveBal, int empPaidLeave, int empUnpaidLeave, int halfday);
 
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE payroll_schema.leave_balance SET leave_balance=?2 WHERE emp_id =?1", nativeQuery = true)
+	public void updateLeaveBalByEmpId( int empId,int leaveBal);
 //UPDATE payroll_schema.leave_balance SET leave_balance=0, paid_leave=1, unpaid_leave=2 WHERE emp_id ='37'
 	// half_day=1,
 

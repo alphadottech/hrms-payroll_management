@@ -250,7 +250,7 @@ public class DetailedSalarySlip {
 	}
 
 	// mpdified code
-	public ByteArrayOutputStream generateDetailedSalarySlipPDF(SalaryDetails salaryDetails, PaySlip paySlip,
+	public ByteArrayOutputStream generateDetailedSalarySlipPDF(String adtId, SalaryDetails salaryDetails, PaySlip paySlip,
 			String joiningDate, String currentMonth, double adjustment) throws DocumentException, IOException {
 
 		log.info("generateDetailedSalarySlipPDF:---");
@@ -328,7 +328,7 @@ public class DetailedSalarySlip {
 		empDetailsTable.setSpacingAfter(10f);
 
 		addTableCell2(empDetailsTable, "Employee Name", paySlip.getName(), 2);
-		addTableCell2(empDetailsTable, "Employee ID", String.valueOf(salaryDetails.getEmpId()), 2);
+		addTableCell2(empDetailsTable, "Employee ID", adtId, 2);
 		addTableCell2(empDetailsTable, "Designation", paySlip.getJobTitle(), 2);
 		addTableCell2(empDetailsTable, "Joining Date", joiningDate, 2);
 		addTableCell2(empDetailsTable, "Pay Period", paySlip.getPayPeriods(), 2);
@@ -360,17 +360,17 @@ public class DetailedSalarySlip {
 
 		PdfPTable earningsTable = createParallelTable("Earnings", "Basic Salary",
 				String.valueOf(salaryDetails.getBasic()), "Hra", String.valueOf(salaryDetails.getHouseRentAllowance()),
-				"Adhoc", String.valueOf(0));// adhoc1));
+				"Adhoc", String.valueOf(paySlip.getAdhoc()),"Bonus", String.valueOf(0));// adhoc1));
 		PdfPCell earningsCell = new PdfPCell(earningsTable);
 		double grossEarning = salaryDetails.getGrossSalary();
 		mainTable.addCell(earningsCell);
 		// Add Deductions Table
 
 		PdfPTable deductionsTable = createParallelTable("Deductions", "Esic Deduction",
-				String.valueOf(salaryDetails.getEmployeeESICAmount()), "PF Deduction",
+				String.valueOf(salaryDetails.getEmployeeESICAmount()!=null?salaryDetails.getEmployeeESICAmount():0), "PF Deduction",
 				String.valueOf(salaryDetails.getEmployeePFAmount()), "Adjustment", String.valueOf(adjustment),
 				"Absent Deduction", String.valueOf(Math.round(paySlip.getLeaveDeductionAmount())), "Medical Insurance",
-				String.valueOf(salaryDetails.getMedicalInsurance()));
+				String.valueOf(salaryDetails.getMedicalInsurance()!=null?salaryDetails.getMedicalInsurance():0));
 		PdfPCell deductionsCell = new PdfPCell(deductionsTable);
 		double grossDeduction = paySlip.getGrossDeduction();
 		mainTable.addCell(deductionsCell);
@@ -391,7 +391,7 @@ public class DetailedSalarySlip {
 		Font smallFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
 
 		document.close();
-		log.info("generateDetailedSalarySlipPDF-outputStream:---" + outputStream);
+		log.info("generateDetailedSalarySlipPDF end");
 		return outputStream;
 	}
 }
