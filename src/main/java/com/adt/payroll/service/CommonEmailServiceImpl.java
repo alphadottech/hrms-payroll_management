@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
@@ -200,6 +201,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 	//*** END:- For Prior Time ***
 
 	//*** START:- To create payslip and then send mail ***
+	@Async
 	@Override
 	public void sendEmail(ByteArrayOutputStream baos, String name, String gmail, String monthYear) {
 		log.info("sendEmail started");
@@ -391,7 +393,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 
 		}
 	}
-	
+	@Async
 	@Override
 	public void sendEmail( String name, String msg) {
 		String massage= Util.ERR_MESSAGE.replace("[Name]", name).replace("[errorMsg]", msg);
