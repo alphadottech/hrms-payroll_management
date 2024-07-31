@@ -368,7 +368,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		
 	}
 	
-	
+	@Async
 	@Override
 	public void sendEmail( String name) {
 		String massage= Util.MESSAGE.replace("[Name]", name);
@@ -417,6 +417,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		}
 	}
 	
+	@Async
 	@Override
 	public void sendEmailForTimeSheet(ByteArrayOutputStream baos, String name, String gmail, String date) {
 		String massage = Util.TIME_SHEET_MSG.replace("[Name]", name).replace("[Company Name]", "AlphaDot Technologies")
@@ -445,6 +446,7 @@ public class CommonEmailServiceImpl implements CommonEmailService {
 		}
 	}
 	
+	@Async
 	@Override
 	public void sendEmail(Map<ByteArrayOutputStream, String> baos, String name, String gmail, String monthYear) {
 		String massage = Util.msg.replace("[Name]", name).replace("[Your Name]", "AlphaDot Technologies")
