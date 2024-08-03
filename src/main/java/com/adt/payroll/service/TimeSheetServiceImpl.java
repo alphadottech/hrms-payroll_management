@@ -160,12 +160,14 @@ public class TimeSheetServiceImpl implements TimeSheetService {
                 timeSheetModel.setCheckInLatitude(String.valueOf(latitude));
                 timeSheetModel.setCheckInLongitude(String.valueOf(longitude));
                 timeSheetModel.setCheckInDistance(String.valueOf(distance));
+                timeSheetModel.setCheckInDistanceStatus("checkedIn out of office");
                 timeSheetRepo.save(timeSheetModel);
                 return " you have check in with latitude: " + latitude + " and longitude: " + longitude + ", which are not within office covered distance";
             }
             timeSheetModel.setCheckInLatitude(String.valueOf(latitude));
             timeSheetModel.setCheckInLongitude(String.valueOf(longitude));
             timeSheetModel.setCheckInDistance(String.valueOf(distance));
+            timeSheetModel.setCheckInDistanceStatus("checkedIn from office");
             LOGGER.info(currentDateTime.getCurrentTime());
             timeSheetRepo.save(timeSheetModel);
             return "you have check in with latitude: " + latitude + " and longitude: " + longitude;
@@ -229,6 +231,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
                 timeSheetModel.setCheckOutLatitude(String.valueOf(latitude));
                 timeSheetModel.setCheckOutLongitude(String.valueOf(longitude));
                 timeSheetModel.setCheckOutDistance(String.valueOf(distance));
+                timeSheetModel.setCheckOutDistanceStatus("checkedOut out of office");
                 timeSheetRepo.save(timeSheetModel);
                 return " you have Check out with latitude: " + latitude + " and longitude: " + longitude + ", which are not within office covered distance";
             }
@@ -236,6 +239,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
             timeSheetModel.setCheckOutLatitude(String.valueOf(latitude));
             timeSheetModel.setCheckOutLongitude(String.valueOf(longitude));
             timeSheetModel.setCheckOutDistance(String.valueOf(distance));
+            timeSheetModel.setCheckOutDistanceStatus("checkedOut from office");
             timeSheetRepo.save(timeSheetModel);
             return "you have Check out with latitude: " + latitude + " and longitude: " + longitude;
         }

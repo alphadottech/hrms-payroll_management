@@ -85,6 +85,12 @@ public class TimeSheetModel {
 
     @Column(name = "day")
     private String day;
+    
+    @Column(name = "check_in_distance_status")
+    private String checkInDistanceStatus;
+    
+    @Column(name = "check_out_distance_status")
+    private String checkOutDistanceStatus;
 
 
     @Transient
@@ -94,7 +100,7 @@ public class TimeSheetModel {
     private String dayOfWeek;
 
     public TimeSheetModel(int timeSheetId, int employeeId, String checkOut, String checkIn, String workingHour,
-                          String date, String status, String month, String year, String reason, Boolean earlyCheckOutStatus, String reasonType, String day) {
+                          String date, String status, String month, String year, String reason, Boolean earlyCheckOutStatus, String reasonType, String day,String checkInDistanceStatus,String checkOutDistanceStatus) {
 
         super();
         this.timeSheetId = timeSheetId;
@@ -110,6 +116,8 @@ public class TimeSheetModel {
         this.earlyCheckOutStatus = earlyCheckOutStatus;
         this.reasonType = reasonType;
         this.day = day;
+        this.checkInDistanceStatus=checkInDistanceStatus;
+        this.checkOutDistanceStatus=checkOutDistanceStatus;
     }
 
     public TimeSheetModel() {
@@ -121,7 +129,7 @@ public class TimeSheetModel {
     public String toString() {
         return "TimeSheetModel [timeSheetId=" + timeSheetId + ", employeeId=" + employeeId + ", checkOut=" + checkOut
                 + ", checkIn=" + checkIn + ", workingHour=" + workingHour + ", date=" + date + ", status=" + status
-                + ", month=" + month + ", year=" + year + ", reason=" + reason + ", earlyCheckOutStatus=" + earlyCheckOutStatus + ", reasonType=" + reasonType + ", day='" + day + "]";
+                + ", month=" + month + ", year=" + year + ", reason=" + reason + ", earlyCheckOutStatus=" + earlyCheckOutStatus + ", reasonType=" + reasonType + ", day='" + day + ", checkInDistanceStatus=" + checkInDistanceStatus + ", checkOutDistanceStatus=" + checkOutDistanceStatus +"]";
     }
 
     public String getDayOfWeek() {
