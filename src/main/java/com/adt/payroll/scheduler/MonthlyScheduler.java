@@ -252,35 +252,35 @@ public class MonthlyScheduler {
 
 //	@Scheduled(cron = "0 */1 * * * *")
 	//@Scheduled(cron = "0 0 0 28-31 * ?") // Executes at midnight on the 28th to 31st of every month
-	@Transactional
-	public String sendLeaveNotificationOnMonthlyBasis() {
-		LocalDate currentDate = LocalDate.now();
-		LocalDate lastDayOfMonth = currentDate.withDayOfMonth(currentDate.lengthOfMonth());
-		// This block ensures the task runs only on the last day of the month
-		if (!currentDate.isEqual(lastDayOfMonth)) {
-			return "Not the last day of the month, task not executed.";
-		}
-		// Fetch all users
-		List<User> users = userRepo.findAll();
-		users.forEach(user -> {
-			try {
-				int employeeId = user.getId();
-				Optional<LeaveBalance> leaveBalanceOpt = Optional.ofNullable(leaveBalanceRepo.findByEmpId(employeeId));
-				LeaveBalance leaveBalance = leaveBalanceOpt.orElseGet(() -> {
-					LeaveBalance newLeaveBalance = new LeaveBalance();
-					newLeaveBalance.setEmpId(employeeId);
-					newLeaveBalance.setLeaveBalance(1); // Initialize paid leave to 0
-					return newLeaveBalance;
-				});
-				// Allocate 1 paid leave at the start of the month
-				leaveBalance.setLeaveBalance(leaveBalance.getPaidLeave() + 1);
-				// Save the updated leave balance
-				leaveBalanceRepo.save(leaveBalance);
-				log.info("Leave notification and balance updated successfully for employee: {} {}", user.getFirstName(), user.getLastName());
-			} catch (Exception ex) {
-				log.error("Error processing leave notification for employeeId: {}. Exception message: {}", user.getId(), ex.getMessage(), ex);
-			}
-		});
-		return "Leave notifications and balances sent successfully for users.";
-	}
+//	@Transactional
+//	public String sendLeaveNotificationOnMonthlyBasis() {
+//		LocalDate currentDate = LocalDate.now();
+//		LocalDate lastDayOfMonth = currentDate.withDayOfMonth(currentDate.lengthOfMonth());
+//		// This block ensures the task runs only on the last day of the month
+//		if (!currentDate.isEqual(lastDayOfMonth)) {
+//			return "Not the last day of the month, task not executed.";
+//		}
+//		// Fetch all users
+//		List<User> users = userRepo.findAll();
+//		users.forEach(user -> {
+//			try {
+//				int employeeId = user.getId();
+//				Optional<LeaveBalance> leaveBalanceOpt = Optional.ofNullable(leaveBalanceRepo.findByEmpId(employeeId));
+//				LeaveBalance leaveBalance = leaveBalanceOpt.orElseGet(() -> {
+//					LeaveBalance newLeaveBalance = new LeaveBalance();
+//					newLeaveBalance.setEmpId(employeeId);
+//					newLeaveBalance.setLeaveBalance(1); // Initialize paid leave to 0
+//					return newLeaveBalance;
+//				});
+//				// Allocate 1 paid leave at the start of the month
+//				leaveBalance.setLeaveBalance(leaveBalance.getPaidLeave() + 1);
+//				// Save the updated leave balance
+//				leaveBalanceRepo.save(leaveBalance);
+//				log.info("Leave notification and balance updated successfully for employee: {} {}", user.getFirstName(), user.getLastName());
+//			} catch (Exception ex) {
+//				log.error("Error processing leave notification for employeeId: {}. Exception message: {}", user.getId(), ex.getMessage(), ex);
+//			}
+//		});
+//		return "Leave notifications and balances sent successfully for users.";
+//	}
 }
