@@ -63,7 +63,8 @@ public class SalaryDetailsController {
 	
 	@PreAuthorize("@auth.allow('GET_ALL_MONTHLY_SALARY_DETAILS')")
 	@GetMapping("/getAllMonthlySalaryDetails")
-	public ResponseEntity<?> getAllSalaryDetails() {
+	public ResponseEntity<?> getAllSalaryDetails(HttpServletRequest request) {
+		LOGGER.info("API Call From IP: " + request.getRemoteHost());
 		for(int i=1; i<=5; i++){
 			LOGGER.info("Payroll loop Started ");
 			try {
