@@ -64,8 +64,21 @@ public class SalaryDetailsController {
 	@PreAuthorize("@auth.allow('GET_ALL_MONTHLY_SALARY_DETAILS')")
 	@GetMapping("/getAllMonthlySalaryDetails")
 	public ResponseEntity<?> getAllSalaryDetails() {
-		LOGGER.info("PayrollService: SalaryDetailsController:Getting all Monthly Salary Details Info level log msg");
-		return monthlySalaryService.getAllMonthlySalaryDetails();
+		for(int i=1; i<=5; i++){
+			LOGGER.info("Payroll loop Started ");
+			try {
+				Thread.sleep(60000);
+				LOGGER.info("Payroll loop iteration ened {} ", i);
+				 monthlySalaryService.getAllMonthlySalaryDetails();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
+	    LOGGER.info("PayrollService: SalaryDetailsController:Getting all Monthly Salary Details Info level log msg");
+		return null;
 	}
 
 	@PreAuthorize("@auth.allow('GET_ALL_MONTHLY_SALARY_DETAILS_BY_ID_EXPORT_TO_EXCEL')")
