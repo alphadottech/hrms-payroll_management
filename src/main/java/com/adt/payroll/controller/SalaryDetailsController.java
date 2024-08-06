@@ -65,21 +65,8 @@ public class SalaryDetailsController {
 	@GetMapping("/getAllMonthlySalaryDetails")
 	public ResponseEntity<?> getAllSalaryDetails(HttpServletRequest request) {
 		LOGGER.info("API Call From IP: " + request.getRemoteHost());
-		for(int i=1; i<=5; i++){
-			LOGGER.info("Payroll loop Started ");
-			try {
-				Thread.sleep(60000);
-				LOGGER.info("Payroll loop iteration ened {} ", i);
-				 monthlySalaryService.getAllMonthlySalaryDetails();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-		}
-		
 	    LOGGER.info("PayrollService: SalaryDetailsController:Getting all Monthly Salary Details Info level log msg");
-		return null;
+		return monthlySalaryService.getAllMonthlySalaryDetails();
 	}
 
 	@PreAuthorize("@auth.allow('GET_ALL_MONTHLY_SALARY_DETAILS_BY_ID_EXPORT_TO_EXCEL')")
