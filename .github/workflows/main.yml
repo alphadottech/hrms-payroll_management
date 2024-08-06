@@ -32,4 +32,4 @@ jobs:
       with:
         context: .
         push: true
-        tags: ajaymishraadt/payroll:0.0.1-SNAPSHOT
+        tags: ajaymishraadt/payroll:0.0.1-RELEASE
