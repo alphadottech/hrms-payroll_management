@@ -2,7 +2,7 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "production" ]
 
 jobs:
   build:
@@ -32,4 +32,4 @@ jobs:
       with:
         context: .
         push: true
-        tags: ajaymishraadt/payroll:0.0.1-SNAPSHOT
+        tags: ajaymishraadt/payroll:0.0.1-RELEASE
