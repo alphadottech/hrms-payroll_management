@@ -333,8 +333,8 @@ public ResponseEntity<List<TimesheetDTO>> empAttendence(@RequestParam("empId") i
 	   LOGGER.info("Payroll service: leave:  RejectLeaveRequest Info level log msg");   
 	  return new ResponseEntity<>(timeSheetService.reSendPriorTimeRequest(priortimeId), HttpStatus.OK); 
 	  }
-	  
-	  
+
+      @PreAuthorize("@auth.allow('EARLY_CHECK_OUT_BY_EMPID')")
 	  @PutMapping("/earlyCheckOut/{empId}") 
 	  public ResponseEntity<String>earlyCheckOut(@RequestParam("Latitude") double latitude, @RequestParam("Longitude")
 	  double longitude,@PathVariable int empId,@RequestParam("reason") String reason,@RequestParam("type") String type) throws ParseException{   	 

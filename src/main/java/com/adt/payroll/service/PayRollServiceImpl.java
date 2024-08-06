@@ -1004,19 +1004,6 @@ public class PayRollServiceImpl implements PayRollService {
 										continue;
 									}
 									double empGrossSalaryAmount = grossAmount;
-									double grossSalaryDifference = Math.round(calculatedGross - empGrossSalaryAmount);
-
-									if (grossSalaryDifference > 100) {
-										log.info("Gross salary calculation is not correct.");
-										mailService.sendEmail(name, "The gross salary difference amount is: "
-												+ grossSalaryDifference
-												+ " ,while the gross salary amount retrived from database is: "
-												+ empGrossSalaryAmount
-												+ " and the calculated & validated gross salary amount is: "
-												+ calculatedGross
-												+ " ,please check entered salary details & enter the correct gross salary amount for the mentioned employee");
-										continue;
-									}
 									
 									double totalLeaveDeduction = calculateAndUpdateEmployeeTotalLeaves(
 											salaryDetails.get().getEmpId(), empGrossSalaryAmount,
@@ -1293,84 +1280,27 @@ public class PayRollServiceImpl implements PayRollService {
 
 	// gross salary calculation for verification
 	private double grossSalaryCalculation(EmpPayrollDetails empPayrollDetails, double fixedBasic,
-			SalaryDetails salaryDetails, boolean isESIC, String name) {
-		double salary = empPayrollDetails.getSalary();
-		double actualBasic = salary / 2;
-		double grossSalaryAmount = salary;
-		// employer pf and esic portion calculation 13% and 3.25% respectively
-		double employerPFAmount = Math.round(actualBasic * 0.13);
-		double employerESICAmount = Math.round(grossSalaryAmount * 0.0325);
+										  SalaryDetails salaryDetails, boolean isESIC, String name) {
+
+		double grossSalaryAmount = empPayrollDetails.getSalary();;
 		double employeeESICAmount = Math.round(grossSalaryAmount * 0.0075);
-		String msg = "";
-		double esicAmt = salaryDetails.getEmployerESICAmount()!=null?salaryDetails.getEmployerESICAmount():0;
+
+		double esicEmployerAmt = salaryDetails.getEmployerESICAmount()!=null?salaryDetails.getEmployerESICAmount():0;
 		double pfEmployer= salaryDetails.getEmployerPFAmount()!=null?salaryDetails.getEmployerPFAmount():0;
+
 		if (isESIC) {
-			if (Math.round(employerESICAmount - esicAmt) > 100) {
-
-				msg = "employer ESIC amount difference is: "
-						+ Math.round(employerESICAmount - esicAmt)
-						+ " ,while the employer ESIC amount retrived from database is: "
-						+ esicAmt
-						+ " & the calculated & validated employer ESIC amount is: " + employerESICAmount
-						+ " ,please check entered salary details & enter the correct employer ESIC amount for the mentioned employee";
-			}	
-		}
-		if (Math.round(employerPFAmount - pfEmployer) > 100) {
-
-			msg = "employer PF amount difference is: "
-					+ Math.round(employerPFAmount - pfEmployer)
-					+ ",while the employer PF amount retrived from database is: " + pfEmployer
-					+ " & the calculated & validated employer PF amount is: " + employerPFAmount
-					+ " ,please check entered salary details & enter the correct employer PF amount for the mentioned employee";
-		}
-		
-		//calculating gross salary of an employee (deduction of employer portion)		
-		if (msg.isEmpty()) {
-			if (isESIC) {
-				grossSalaryAmount = Math.round(grossSalaryAmount - employerPFAmount
-						- (employeeESICAmount + employerESICAmount) + (grossSalaryAmount * 0.01617));
-				// calculating employee esic
-				employeeESICAmount=Math.round(grossSalaryAmount * 0.0075);
-				double esicEmployee =salaryDetails.getEmployeeESICAmount()!=null?salaryDetails.getEmployeeESICAmount():0;
-				if (Math.round(employeeESICAmount - esicEmployee) > 100) {
-
-					msg = "employee ESIC amount difference is: "
-							+ Math.round(employeeESICAmount - esicEmployee)
-							+ " ,while the employee ESIC amount retrived from database is: "
-							+ esicEmployee
-							+ " & the calculated & validated employee ESIC amount is: " + employeeESICAmount
-							+ " ,please check entered salary details & enter the correct employee ESIC amount for the mentioned employee";
-				}
+			grossSalaryAmount = Math.round(grossSalaryAmount - pfEmployer
+					- (esicEmployerAmt + employeeESICAmount) + (grossSalaryAmount * 0.01617));
+		} else {
+			if (fixedBasic == 15000) {
+				grossSalaryAmount = Math
+						.round(grossSalaryAmount - (fixedBasic * 0.13) + (grossSalaryAmount * 0.01617));
 			} else {
-				if (fixedBasic == 15000) {
-					grossSalaryAmount = Math
-							.round(grossSalaryAmount - (fixedBasic * 0.13) + (grossSalaryAmount * 0.01617));
-				} else {
-					grossSalaryAmount = Math
-							.round(grossSalaryAmount - employerPFAmount + (grossSalaryAmount * 0.01617));
-				}
+				grossSalaryAmount = Math
+						.round(grossSalaryAmount - pfEmployer + (grossSalaryAmount * 0.01617));
 			}
-			
-			double pf=salaryDetails.getEmployeePFAmount()!=null?salaryDetails.getEmployeePFAmount():0;
-			msg = validateEmployeePF(grossSalaryAmount, pf);
-		}
-		if (!msg.isEmpty()) {
-			mailService.sendEmail(name, msg);
-			return -1;
 		}
 		return grossSalaryAmount;
-	}
-
-	private String validateEmployeePF(double calculatedGross, double employeePFAmount) {
-		double basic = calculatedGross / 2;
-		double empCalcutedPFAmount = Math.round(basic * 0.12);
-		if (Math.round(empCalcutedPFAmount - employeePFAmount) > 100) {
-			return "employee PF amount difference is: " + Math.round(empCalcutedPFAmount - employeePFAmount)
-			+ " ,while the employee PF amount retrived from database is: " + employeePFAmount
-			+ " and the calculated & validated employee PF amount is: " + empCalcutedPFAmount
-			+ " ,please check entered salary details & enter the correct employee PF amount for the mentioned employee";
-		}
-		return "";
 	}
 
 	@Override
