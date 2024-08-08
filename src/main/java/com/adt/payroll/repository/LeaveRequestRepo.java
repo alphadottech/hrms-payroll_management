@@ -1,6 +1,7 @@
 package com.adt.payroll.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,4 +23,5 @@ LeaveRequestModel findByLeaveid(int leaveid);
 @Query(value = "select * from payroll_schema.leave_request where empid =?1 and leaveid =?2",nativeQuery= true)
 LeaveRequestModel search(Integer empid, Integer leaveId);
 
+    Optional<Object> findByEmpidAndLeaveid(int empId, int leaveId);
 }

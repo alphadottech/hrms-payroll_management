@@ -157,5 +157,12 @@ public class LeaveController {
 		LOGGER.info("Payroll service: leave:  RejectLeaveRequest Info level log msg");
 		return new ResponseEntity<>(leaveRequestService.reSendLeaveRequest(leaveId), HttpStatus.OK);
 	}
-	
+	@PreAuthorize("@auth.allow('GET_ALL_LEAVE_BY_EMP_ID_AND_LEAVE_ID')")
+	@GetMapping("getAllLeaveByEmpIdAndLeaveId/{empId}/{leaveId}")
+	public ResponseEntity<LeaveRequestModel> getLeaveRequestDetailsByEmpIdAndLeaveId(
+			@PathVariable("empId") int empId,
+			@PathVariable("leaveId") int leaveId) {
+		LOGGER.info("Payroll service: leave: getLeaveRequestDetailsByEmpIdAndLeaveId Info level log msg");
+		return new ResponseEntity<>(leaveRequestService.getLeaveRequestDetailsByEmpIdAndLeaveId(empId, leaveId), HttpStatus.OK);
+	}
 }

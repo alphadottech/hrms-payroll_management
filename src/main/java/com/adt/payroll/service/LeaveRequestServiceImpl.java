@@ -336,6 +336,12 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     	return "this records  not persent "; 
     	 
      }
-	
+		@Override
+		public LeaveRequestModel getLeaveRequestDetailsByEmpIdAndLeaveId(int empId, int leaveId) {
+			return (LeaveRequestModel) leaveRequestRepo.findByEmpidAndLeaveid(empId, leaveId)
+					.orElseThrow(() -> new IllegalArgumentException("Leave request not found for empId: " + empId + " and leaveId: " + leaveId));
+		}
+	}
 
-}
+
+

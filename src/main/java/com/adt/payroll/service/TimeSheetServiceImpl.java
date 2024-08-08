@@ -328,6 +328,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
             ResponseModel responseModel = new ResponseModel();
             responseModel.setEmployeeId(empId);
             String checkDate = dateformater.format(cal.getTime());
+            LOGGER.info("checkDate"+checkDate);
             int dayNumber = cal.get(Calendar.DAY_OF_MONTH);
             String dayNames[] = new DateFormatSymbols().getWeekdays();
             String nameDay = dayNames[cal.get(Calendar.DAY_OF_WEEK)];
@@ -344,10 +345,13 @@ public class TimeSheetServiceImpl implements TimeSheetService {
                 responseModel.setEmail(use.getEmail());
                 LOGGER.info("Get last 15 days CheckIn and CheckOut Data");
                 Optional<TimeSheetModel> timeSheetModelData = timeSheetRepo.findByEmployeeIdAndDate(empId, date);
+                LOGGER.info("Present priortime date"+checkDate);
                 LOGGER.info(""+timeSheetModelData);
                 if (!timeSheetModelData.isPresent()) {
+                    LOGGER.info("checkIn and checkout data not present in timesheet ");
                     list.add(responseModel);
                 } else if (timeSheetModelData.get().getCheckOut() == null && !timeSheetModelData.isEmpty()) {
+                    LOGGER.info("checkIn and checkout data present in timesheet ");
                     responseModel.setCheckIn(timeSheetModelData.get().getCheckIn());
                     responseModel.setStatus("Pending");
                     responseModel.setWorkingHour(timeSheetModelData.get().getWorkingHour());
@@ -358,6 +362,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
                 }
 
 				Optional<Priortime> priortime = priorTimeRepository.findByEmployeeIdAndDate(empId, date);
+                LOGGER.info("Pending Priortime Data");
 				if (priortime.isPresent()) {
 					Priortime prior = priortime.get();
 					long currentTime = System.currentTimeMillis();
