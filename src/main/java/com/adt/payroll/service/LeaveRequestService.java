@@ -26,6 +26,8 @@ public interface LeaveRequestService {
 	public List<LeaveRequestModel> getAllEmployeeLeaveDetails();
 	
     public	String reSendLeaveRequest(int leaveId);
-     
+	LeaveRequestModel getLeaveRequestDetailsByEmpIdAndLeaveId(int empId, int leaveId);
+
+
 
 }
